@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Environment variables
+.env
+
+# Flask cache
+instance/
+.webassets-cache/
+
+# VS Code settings (if you use VS Code)
+.vscode/
