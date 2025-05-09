@@ -4,31 +4,10 @@
     <meta charset="UTF-8">
     <title>My To-Do List</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+    
 </head>
 <body>
-    <!-- <h1>Ongea Task</h1> -->
-    <div class="login-form"> 
-        <div class="container">
-            <h2><span class="highlight">Ongea</span>Task</h2>
-            <div class="main">
-                <div class="content">
-                    <h3>Welcome Back!</h3>
-                    <form class="form1" method="post">
-                        <input type="text" name="" placeholder="User Name" required autofocus="">
-                        <input type="password" name="" placeholder="User Password" required autofocus="">
-                        <div class="forget">
-                            <a href="#">Forgot Password?</a>
-                        </div>
-                        <button class="btn" type="submit"> Login </button>    
-                    </form>
-                    
-                    <div class="signup">
-                        <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign Up</a></p>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-    </div>
+    <h1>Ongea Task</h1>
 </body>
 </html>
