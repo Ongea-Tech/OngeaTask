@@ -1,0 +1,33 @@
+body {
+  padding: 10px;
+  color: 2C2C2C;
+}
+
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  padding: 20px;
+  position: fixed;
+}
+
+.sidebar a {
+  padding: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.top-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 68%;
+}
+
+.bottom-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-self: end;
+}
+
+.sidebar i {
+  padding-right: 10px;
+}
