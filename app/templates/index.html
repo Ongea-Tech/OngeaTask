@@ -7,6 +7,25 @@
     
 </head>
 <body>
-    <h1>Ongea Task</h1>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <span class="ongea">Ongea</span><span class="task">Task</span>
+          </a>          
+        <form class="search-bar">
+          <input type="text" placeholder="Search tasks..." />
+        </form>
+        <div class="profile-section">
+          <div class="dropdown">
+            <img src="{{ url_for('static', filename='/images/profile.png') }}" alt="Profile" class="profile-pic">
+            <div class="dropdown-content">
+              <a href="/profile">Profile</a>
+              <a href="/login">Logout</a>
+            </div>
+          </div>
+           <span class="user-name">{{ user.name if user else 'Guest' }}</span>
+        </div>
+      </nav>
+    
+      
 </body>
 </html>

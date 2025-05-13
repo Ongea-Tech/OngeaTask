@@ -52,4 +52,40 @@ flask run
 ```
 The app will be running at http://127.0.0.1:5000
 
+---
+
+6. **Branching Rules**
+
+To keep the project organized and maintain clean code, please follow these branch rules when contributing:
+
+- The **`main`** branch is the production-ready branch. Do not commit or push directly to `main`.
+- All new features or bug fixes should be developed in a **feature branch** created from `main`.  
+  Your branch name should start with **your first name**, followed by a short description.
+
+- **Branch naming convention:**
+
+   yourname/feature-short-description
+
+   yourname/bugfix-short-description
+
+   **Examples:**
+
+   mike/feature-add-task-form
+
+   molly/bugfix-fix-task-deletion
+
+- After completing your changes, open a **Pull Request** into `main`.  
+Make sure your code is tested and clean before submitting.
+
+- All Pull Requests must be **reviewed and approved** by at least one other contributor before merging into `main`.
+
+- Regularly **pull from `main`** into your branch to stay up-to-date:
+  ```bash
+  git pull origin main
+  ```
+
+
+---
+
+
 **Start date:** May 4th, 2025
