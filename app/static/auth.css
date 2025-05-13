@@ -1,15 +1,3 @@
-/* @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
-*{
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-    font-family: "Nunito Sans", sans-serif;
-    font-weight: normal;
-}
-body{
-    background-color: #E5E7EB;
-    margin: 0;
-} */
 .login-form{
     position: relative;
     /* min-height: 10vh; */
@@ -33,8 +21,8 @@ body{
 .highlight{
     color: #6198f8;
 }
-.login-form h3{
-    line-height: 120px;
+.login-form h1{
+    line-height: 150px;
     margin-bottom: 5px;
     font-size: 3rem;
     font-weight: bold;
@@ -50,12 +38,13 @@ body{
     width: 500px;
     margin-bottom: 2rem;
     padding: 1rem;
-    font-size: 1.2rem;
+    font-size: 16px;
     border: none;
     text-align: left;
     height: 70px;
     border-radius: 5px;
     font-weight: 400;
+
 }
 
 .btn{
@@ -70,7 +59,7 @@ body{
     border-radius: 5px;
     margin-bottom: 3rem;
     height: 60px;
-    font-size: 1.2rem;
+    font-size: 16px;
 }
 .btn:hover{
     background-color: #6198f8;
@@ -83,10 +72,10 @@ body{
 .container .forget{
     text-align: right;
     /* line-height: 5px; */
-    font-size: 1.2rem;
+    font-size: 16px;
 }
 .container .signup{
-    font-size: 1.2rem;
+    font-size: 16px;
     text-align: center;
 }
 .signup-form{
