@@ -5,7 +5,8 @@ body {
 
 .sidebar {
   width: 200px;
-  height: 100vh;
+  height: calc(100vh - 90px);
+  top: 90px;
   padding: 20px;
   position: fixed;
 }
@@ -19,7 +20,7 @@ body {
 .top-sidebar {
   display: flex;
   flex-direction: column;
-  height: 68%;
+  height: 75%;
 }
 
 .bottom-sidebar {
@@ -30,4 +31,11 @@ body {
 
 .sidebar i {
   padding-right: 10px;
+}
+
+.top-sidebar a.active {
+  background-color: darkgray;
+  color: white;
+  font-weight: bold;
+
 }
