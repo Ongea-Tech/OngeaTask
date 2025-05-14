@@ -3,39 +3,53 @@
   <head>
     <meta charset="UTF-8" />
     <title>My To-Do List</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-</head>
-<body>
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
     <nav class="navbar">
-        <a href="/" class="logo">
-            <span class="ongea">Ongea</span><span class="task">Task</span>
-          </a>          
-        <form class="search-bar">
-          <input type="text" placeholder="Search tasks..." />
-        </form>
-        <div class="profile-section">
-          <div class="dropdown">
-            <img src="{{ url_for('static', filename='/images/profile.png') }}" alt="Profile" class="profile-pic">
-            <div class="dropdown-content">
-              <a href="/profile">Profile</a>
-              <a href="/login">Logout</a>
-            </div>
+      <a href="/" class="logo">
+        <span class="ongea">Ongea</span><span class="task">Task</span>
+      </a>
+      <form class="search-bar">
+        <input type="text" placeholder="Search tasks..." />
+      </form>
+      <div class="profile-section">
+        <div class="dropdown">
+          <img
+            src="{{ url_for('static', filename='/images/profile.png') }}"
+            alt="Profile"
+            class="profile-pic"
+          />
+          <div class="dropdown-content">
+            <a href="{{ url_for('profile') }}">Profile</a>
+            <a href="{{ url_for('login') }}">Logout</a>
           </div>
-           <span class="user-name">{{ user.name if user else 'Guest' }}</span>
         </div>
-      </nav>
+        Welcome back,
+        <span class="user-name">{{ user.name if user else 'Guest' }}</span>
+      </div>
+    </nav>
+
+    <!-- Flex container for sidebar and page content -->
+    <div class="layout-container">
+
+      <!-- Sidebar -->
       <div class="sidebar">
         <div class="top-sidebar">
           <a href="#"><i class="fa-solid fa-list-check"></i>Tasks</a>
           <a href="#"><i class="fa-solid fa-layer-group"></i>Categories</a>
-          <a href="#"><i class="fa-solid fa-user"></i>Profile</a>
+          <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i>Profile</a>
           <a href="#"><i class="fa-solid fa-clock-rotate-left"></i>History</a>
         </div>
-  
+
         <div class="bottom-sidebar">
           <a href="#"><i class="fa-solid fa-trash"></i>Trash</a>
           <a href="#"><i class="fa-solid fa-gear"></i>Settings</a>
@@ -43,5 +57,10 @@
         </div>
       </div>
       
-</body>
+      <!-- Main content -->
+       <main class="page-content">
+      {% block content %} {% endblock %}
+      </main>
+    </div>
+  </body>
 </html>
