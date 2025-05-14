@@ -17,3 +17,27 @@ def signup():
 @app.route('/profile')
 def profile():
     return render_template('profile.html')
+
+@app.route('/categories')
+def categories():
+    return render_template('categories.html')
+
+@app.route('/history')
+def history():
+    return render_template('history.html')
+
+@app.route('/logout')
+def logout():
+    return render_template('logout.html')
+
+@app.route('/individual')
+def individual():
+    return render_template('individual.html')
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
+@app.route('/trash')
+def trash():
+    return render_template('trash.html')
