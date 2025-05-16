@@ -30,11 +30,10 @@
           />
           <div class="dropdown-content">
             <a href="{{ url_for('profile') }}">Profile</a>
-            <a href="{{ url_for('login') }}">Logout</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
           </div>
         </div>
-        Welcome back,
-        <span class="user-name">{{ user.name if user else 'Guest' }}</span>
+        <span class="user-name">{{ user.name if user else 'Edwin' }}</span>
       </div>
     </nav>
 
@@ -44,16 +43,16 @@
       <!-- Sidebar -->
       <div class="sidebar">
         <div class="top-sidebar">
-          <a href="#"><i class="fa-solid fa-list-check"></i>Tasks</a>
-          <a href="#"><i class="fa-solid fa-layer-group"></i>Categories</a>
+          <a href="{{ url_for('index') }}"><i class="fa-solid fa-list-check"></i>Tasks</a>
+          <a href="{{ url_for('categories') }}"><i class="fa-solid fa-layer-group"></i>Categories</a>
           <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i>Profile</a>
-          <a href="#"><i class="fa-solid fa-clock-rotate-left"></i>History</a>
+          <a href="{{ url_for('history') }}"><i class="fa-solid fa-clock-rotate-left"></i>History</a>
         </div>
 
         <div class="bottom-sidebar">
-          <a href="#"><i class="fa-solid fa-trash"></i>Trash</a>
-          <a href="#"><i class="fa-solid fa-gear"></i>Settings</a>
-          <a href="#"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
+          <a href="{{ url_for('trash') }}"><i class="fa-solid fa-trash"></i>Trash</a>
+          <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear"></i>Settings</a>
+          <a href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
         </div>
       </div>
       
