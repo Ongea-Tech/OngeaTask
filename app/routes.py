@@ -1,7 +1,10 @@
 from app import app
-from flask import render_template
+from flask import render_template, request, redirect
 
+@app.route('/history')
+def history():
+    return render_template('history.html')
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+@app.route('/trash')
+def trash():
+    return render_template('trash.html')
