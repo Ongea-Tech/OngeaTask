@@ -164,6 +164,93 @@ html, body {
   background-color: #e5e7eb;
   width: calc(100% - 220px); 
 }
+.description input{
+  width: 95rem;
+  display: flex;
+  height: 120px;
+  padding-left: 5px;
+}
+.title{
+  display: flex;
+  margin-bottom: 13px;
+}
+.title h2{
+  font-weight: bold;
+}
+.title .category{
+  margin-left: 80rem;
+  height: 60px;
+  width: 75px;
+  background-color: #4CAF50;
+  border: none;
+  box-shadow: 0 5px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  cursor: pointer;
+}
+.deleteIcon{
+  color: red;
+}
+.subtasks{
+  align-items: center;
+  position: relative;
+}
+
+.subtasks .checkbox{
+  background-color: #FFFFFF;
+  border: 1px solid #ccc;
+  padding: 10px 0 0 5px;
+  margin-bottom: 1rem;
+  height: 55px;
+  display: block;
+  width: 95rem;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  border-radius: 0 0 5px 5px;
+  
+}
+.checkbox .icon{
+  position: absolute;
+  right: 9rem;
+  pointer-events: auto;
+  cursor: pointer;
+  color: red;
+}
+.addSubtask{
+  position: relative;
+  display: inline-block;
+  margin-top: 2rem;
+}
+.addSubtask input{
+  width: 95rem;
+  height: 62px;
+  padding-left: 5px;
+}
+.check-all{
+  margin: 1rem 0 1rem 0.5rem;
+  
+}
+.check-all .delete{
+  margin-left: 1rem;
+  color: red;
+  border: 1px solid red;
+  height: 25px;
+  width: 95px;
+}
+.addSubtask button{
+  background-color: #3F7EE8;
+  color: white;
+  height: 100%;
+  width: 62px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 0 12px;
+  border: none;
+  cursor: pointer;
+}
+
 
 
 

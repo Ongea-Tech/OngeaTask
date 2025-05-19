@@ -1,6 +1,56 @@
 {% extends "index.html" %}
 {% block content %}
+<div class="taskContainer">
+    <div class="title">
+        <h2>Julies Birthday</h2>
+        <button class="category"></button>
+    </div>
+    <div class="description">
+        <input type="text" placeholder="Description" name="">
+    </div>
 
-<h1>This is the individual task page</h1>
+    <div class="check-all">
+        <label for="" class="checkbox">
+            <input type="checkbox">
+        </label>
+        <button class="delete"> Delete all <a href="" class="deleteIcon"><i class="fa-solid fa-trash-can"></i></a></button>
+    </div>
+
+    <div class="subtasks">
+        <label for="" class="checkbox">
+        <input type="checkbox"> Send invites 
+        <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
+        </label>
+        <br>
+        <label for="" class="checkbox">
+        <input type="checkbox"> Order cake 
+        <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
+        </label>
+        <br>
+        <label for="" class="checkbox">
+        <input type="checkbox"> Buy outfit 
+        <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a></label>
+        <br>
+        <label for="" class="checkbox">
+        <input type="checkbox"> Shop for food and drinks
+        <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
+        </label>
+        <br>
+        <label for="" class="checkbox">
+        <input type="checkbox"> Create birthday party playlist
+        <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
+        </label>
+        <br>
+    </div>
+    <div class="addSubtask">
+        <input type="text" placeholder="Add a new list item" >
+        <button class="inputButton">Add</button>
+    </div>
+</div>
 
 {% endblock %}
+
+
+
+
+
