@@ -1,77 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Trash - OngeaTask</title>
+{% extends "index.html" %}
+
+{% block head %}
   <link rel="stylesheet" href="{{ url_for('static', filename='trash.css') }}">
-</head>
-<body>
-<div class="layout">
+{% endblock %}
 
-  <main class="task-content">
-    <div class="task-inner">
-      
-      <h1 class="trash-title">Trash</h1>
-      <div class="trash-divider"></div>
+{% block content %}
 
-      <div class="trash-section">
-        <div class="trash-header-row">
-        <h2>Today (March 17, 2025)</h2>
-        <div class="search-bar">
-          <span class="search-icon">🔍</span>
-          <input type="text" placeholder="Search">
+<h1 class="trash-title">Trash</h1>
+<div class="trash-divider"></div>
+
+<div class="trash-section">
+  <div class="trash-header-row">
+    <h2>Today (March 17, 2025)</h2>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search" />
+    </div>
+  </div>
+
+  <div class="trash-controls">
+    <button class="btn-blue">Restore</button>
+    <input type="checkbox" class="master-checkbox" />
+    <button class="btn-blue">Delete Permanently</button>
+  </div>
+
+  <div class="trash-task-item">
+    <input type="checkbox" />
+    <div>
+      <span class="task-label home">Home</span>
+      <p>Birthday<br /><small>5/6 completed</small></p>
+    </div>
+    <div class="task-color-bar red"></div>
+  </div>
+
+  <div class="trash-task-item">
+    <input type="checkbox" />
+    <div>
+      <span class="task-label home">Home</span>
+      <p>Birthday<br /><small>5/6 completed</small></p>
+    </div>
+    <div class="task-color-bar yellow"></div>
   </div>
 </div>
 
-      <div class="trash-controls">
-        <button class="btn-blue">Restore</button>
-        <input type="checkbox" class="master-checkbox">
-        <button class="btn-blue">Delete Permanently</button>
+<div class="trash-section">
+  <h2>Yesterday (March 16, 2025)</h2>
+
+  <div class="trash-task-item">
+    <input type="checkbox" />
+    <div>
+      <span class="task-label home">Home</span>
+      <p>Birthday<br /><small>5/6 completed</small></p>
     </div>
-        <div class="trash-task-item">
-          <input type="checkbox">
-          <div>
-            <span class="task-label home">Home</span>
-            <p>Birthday<br><small>5/6 completed</small></p>
-          </div>
-          <div class="task-color-bar red"></div>
-        </div>
-
-        <div class="trash-task-item">
-          <input type="checkbox">
-          <div>
-            <span class="task-label home">Home</span>
-            <p>Birthday<br><small>5/6 completed</small></p>
-          </div>
-          <div class="task-color-bar yellow"></div>
-        </div>
-      </div>
-
-    
-      <div class="trash-section">
-        <h2>Yesterday (March 16, 2025)</h2>
-
-        <div class="trash-task-item">
-          <input type="checkbox">
-          <div>
-            <span class="task-label home">Home</span>
-            <p>Birthday<br><small>5/6 completed</small></p>
-          </div>
-          <div class="task-color-bar red"></div>
-        </div>
-
-        <div class="trash-task-item">
-          <input type="checkbox">
-          <div>
-            <span class="task-label home">Home</span>
-            <p>Birthday<br><small>5/6 completed</small></p>
-          </div>
-          <div class="task-color-bar gray"></div>
-        </div>
-      </div>
-
-    </div>
-  </main>
+    <div class="task-color-bar gray"></div>
+  </div>
 </div>
-</body>
-</html>
+
+ <div class="trash-task-item">
+    <input type="checkbox" />
+    <div>
+      <span class="task-label home">Home</span>
+      <p>Birthday<br /><small>5/6 completed</small></p>
+    </div>
+    <div class="task-color-bar gray"></div>
+  </div>
+</div>
+
+{% endblock %}

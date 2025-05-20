@@ -1,19 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>History - OngeaTask</title>
+{% extends "index.html" %}
+
+{% block head %}
   <link rel="stylesheet" href="{{ url_for('static', filename='history.css') }}">
-</head>
-<body>
-<div class="layout">
+{% endblock %}
 
-  <main class="task-content">
-    <div class="task-inner">
-      <h1 class="history-title">History</h1>
-      <hr class="divider">
+{% block content %}
 
-    
+<h1 class="history-title">History</h1>
+<hr class="divider" />
+
 <div class="today-header-row">
   <h2>Today (March 17, 2025)</h2>
   <div class="search-bar">
@@ -22,53 +17,51 @@
   </div>
 </div>
 
-      <div class="history-controls">
-        <input type="checkbox" class="master-checkbox">
-        <button class="btn-blue">Reopen task</button>
-        <button class="btn-icon">🗑</button>
-      </div>
-
-      <div class="history-task-item">
-        <input type="checkbox">
-        <div>
-          <span class="task-label home">Home</span>
-          <p>Birthday<br><small>5/6 completed</small></p>
-        </div>
-        <div class="task-color-bar red"></div>
-      </div>
-
-      <div class="history-task-item">
-        <input type="checkbox">
-        <div>
-          <span class="task-label work">Work</span>
-          <p>Birthday<br><small>5/6 completed</small></p>
-        </div>
-        <div class="task-color-bar red"></div>
-      </div>
-
-      <div class="history-task-item">
-        <input type="checkbox">
-        <div>
-          <span class="task-label home">Home</span>
-          <p>Birthday<br><small>5/6 completed</small></p>
-        </div>
-        <div class="task-color-bar yellow"></div>
-      </div>
-
-      <!-- Yesterday Section -->
-      <div class="history-section">
-        <h2>Yesterday (March 16, 2025)</h2>
-        <div class="history-task-item">
-          <input type="checkbox">
-          <div>
-            <span class="task-label home">Home</span>
-            <p>Birthday<br><small>5/6 completed</small></p>
-          </div>
-          <div class="task-color-bar gray"></div>
-        </div>
-      </div>
-    </div>
-  </main>
+<div class="history-controls">
+  <input type="checkbox" class="master-checkbox" />
+  <button class="btn-blue">Reopen task</button>
+  <button class="btn-icon">🗑</button>
 </div>
-</body>
-</html>
+
+<!-- Example Task Items -->
+<div class="history-task-item">
+  <input type="checkbox" />
+  <div>
+    <span class="task-label home">Home</span>
+    <p>Birthday<br /><small>5/6 completed</small></p>
+  </div>
+  <div class="task-color-bar red"></div>
+</div>
+
+<div class="history-task-item">
+  <input type="checkbox" />
+  <div>
+    <span class="task-label work">Work</span>
+    <p>Meeting<br /><small>3/4 completed</small></p>
+  </div>
+  <div class="task-color-bar yellow"></div>
+</div>
+
+<div class="history-task-item">
+  <input type="checkbox" />
+  <div>
+    <span class="task-label work">Home</span>
+    <p>Birthday<br /><small>5/6 completed</small></p>
+  </div>
+  <div class="task-color-bar yellow"></div>
+</div>
+
+<div class="history-section">
+  <h2>Yesterday (March 16, 2025)</h2>
+  
+  <div class="history-task-item">
+    <input type="checkbox" />
+    <div>
+      <span class="task-label home">Home</span>
+      <p>Groceries<br /><small>Completed</small></p>
+    </div>
+    <div class="task-color-bar gray"></div>
+  </div>
+</div>
+
+{% endblock %}
