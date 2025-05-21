@@ -35,7 +35,7 @@ html, body {
 }
 
 .logo {
-  height: 45px; /* Adjust as needed */
+  height: 45px; 
   width: auto;
 }
 
@@ -290,7 +290,7 @@ input[type="checkbox"] {
   align-items: center;
   height: 85vh;
   background-color: inherit;
-  padding-left: 250px; /* adjust if your sidebar is wider or dynamic */
+  padding-left: 250px; 
 }
 
 .logout-box {
@@ -341,5 +341,5 @@ input[type="checkbox"] {
 }
 
 .logout-buttons .confirm {
-  background-color: #F1461B; /* red-orange */
+  background-color: #F1461B; 
 }
