@@ -56,8 +56,9 @@ html, body {
 
 .trash-controls {
   display: flex;
+  justify-content: flex-start; 
   align-items: center;
-  gap: 3rem;
+  gap: 2rem; 
   margin-bottom: 1.5rem;
 }
 
@@ -70,6 +71,7 @@ html, body {
   appearance: none;
   position: relative;
   cursor: pointer;
+  margin-left: 15px;
 }
 
 .master-checkbox:checked {
@@ -169,30 +171,6 @@ html, body {
   font-size: 25px;
   font-weight: 600;
   margin: 0;
-}
-
-.search-bar {
-  display: flex;
-  align-items: center;
-  background-color: #f2f2f2;
-  border: 1px solid #ccc;
-  border-radius: 25px;
-  padding: 0.3rem 0.8rem;
-  width: 450px;
-}
-
-.search-bar input[type="text"] {
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 14px;
-  flex: 1;
-  padding-left: 1rem;
-}
-
-.search-icon {
-  font-size: 16px;
-  color: #555;
 }
 
 .master-checkbox:checked::before,

@@ -34,7 +34,6 @@ html, body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
 }
 
-
 .logo {
   font-size: 1.5rem;
   font-weight: bold;
@@ -119,7 +118,6 @@ html, body {
   justify-content: space-between;
 }
 
-
 .sidebar a {
   padding: 10px;
   color: inherit;
@@ -164,7 +162,3 @@ html, body {
   background-color: #e5e7eb;
   width: calc(100% - 220px); 
 }
-
-
-
-
