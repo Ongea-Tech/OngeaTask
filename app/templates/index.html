@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <title>My To-Do List</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='styles.css') }}"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-  </head>
+  <meta charset="UTF-8" />
+  <title>My To-Do List</title>
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='styles.css') }}"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  {% block head %}{% endblock %}
+</head>
   <body>
     <!-- Top Navigation Bar -->
     <nav class="navbar">
