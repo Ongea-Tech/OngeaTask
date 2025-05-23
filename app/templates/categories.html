@@ -1,6 +1,48 @@
 {% extends "index.html" %}
 {% block content %}
 
-<h1>This is the categories page</h1>
+<div class="categories-page">
+  <h2 class="categories-title">Categories</h2>
+
+  <form class="category-form">
+    <div class="category-group">
+      <input type="checkbox" class="category-checkbox" />
+      <input type="text" class="category-input" value="Work" />
+      <div class="category-actions">
+        <span class="delete-icon">&#128465;</span>
+        <span class="edit-icon">&#9998;</span>
+      </div>
+    </div>
+
+    <div class="category-group">
+      <input type="checkbox" class="category-checkbox" />
+      <input type="text" class="category-input" value="School" />
+      <div class="category-actions">
+        <span class="delete-icon">&#128465;</span>
+        <span class="edit-icon">&#9998;</span>
+      </div>
+    </div>
+
+    <div class="category-group">
+      <input type="checkbox" class="category-checkbox" />
+      <input type="text" class="category-input" value="Personal" />
+      <div class="category-actions">
+        <span class="delete-icon">&#128465;</span>
+        <span class="edit-icon">&#9998;</span>
+      </div>
+    </div>
+
+    <div class="category-group">
+      <input type="checkbox" class="category-checkbox" />
+      <input type="text" class="category-input" value="Home" />
+      <div class="category-actions">
+        <span class="delete-icon">&#128465;</span>
+        <span class="edit-icon">&#9998;</span>
+      </div>
+    </div>
+  </form>
+
+  <button class="add-category-button">Add Category</button>
+</div>
 
 {% endblock %}
