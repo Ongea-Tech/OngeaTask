@@ -1,44 +1,45 @@
 {% extends "index.html" %}
 {% block content %}
 <div class="taskContainer">
-    <a href="{{ url_for('index') }}"><i class="fa-solid fa-arrow-left"></i>
-    <div class="title"></a> 
+    <a href="{{ url_for('index') }}"><i class="fa-solid fa-arrow-left"></i></a>
+    <div class="title"> 
         <h2>Julie's Birthday</h2>
         <label class="category"></label>
     </div>
     <div class="description">
-        <input type="text" placeholder="Description" name="">
+        <textarea placeholder="Add a description here..."></textarea> 
     </div>
 
     <div class="check-all">
         <label for="" class="checkbox">
-            <input type="checkbox">
+            <input type="checkbox"/>
         </label>
         <button class="delete"> Delete all <a href="" class="deleteIcon"><i class="fa-solid fa-trash-can"></i></a></button>
     </div>
 
     <div class="subtasks">
         <label for="" class="checkbox">
-        <input type="checkbox"> Send invites 
+        <input type="checkbox"> 
+        <p>Send invites</p> 
         <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
         </label>
         <br>
         <label for="" class="checkbox">
-        <input type="checkbox"> Order cake 
+        <input type="checkbox"> <p>Order cake</p>
         <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
         </label>
         <br>
         <label for="" class="checkbox">
-        <input type="checkbox"> Buy outfit 
+        <input type="checkbox"> <p>Buy outfit</p> 
         <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a></label>
         <br>
         <label for="" class="checkbox">
-        <input type="checkbox"> Shop for food and drinks
+        <input type="checkbox"> <p>Shop for food and drinks</p>
         <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
         </label>
         <br>
         <label for="" class="checkbox">
-        <input type="checkbox"> Create birthday party playlist
+        <input type="checkbox"> <p>Create birthday party playlist</p>
         <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
         </label>
         <br>

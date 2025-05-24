@@ -169,28 +169,29 @@ html, body {
   background-color: #e5e7eb;
   width: calc(100% - 220px); 
 }
-.description input{
-  width: 80rem;
+.description textarea{
+  width: 100%;
   display: flex;
   height: 120px;
-  padding-left: 5px;
+  padding: 15px;
   border: none;
 }
-/* .taskContainer{
+
+.taskContainer{
   max-width: 100%;
-} */
+}
  
 .title{
   display: flex;
   margin-bottom: 13px;
-  max-width: 80rem;
+  width: 100%;
+  justify-content: space-between;
 }
 .title h2{
   font-weight: bold;
   margin-top: 1rem;
 }
 .title .category{
-  margin-left: 64rem;
   height: 60px;
   width: 85px;
   background-color: #4CAF50;
@@ -212,13 +213,10 @@ html, body {
 .subtasks .checkbox{
   background-color: #FFFFFF;
   border: 1px solid #ccc;
-  padding: 10px 0 0 5px;
-  margin-bottom: 1rem;
-  height: 55px;
-  display: block;
-  position: relative;
-  width: 80rem;
-  font-size: 16px;
+  padding: 10px;
+  height: 80px;
+  display: flex;
+  align-items: center;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
@@ -236,9 +234,10 @@ html, body {
   position: relative;
   display: inline-block;
   margin-top: 4rem;
+  width: 100%;
 }
 .addSubtask input{
-  width: 80rem;
+  width: 100%;
   height: 62px;
   padding-left: 5px;
   border: none;
@@ -259,7 +258,7 @@ html, body {
   background-color: #3F7EE8;
   color: white;
   height: 100%;
-  width: 62px;
+  width: 100px;
   position: absolute;
   right: 0;
   top: 0;
@@ -308,7 +307,7 @@ html, body {
   height: 48px;
   border: none;
   border-radius: 3px;
-  margin-top: 20rem;
+  margin-top: 2%;
   cursor: pointer;
 }
 

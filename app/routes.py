@@ -30,9 +30,9 @@ def history():
 def logout():
     return render_template('logout.html')
 
-@app.route('/individual')
+@app.route('/individual-task')
 def individual():
-    return render_template('individual.html')
+    return render_template('individual-task.html')
 
 @app.route('/settings')
 def settings():
