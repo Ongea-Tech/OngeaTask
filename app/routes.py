@@ -42,6 +42,3 @@ def settings():
 def trash():
     return render_template('trash.html')
 
-@app.route('/ongoing')
-def ongoing():
-    return render_template('ongoing.html')

@@ -1,6 +1,16 @@
 {% extends "index.html" %}
 {% block content %}
 
-<h1>This is the settings page</h1>
+<h1 class="settings">Settings</h1>
+<hr>
+<h2 class="passChange">Change password</h2>
+
+<div class="passInput">
+    <input type="password" class="oldPass" placeholder="Old password" required> <br>
+    <input type="password" class="newPass" placeholder="New password" required> <br>
+</div>
+
+<button class="changePass">Change Password</button> <br>
+<button class="delAccount">Delete Account</button>
 
 {% endblock %}
