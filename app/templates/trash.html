@@ -1,6 +1,65 @@
 {% extends "index.html" %}
+
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='trash.css') }}">
+{% endblock %}
+
 {% block content %}
 
-<h1>This is the trash page</h1>
+<h1 class="trash-title">Trash</h1>
+<div class="trash-divider"></div>
+
+<div class="trash-section">
+  <div class="trash-header-row">
+    <h2>Today (March 17, 2025)</h2>
+  </div>
+
+ <div class="trash-controls">
+  <input type="checkbox" class="master-checkbox" />
+  <button class="btn-blue">Restore</button>
+  <button class="btn-blue">Delete Permanently</button>
+</div>
+
+  <div class="trash-task-item">
+    <input type="checkbox" />
+    <div>
+      <span class="task-label home">Home</span>
+      <p>Birthday<br /><small>5/6 completed</small></p>
+    </div>
+    <div class="task-color-bar red"></div>
+  </div>
+
+  <div class="trash-task-item">
+    <input type="checkbox" />
+    <div>
+      <span class="task-label home">Home</span>
+      <p>Birthday<br /><small>5/6 completed</small></p>
+    </div>
+    <div class="task-color-bar yellow"></div>
+  </div>
+</div>
+
+<div class="trash-section">
+  <h2>Yesterday (March 16, 2025)</h2>
+
+  <div class="trash-task-item">
+    <input type="checkbox" />
+    <div>
+      <span class="task-label home">Home</span>
+      <p>Birthday<br /><small>5/6 completed</small></p>
+    </div>
+    <div class="task-color-bar gray"></div>
+  </div>
+</div>
+
+ <div class="trash-task-item">
+    <input type="checkbox" />
+    <div>
+      <span class="task-label home">Home</span>
+      <p>Birthday<br /><small>5/6 completed</small></p>
+    </div>
+    <div class="task-color-bar gray"></div>
+  </div>
+</div>
 
 {% endblock %}
