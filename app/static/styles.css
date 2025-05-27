@@ -590,6 +590,25 @@ input[type="checkbox"] {
   color: #2c3e50;
   margin-bottom: 1.5rem;
 }
+.delete-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: black;
+  font-weight: 500;
+  margin-left: 3.5rem; 
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  margin-left: -8px;
+  margin-bottom: 10px;
+}
+
+
+.delete-header .delete-icon {
+  font-size: 1rem;
+  color: #888;
+}
+
 
 .category-form {
   width: 100%;
