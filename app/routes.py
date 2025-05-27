@@ -1,42 +1,52 @@
-from app import app
 from flask import render_template, request, redirect
+from flask import Blueprint
+from app.models import Task
 
-@app.route('/')
+routes = Blueprint('routes', __name__)
+
+@routes.route('/', endpoint='index')
 def index():
-    return render_template('index.html')
+    tasks = Task.query.all()
+    return render_template('index.html', tasks=tasks)
 
-@app.route('/login')
+@routes.route('/tasks')
+def tasks():
+    tasks = Task.query.all()
+    return render_template('tasks.html', tasks=tasks)
+
+@routes.route('/login')
 def login():
     return render_template('login.html')
 
-@app.route('/signup')
+@routes.route('/signup')
 def signup():
     return render_template('signup.html')
 
-@app.route('/profile')
+@routes.route('/profile')
 def profile():
     return render_template('profile.html')
 
-@app.route('/categories')
+@routes.route('/categories')
 def categories():
     return render_template('categories.html')
 
-@app.route('/history')
+@routes.route('/history')
 def history():
     return render_template('history.html')
 
-@app.route('/logout')
+@routes.route('/logout')
 def logout():
     return render_template('logout.html')
 
-@app.route('/individual')
+@routes.route('/individual-task')
 def individual():
-    return render_template('individual.html')
+    return render_template('individual-task.html')
 
-@app.route('/settings')
+@routes.route('/settings')
 def settings():
     return render_template('settings.html')
 
-@app.route('/trash')
+@routes.route('/trash')
 def trash():
     return render_template('trash.html')
+
