@@ -1,67 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
   <meta charset="UTF-8" />
   <title>My To-Do List</title>
-  <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='styles.css') }}"
-  />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-  />
-
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   {% block head %}{% endblock %}
 </head>
-  <body>
-    <!-- Top Navigation Bar -->
-    <nav class="navbar">
-      <a href="/" class="logo">
-        <span class="ongea">Ongea</span><span class="task">Task</span>
-      </a>
-      <form class="search-bar">
-        <input type="text" placeholder="Search tasks..." />
-      </form>
-      <div class="profile-section">
-        <div class="dropdown">
-          <img
-            src="{{ url_for('static', filename='/images/profile.png') }}"
-            alt="Profile"
-            class="profile-pic"
-          />
-          <div class="dropdown-content">
-            <a href="{{ url_for('profile') }}">Profile</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-          </div>
-        </div>
-        <span class="user-name">{{ user.name if user else 'Edwin' }}</span>
-      </div>
-    </nav>
 
-    <!-- Flex container for sidebar and page content -->
-    <div class="layout-container">
-
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <div class="top-sidebar">
-          <a href="{{ url_for('index') }}"><i class="fa-solid fa-list-check"></i>Tasks</a>
-          <a href="{{ url_for('categories') }}"><i class="fa-solid fa-layer-group"></i>Categories</a>
-          <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i>Profile</a>
-          <a href="{{ url_for('history') }}"><i class="fa-solid fa-clock-rotate-left"></i>History</a>
-        </div>
-
-        <div class="bottom-sidebar">
-          <a href="{{ url_for('trash') }}"><i class="fa-solid fa-trash"></i>Trash</a>
-          <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear"></i>Settings</a>
-          <a href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
+<body>
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <a href="{{ url_for('index') }}" class="logo">
+      <img src="{{ url_for('static', filename='/images/logo.png') }}" alt="OngeaTask Logo" class="logo" />
+    </a>
+    <form class="search-bar">
+      <input type="text" placeholder="Search tasks..." />
+    </form>
+    <div class="profile-section">
+      <div class="dropdown">
+        <img src="{{ url_for('static', filename='/images/profile.png') }}" alt="Profile" class="profile-pic" />
+        <div class="dropdown-content">
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('logout') }}">Logout</a>
         </div>
       </div>
-      
-      <!-- Main content -->
-       <main class="page-content">
-      {% block content %} {% endblock %}
-      </main>
+      <span class="user-name">{{ user.name if user else 'User' }}</span>
     </div>
-  </body>
+  </nav>
+
+  <!-- Flex container for sidebar and page content -->
+  <div class="layout-container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="top-sidebar">
+        <a href="{{ url_for('index') }}"><i class="fa-solid fa-list-check"></i>Tasks</a>
+        <a href="{{ url_for('categories') }}"><i class="fa-solid fa-layer-group"></i>Categories</a>
+        <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i>Profile</a>
+        <a href="{{ url_for('history') }}"><i class="fa-solid fa-clock-rotate-left"></i>History</a>
+      </div>
+
+      <div class="bottom-sidebar">
+        <a href="{{ url_for('trash') }}"><i class="fa-solid fa-trash"></i>Trash</a>
+        <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear"></i>Settings</a>
+        <a href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <main class="page-content">
+      {% block content %}
+
+      <div class="header">
+        <h2>Ongoing Tasks</h2>
+        <button class="add-task-button"> Add New Task</button>
+      </div>
+
+      <div class="task-list">
+        <a href="#" class="task-card border-first">
+          <input type="checkbox">
+          <div class="task-info">
+            <span class="category category-home">
+            Home
+            </span>
+            <div>
+              <h4>Birthday</h4>
+              <p>5/6 completed</p>
+            </div>
+            <div class="priority priority-first"></div>
+          </div>
+          
+        </a>
+        <a href="#" class="task-card border-second">
+          <input type="checkbox">
+          <div class="task-info">
+            <span class="category category-work">
+            Work
+            </span>
+            <div>
+              <h4>Field reports</h4>
+              <p>0/4 completed</p>
+            </div>
+            <div class="priority priority-second"></div>
+          </div>
+        </a>
+
+      </div>
+  
+
+
+
+
+  {% endblock %}
+  </main>
+  </div>
+</body>
+
 </html>
