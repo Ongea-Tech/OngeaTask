@@ -39,23 +39,6 @@ html, body {
   width: auto;
 }
 
-/* 
-.logo { 
-  font-size: 1.5rem;
-  font-weight:bold;
-  font-family: sans-serif;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.logo .ongea {
-  color: #3f7ee8;
-}
-
-.logo .task {
-  color: #000000;
-} */
-
 .search-bar input {
   padding: 8px;
   width: 250px;
@@ -354,6 +337,12 @@ color: 011936;
   transition: transform 0.1s ease;
   gap: 15px;
   position: relative;
+  height: 100px;
+}
+
+.task-card input {
+  width: 15px;
+  height: 15px;
 }
 
 .task-card:hover {
@@ -492,6 +481,7 @@ input[type="checkbox"] {
   align-items: flex-start;
   color: #333;
   margin-left: 2rem;
+  justify-content: center;
 }
 
 .profile-title {
@@ -502,15 +492,18 @@ input[type="checkbox"] {
 }
 
 .profile-image-container {
-  margin-bottom: 1.5rem; 
+  margin-bottom: 1.5rem;
+  margin-left: 195px; 
 }
 
 .profile-image {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   border: 2px solid #ddd;
   object-fit: cover;
+  margin-top: -40px;
+  margin-bottom: 5px;
 }
 
 .profile-form {
@@ -551,6 +544,24 @@ input[type="checkbox"] {
   border-color: #3b82f6;
   background-color: #fff;
 }
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0 10px;
+  background-color: #fff;
+  width: 70%;
+}
+
+.input-wrapper input {
+  border: none;
+  outline: none;
+  flex: 1;
+  padding: 0.8rem 0;
+  font-size: 1rem;
+  background-color: transparent;
+}
 
 .edit-icon {
   margin-left: 10px;
@@ -588,10 +599,6 @@ input[type="checkbox"] {
   gap: 1rem;
 }
 
-.category-form button {
-
-}
-
 .category-group {
   display: flex;
   align-items: center;
@@ -624,7 +631,7 @@ input[type="checkbox"] {
 .delete-icon {
   margin-left: 10px;
   color: black; 
-  font-size: .7rem;
+  font-size: .9rem;
   cursor: pointer;
   flex-shrink: 0;
   transition: color 0.2s ease;
@@ -645,6 +652,9 @@ input[type="checkbox"] {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  margin-top: 40px;
+  margin-left: auto;
+  display: block;
 }
 
 .add-category-button:hover {
