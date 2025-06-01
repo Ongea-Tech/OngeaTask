@@ -1,18 +1,44 @@
-from flask import render_template, request, redirect
+from flask import flash, render_template, request, redirect, url_for
 from flask import Blueprint
 from app.models import Task
+from . import db
 
 routes = Blueprint('routes', __name__)
 
-@routes.route('/', endpoint='index')
+@routes.route('/')
 def index():
-    tasks = Task.query.all()
-    return render_template('index.html', tasks=tasks)
+    return render_template('index.html')
 
 @routes.route('/tasks')
 def tasks():
     tasks = Task.query.all()
     return render_template('tasks.html', tasks=tasks)
+
+@routes.route('/<int:task_id>')
+def show_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    return render_template('individual-task.html', task=task)
+
+@routes.route('/create_task', methods=['GET', 'POST'])
+def create_task():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+
+        if not name:
+            flash("Task name is required", "error")
+            return redirect(url_for('routes.create_task'))
+
+        new_task = Task(title=name, description=description, completed=False)
+        db.session.add(new_task)
+        db.session.commit()
+
+        flash("Task created successfully", "success")
+        # Redirect to the newly created task page using its ID
+        return redirect(url_for('routes.show_task', task_id=new_task.id))
+
+    return render_template('index.html')
+
 
 @routes.route('/login')
 def login():
