@@ -5,61 +5,64 @@
 {% endblock %}
 
 {% block content %}
-
 <h1 class="trash-title">Trash</h1>
 <div class="trash-divider"></div>
 
-<div class="trash-section">
-  <div class="trash-header-row">
-    <h2>Today (March 17, 2025)</h2>
-  </div>
+<form method="POST" action="{{ url_for('routes.restore_tasks') }}">
 
- <div class="trash-controls">
-  <input type="checkbox" class="master-checkbox" />
-  <button class="btn-blue">Restore</button>
-  <button class="btn-blue">Delete Permanently</button>
-</div>
+  {% if today_deleted %}
+    <div class="trash-section">
+      <div class="trash-header-row">
+        <h2>Today ({{ today_date }})</h2>
+      </div>
 
-  <div class="trash-task-item">
-    <input type="checkbox" />
-    <div>
-      <span class="task-label home">Home</span>
-      <p>Birthday<br /><small>5/6 completed</small></p>
+      <div class="trash-controls">
+        <input type="checkbox" class="master-checkbox" />
+        <button type="submit" class="btn-blue">Restore</button>
+        <button type="submit" formaction="{{ url_for('routes.delete_tasks_permanently') }}" class="btn-blue">Delete Permanently</button>
+      </div>
+
+      {% for task in today_deleted %}
+        <div class="trash-task-item">
+          <input type="checkbox" name="task_ids" value="{{ task.id }}" />
+          <div>
+            <span class="task-label {{ task.category | lower }}">{{ task.category }}</span>
+            <p>{{ task.title }}<br /><small>{{ task.subtask_summary }}</small></p>
+          </div>
+          <div class="task-color-bar {{ task.color }}"></div>
+        </div>
+      {% endfor %}
     </div>
-    <div class="task-color-bar red"></div>
-  </div>
+  {% endif %}
 
-  <div class="trash-task-item">
-    <input type="checkbox" />
-    <div>
-      <span class="task-label home">Home</span>
-      <p>Birthday<br /><small>5/6 completed</small></p>
+  {% if yesterday_deleted %}
+    <div class="trash-section">
+      <div class="trash-header-row">
+        <h2>Yesterday ({{ yesterday_date }})</h2>
+      </div>
+
+      <div class="trash-controls">
+        <input type="checkbox" class="master-checkbox" />
+        <button type="submit" class="btn-blue">Restore</button>
+        <button type="submit" formaction="{{ url_for('routes.delete_tasks_permanently') }}" class="btn-blue">Delete Permanently</button>
+      </div>
+
+      {% for task in yesterday_deleted %}
+        <div class="trash-task-item">
+          <input type="checkbox" name="task_ids" value="{{ task.id }}" />
+          <div>
+            <span class="task-label {{ task.category | lower }}">{{ task.category }}</span>
+            <p>{{ task.title }}<br /><small>{{ task.subtask_summary }}</small></p>
+          </div>
+          <div class="task-color-bar {{ task.color }}"></div>
+        </div>
+      {% endfor %}
     </div>
-    <div class="task-color-bar yellow"></div>
-  </div>
-</div>
+  {% endif %}
 
-<div class="trash-section">
-  <h2>Yesterday (March 16, 2025)</h2>
+  {% if not today_deleted and not yesterday_deleted %}
+    <p class="empty-state">Nothing in Trash.</p>
+  {% endif %}
 
-  <div class="trash-task-item">
-    <input type="checkbox" />
-    <div>
-      <span class="task-label home">Home</span>
-      <p>Birthday<br /><small>5/6 completed</small></p>
-    </div>
-    <div class="task-color-bar gray"></div>
-  </div>
-</div>
-
- <div class="trash-task-item">
-    <input type="checkbox" />
-    <div>
-      <span class="task-label home">Home</span>
-      <p>Birthday<br /><small>5/6 completed</small></p>
-    </div>
-    <div class="task-color-bar gray"></div>
-  </div>
-</div>
-
+</form>
 {% endblock %}

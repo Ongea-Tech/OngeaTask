@@ -1,13 +1,14 @@
 {% extends "index.html" %}
 {% block content %}
+
 <div class="taskContainer">
-    <a href="{{ url_for('index') }}"><i class="fa-solid fa-arrow-left"></i></a>
+    <a href="{{ url_for('routes.index') }}"><i class="fa-solid fa-arrow-left"></i></a>
     <div class="title"> 
-        <h2>Julie's Birthday</h2>
+        <h2>{{task.title}}</h2>
         <label class="category"></label>
     </div>
     <div class="description">
-        <textarea placeholder="Add a description here..."></textarea> 
+        <textarea placeholder="Add a description here...">{{task.description}}</textarea> 
     </div>
 
     <div class="check-all">
@@ -51,8 +52,3 @@
 </div>
 
 {% endblock %}
-
-
-
-
-

@@ -1,0 +1,14 @@
+{% extends "index.html" %}
+{% block content %}
+<h1>Tasks</h1>
+ {% for task in tasks %}
+        <div>
+          <h2>Task ID: {{ task.id }}</h2>
+            <h2>{{ task.title }}</h2>
+            <p>{{ task.description }}</p>
+            <p>Status: {{ 'Completed' if task.completed else 'Pending' }}</p>
+        </div>
+  {% endfor %}
+
+
+{% endblock %}
