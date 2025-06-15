@@ -1,5 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>My To-Do List</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <a href="{{ url_for('index') }}" class="logo">
+      <img src="{{ url_for('static', filename='/images/logo.png') }}" alt="OngeaTask Logo" class="logo" />
+    </a>
+    <form class="search-bar">
+      <input type="text" placeholder="Search tasks..." />
+    </form>
+    <div class="profile-section">
+      <div class="dropdown">
+        <img src="{{ url_for('static', filename='/images/profile.png') }}" alt="Profile" class="profile-pic" />
+        <div class="dropdown-content">
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </div>
+      <span class="user-name">{{ user.name if user else 'User' }}</span>
+    </div>
+  </nav>
   <head>
     <meta charset="UTF-8" />
     <title>My To-Do List</title>
