@@ -12,7 +12,7 @@
 <body>
   <!-- Top Navigation Bar -->
   <nav class="navbar">
-    <a href="{{ url_for('index') }}" class="logo">
+    <a href="{{ url_for('routes.index') }}" class="logo">
       <img src="{{ url_for('static', filename='/images/logo.png') }}" alt="OngeaTask Logo" class="logo" />
     </a>
     <form class="search-bar">
@@ -22,8 +22,8 @@
       <div class="dropdown">
         <img src="{{ url_for('static', filename='/images/profile.png') }}" alt="Profile" class="profile-pic" />
         <div class="dropdown-content">
-          <a href="{{ url_for('profile') }}">Profile</a>
-          <a href="{{ url_for('logout') }}">Logout</a>
+          <a href="{{ url_for('routes.profile') }}">Profile</a>
+          <a href="{{ url_for('routes.logout') }}">Logout</a>
         </div>
       </div>
       <span class="user-name">{{ user.name if user else 'User' }}</span>
