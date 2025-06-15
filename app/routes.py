@@ -9,7 +9,7 @@ routes = Blueprint('routes', __name__)
 def index():
     return render_template('index.html')
 
-@routes.route('/tasks')
+@routes.route('/tasks', methods=['GET'])
 def tasks():
     tasks = Task.query.all()
     return render_template('tasks.html', tasks=tasks)

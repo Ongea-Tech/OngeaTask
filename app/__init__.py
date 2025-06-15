@@ -18,7 +18,10 @@ def create_app():
 
     # Import routes after app is created to avoid circular import
     from app.routes import routes
+    from app.api_routes import api
+
     app.register_blueprint(routes)
+    app.register_blueprint(api)
 
     # Create tables
     with app.app_context():
