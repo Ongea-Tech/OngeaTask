@@ -29,39 +29,26 @@
       <span class="user-name">{{ user.name if user else 'User' }}</span>
     </div>
   </nav>
+
   <head>
     <meta charset="UTF-8" />
     <title>My To-Do List</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='styles.css') }}"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   </head>
 
   <body>
     <!-- Top Navigation Bar -->
     <nav class="navbar">
       <a href="{{ url_for('routes.index') }}" class="logo">
-        <img
-          src="{{ url_for('static', filename='/images/logo.png') }}"
-          alt="OngeaTask Logo"
-          class="logo"
-        />
+        <img src="{{ url_for('static', filename='/images/logo.png') }}" alt="OngeaTask Logo" class="logo" />
       </a>
       <form class="search-bar">
         <input type="text" placeholder="Search tasks..." />
       </form>
       <div class="profile-section">
         <div class="dropdown">
-          <img
-            src="{{ url_for('static', filename='/images/profile.png') }}"
-            alt="Profile"
-            class="profile-pic"
-          />
+          <img src="{{ url_for('static', filename='/images/profile.png') }}" alt="Profile" class="profile-pic" />
           <div class="dropdown-content">
             <a href="{{ url_for('routes.profile') }}">Profile</a>
             <a href="{{ url_for('routes.logout') }}">Logout</a>
@@ -76,30 +63,16 @@
       <!-- Sidebar -->
       <div class="sidebar">
         <div class="top-sidebar">
-          <a href="{{ url_for('routes.index') }}"
-            ><i class="fa-solid fa-list-check"></i>Tasks</a
-          >
-          <a href="{{ url_for('routes.categories') }}"
-            ><i class="fa-solid fa-layer-group"></i>Categories</a
-          >
-          <a href="{{ url_for('routes.profile') }}"
-            ><i class="fa-solid fa-user"></i>Profile</a
-          >
-          <a href="{{ url_for('routes.history') }}"
-            ><i class="fa-solid fa-clock-rotate-left"></i>History</a
-          >
+          <a href="{{ url_for('routes.index') }}"><i class="fa-solid fa-list-check"></i>Tasks</a>
+          <a href="{{ url_for('routes.categories') }}"><i class="fa-solid fa-layer-group"></i>Categories</a>
+          <a href="{{ url_for('routes.profile') }}"><i class="fa-solid fa-user"></i>Profile</a>
+          <a href="{{ url_for('routes.history') }}"><i class="fa-solid fa-clock-rotate-left"></i>History</a>
         </div>
 
         <div class="bottom-sidebar">
-          <a href="{{ url_for('routes.trash') }}"
-            ><i class="fa-solid fa-trash"></i>Trash</a
-          >
-          <a href="{{ url_for('routes.settings') }}"
-            ><i class="fa-solid fa-gear"></i>Settings</a
-          >
-          <a href="{{ url_for('routes.logout') }}"
-            ><i class="fa-solid fa-right-from-bracket"></i>Logout</a
-          >
+          <a href="{{ url_for('routes.trash') }}"><i class="fa-solid fa-trash"></i>Trash</a>
+          <a href="{{ url_for('routes.settings') }}"><i class="fa-solid fa-gear"></i>Settings</a>
+          <a href="{{ url_for('routes.logout') }}"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
         </div>
       </div>
 
@@ -119,11 +92,7 @@
           <div class="modal-content">
             <span id="closeModalBtn" class="close">&times;</span>
 
-            <form
-              id="createTaskForm"
-              method="POST"
-              action="{{ url_for('routes.create_task') }}"
-            >
+            <form id="createTaskForm" method="POST" action="{{ url_for('routes.create_task') }}">
               <h2>Create New Task</h2>
 
               <label for="name">Task Name (required):</label>
@@ -137,29 +106,8 @@
           </div>
         </div>
 
-        <div class="task-list">
-          <a href="#" class="task-card border-first">
-            <input type="checkbox" />
-            <div class="task-info">
-              <span class="category category-home"> Home </span>
-              <div>
-                <h4>Birthday</h4>
-                <p>5/6 completed</p>
-              </div>
-              <div class="priority priority-first"></div>
-            </div>
-          </a>
-          <a href="#" class="task-card border-second">
-            <input type="checkbox" />
-            <div class="task-info">
-              <span class="category category-work"> Work </span>
-              <div>
-                <h4>Field reports</h4>
-                <p>0/4 completed</p>
-              </div>
-              <div class="priority priority-second"></div>
-            </div>
-          </a>
+        <div class="task-list" id="taskList">
+
         </div>
 
         <script>
@@ -183,8 +131,47 @@
           };
         </script>
 
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            fetch('/api/tasks')
+              .then(response => response.json())
+              .then(tasks => {
+                const taskList = document.getElementById('taskList');
+                taskList.innerHTML = ''; // Clear if anything exists
+
+                tasks.forEach(task => {
+                  const completedSubtasks = task.subtasks.filter(st => st.completed).length;
+                  const totalSubtasks = task.subtasks.length;
+
+                  const taskCard = document.createElement('a');
+                  taskCard.className = 'task-card border-first';
+                  taskCard.href = '#';
+
+                  taskCard.innerHTML = `
+            <input type="checkbox" ${task.completed ? 'checked' : ''} />
+            <div class="task-info">
+              <span class="category category-home">General</span>
+              <div>
+                <h4>${task.title}</h4>
+                <p>${completedSubtasks}/${totalSubtasks} completed</p>
+              </div>
+              <div class="priority priority-first"></div>
+            </div>
+          `;
+
+                  taskList.appendChild(taskCard);
+                });
+              })
+              .catch(error => {
+                console.error('Error fetching tasks:', error);
+              });
+          });
+        </script>
+
+
         {% endblock %}
       </main>
     </div>
   </body>
+
 </html>
