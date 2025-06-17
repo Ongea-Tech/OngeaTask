@@ -45,4 +45,27 @@
     </div>
   </form>
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+  
+  const editIcons = document.querySelectorAll(".edit-icon");
+
+  editIcons.forEach(function (icon) {
+    icon.addEventListener("click", function () {
+      
+      const input = this.parentElement.querySelector("input");
+      if (input) {
+        input.removeAttribute("readonly");
+        input.focus();
+      }
+    });
+  });
+
+  
+  const inputs = document.querySelectorAll(".profile-form input");
+  inputs.forEach(function (input) {
+    input.setAttribute("readonly", true);
+  });
+});
+</script>
 {% endblock %}
