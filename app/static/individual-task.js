@@ -34,13 +34,20 @@ document.addEventListener("DOMContentLoaded", function () {
       // Append the label to the subtask list
       document.getElementById("subtaskList").appendChild(label);
 
+      // empties the input field
+      input.value = "";
+
+
       // if input is empyty      
     } else {
       alert("Please enter a new item.");
     }
   });
+
+  // deletes a subtask 
   document.getElementById("subtaskList").addEventListener("click", function (event) {
     if (event.target.classList.contains("fa-trash-can")) {
+        event.preventDefault() // Prevent link navigation
         const subtaskItem = event.target.closest(".checkbox");
         if (subtaskItem) {
         subtaskItem.remove();
