@@ -107,13 +107,13 @@
         </div>
 
         <div id="bulk-actions" class="task-actions" style="display: none;">
-          <form id="markCompletedForm" method="POST" action="/mark_completed">
-            <input type="hidden" name="task_ids" id="completedTaskIds">
+          <form id="markCompletedForm" method="POST" action="{{ url_for('routes.mark_completed') }}">
+            <input type="hidden" name="completed_ids" id="completedTaskIds">
             <button type="submit">Mark as Completed</button>
           </form>
 
-          <form id="moveToTrashForm" method="POST" action="/move_to_trash">
-            <input type="hidden" name="task_ids" id="trashTaskIds">
+          <form id="moveToTrashForm" method="POST" action="{{ url_for('routes.move_to_trash') }}">
+            <input type="hidden" name="trash_ids" id="trashTaskIds">
             <button type="submit">🗑️ Move to Trash</button>
           </form>
         </div>
