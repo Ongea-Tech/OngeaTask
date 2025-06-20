@@ -106,10 +106,20 @@
           </div>
         </div>
 
-        <div class="task-list" id="taskList">
+        <div id="bulk-actions" class="task-actions" style="display: none;">
+          <form id="markCompletedForm" method="POST" action="/mark_completed">
+            <input type="hidden" name="task_ids" id="completedTaskIds">
+            <button type="submit">Mark as Completed</button>
+          </form>
 
+          <form id="moveToTrashForm" method="POST" action="/move_to_trash">
+            <input type="hidden" name="task_ids" id="trashTaskIds">
+            <button type="submit">🗑️ Move to Trash</button>
+          </form>
         </div>
 
+        <div class="task-list" id="taskList">
+        </div>
         <script>
           const modal = document.getElementById("taskModal");
           const openBtn = document.getElementById("openModalBtn");
@@ -133,38 +143,87 @@
 
         <script>
           document.addEventListener('DOMContentLoaded', function () {
+            const bulkActions = document.getElementById('bulk-actions');
+            const completedInput = document.getElementById('completedTaskIds');
+            const trashInput = document.getElementById('trashTaskIds');
+            const selectedTaskIds = new Set();
+
+            function updateBulkActionsVisibility() {
+              if (selectedTaskIds.size > 0) {
+                bulkActions.style.display = 'flex';
+              } else {
+                bulkActions.style.display = 'none';
+              }
+            }
+
             fetch('/api/tasks')
               .then(response => response.json())
               .then(tasks => {
                 const taskList = document.getElementById('taskList');
-                taskList.innerHTML = ''; // Clear if anything exists
+                taskList.innerHTML = ''; // Clear existing content
 
                 tasks.forEach(task => {
                   const completedSubtasks = task.subtasks.filter(st => st.completed).length;
                   const totalSubtasks = task.subtasks.length;
 
-                  const taskCard = document.createElement('a');
+                  // Create the card
+                  const taskCard = document.createElement('div');
                   taskCard.className = 'task-card border-first';
-                  taskCard.href = '#';
+                  taskCard.style.cursor = 'pointer';
+                  taskCard.addEventListener('click', () => {
+                    window.location.href = `/tasks/${task.id}`;
+                  });
 
-                  taskCard.innerHTML = `
-            <input type="checkbox" ${task.completed ? 'checked' : ''} />
-            <div class="task-info">
-              <span class="category category-home">General</span>
-              <div>
-                <h4>${task.title}</h4>
-                <p>${completedSubtasks}/${totalSubtasks} completed</p>
-              </div>
-              <div class="priority priority-first"></div>
+                  // Create the checkbox
+                  const checkbox = document.createElement('input');
+                  checkbox.type = 'checkbox';
+                  checkbox.dataset.taskId = task.id;
+
+                  // Prevent checkbox click from triggering card navigation
+                  checkbox.addEventListener('click', event => {
+                    event.stopPropagation();
+                  });
+
+                  // Track selected tasks
+                  checkbox.addEventListener('change', () => {
+                    const taskId = checkbox.dataset.taskId;
+                    if (checkbox.checked) {
+                      selectedTaskIds.add(taskId);
+                    } else {
+                      selectedTaskIds.delete(taskId);
+                    }
+                    updateBulkActionsVisibility();
+                  });
+
+                  // Task info section
+                  const taskInfo = document.createElement('div');
+                  taskInfo.className = 'task-info';
+                  taskInfo.innerHTML = `
+            <span class="category category-home">General</span>
+            <div>
+              <h4>${task.title}</h4>
+              <p>${completedSubtasks}/${totalSubtasks} completed</p>
             </div>
+            <div class="priority priority-first"></div>
           `;
 
+                  taskCard.appendChild(checkbox);
+                  taskCard.appendChild(taskInfo);
                   taskList.appendChild(taskCard);
                 });
               })
               .catch(error => {
                 console.error('Error fetching tasks:', error);
               });
+
+            // Attach form submit handlers to pass selected task IDs
+            document.getElementById('markCompletedForm').addEventListener('submit', function () {
+              completedInput.value = Array.from(selectedTaskIds).join(',');
+            });
+
+            document.getElementById('moveToTrashForm').addEventListener('submit', function () {
+              trashInput.value = Array.from(selectedTaskIds).join(',');
+            });
           });
         </script>
 

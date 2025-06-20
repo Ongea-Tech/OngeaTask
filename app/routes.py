@@ -76,3 +76,27 @@ def settings():
 def trash():
     return render_template('trash.html')
 
+@routes.route('/mark-completed', methods=['POST'])
+def mark_completed():
+    ids = request.form.get('completed_ids', '')
+    if ids:
+        task_ids = [int(tid) for tid in ids.split(',')]
+        for task_id in task_ids:
+            task = Task.query.get(task_id)
+            if task:
+                task.completed = True
+        db.session.commit()
+    return redirect(url_for('routes.index'))
+
+@routes.route('/move-to-trash', methods=['POST'])
+def move_to_trash():
+    ids = request.form.get('trash_ids', '')
+    if ids:
+        task_ids = [int(tid) for tid in ids.split(',')]
+        for task_id in task_ids:
+            task = Task.query.get(task_id)
+            if task:
+                db.session.delete(task)
+        db.session.commit()
+    return redirect(url_for('routes.index'))
+

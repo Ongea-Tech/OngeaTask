@@ -776,3 +776,36 @@ input[type="checkbox"] {
 .modal-content button[type="submit"]:hover {
   background-color: #335fcc;
 }
+
+#bulk-actions {
+  display: none;
+  gap: 1rem;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+#bulk-actions form button {
+  padding: 8px 8px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#bulk-actions form button:hover {
+  opacity: 0.85;
+}
+
+#markCompletedForm button {
+  background-color: #4CAF50;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+#moveToTrashForm button {
+  background-color: #f44336;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
