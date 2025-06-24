@@ -6,65 +6,115 @@
 
   <div class="profile-image-container">
     <img 
-    src="{{ url_for('static', filename='/images/profile.png') }}" 
-    alt="Profile" 
-    class="profile-image" />
+      src="{{ url_for('static', filename='/images/profile.png') }}" 
+      alt="Profile" 
+      class="profile-image" />
   </div>
 
   <form class="profile-form">
     <div class="form-group">
       <label for="username">Username</label>
-      <div class ="input-wrapper">
-        <input type="text" id="username" value="username1" />
+      <div class="input-wrapper">
+        <input type="text" id="username" />
         <span class="edit-icon">&#9998;</span>
       </div>
     </div>
 
     <div class="form-group">
       <label for="firstname">First Name</label>
-      <div class ="input-wrapper">
-        <input type="text" id="firstname" value="Jane" />
+      <div class="input-wrapper">
+        <input type="text" id="firstname" />
         <span class="edit-icon">&#9998;</span>
       </div>
     </div>
 
     <div class="form-group">
       <label for="lastname">Last Name</label>
-      <div class ="input-wrapper">
-        <input type="text" id="lastname" value="Doe" />
+      <div class="input-wrapper">
+        <input type="text" id="lastname" />
         <span class="edit-icon">&#9998;</span>
       </div>
     </div>
 
     <div class="form-group">
       <label for="email">Email</label>
-      <div class ="input-wrapper">
-        <input type="email" id="email" value="jdoe@email.com" />
+      <div class="input-wrapper">
+        <input type="email" id="email" />
         <span class="edit-icon">&#9998;</span>
       </div>
     </div>
+
+    <button id="save-profile" type="button">Save Profile</button>
   </form>
 </div>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-  
-  const editIcons = document.querySelectorAll(".edit-icon");
 
-  editIcons.forEach(function (icon) {
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const profileId = 1; // Replace with dynamic user ID if needed
+
+  const inputs = document.querySelectorAll(".profile-form input");
+  inputs.forEach(input => input.setAttribute("readonly", true));
+
+  // Enable individual field editing
+  document.querySelectorAll(".edit-icon").forEach(icon => {
     icon.addEventListener("click", function () {
-      
-      const input = this.parentElement.querySelector("input");
-      if (input) {
-        input.removeAttribute("readonly");
-        input.focus();
-      }
+      const input = this.previousElementSibling;
+      input.removeAttribute("readonly");
+      input.focus();
     });
   });
 
-  
-  const inputs = document.querySelectorAll(".profile-form input");
-  inputs.forEach(function (input) {
-    input.setAttribute("readonly", true);
+  // Load profile data (GET)
+  fetch(`/api/profiles/${profileId}`)
+    .then(res => {
+      if (!res.ok) throw new Error("Profile not found");
+      return res.json();
+    })
+    .then(data => {
+      document.getElementById('username').value = data.username;
+      document.getElementById('firstname').value = data.first_name;
+      document.getElementById('lastname').value = data.last_name;
+      document.getElementById('email').value = data.email;
+      document.querySelector('.profile-image').src = `/static/${data.image_filename}`;
+    })
+    .catch(err => {
+      console.warn("No profile found, will create on save.");
+    });
+
+  // Save profile (PUT or POST fallback)
+  document.getElementById('save-profile').addEventListener('click', function () {
+    const payload = {
+      username: document.getElementById('username').value,
+      first_name: document.getElementById('firstname').value,
+      last_name: document.getElementById('lastname').value,
+      email: document.getElementById('email').value
+    };
+
+    fetch(`/api/profiles/${profileId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(res => {
+      if (res.status === 404) {
+        // If no profile, create a new one
+        return fetch("/api/profiles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      }
+      return res;
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert("Profile saved successfully.");
+      console.log(data);
+    })
+    .catch(err => {
+      alert("Error saving profile.");
+      console.error(err);
+    });
   });
 });
 </script>
