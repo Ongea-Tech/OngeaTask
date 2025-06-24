@@ -48,5 +48,77 @@
     <button class="add-category-button">Add Category</button>
   </form>
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".category-input").forEach(input => {
+    input.setAttribute("readonly", true);
+  });
+
+  document.querySelectorAll(".edit-icon").forEach(icon => {
+    icon.addEventListener("click", function () {
+      const input = this.closest(".category-group").querySelector(".category-input");
+      if (input) {
+        input.removeAttribute("readonly");
+        input.focus();
+      }
+    });
+  });
+
+  document.querySelectorAll(".category-group .delete-icon").forEach(icon => {
+    icon.addEventListener("click", function () {
+      const group = this.closest(".category-group");
+      if (group) {
+        group.remove();
+      }
+    });
+  });
+
+  const topCheckbox = document.querySelector(".delete-header .category-checkbox");
+  if (topCheckbox) {
+    topCheckbox.addEventListener("change", function () {
+      const allCheckboxes = document.querySelectorAll(".category-group .category-checkbox");
+      allCheckboxes.forEach(cb => cb.checked = topCheckbox.checked);
+    });
+  }
+
+  const addButton = document.querySelector(".add-category-button");
+  if (addButton) {
+    addButton.addEventListener("click", function (e) {
+      e.preventDefault();
+
+      
+      const newGroup = document.createElement("div");
+      newGroup.className = "category-group";
+      newGroup.innerHTML = `
+        <input type="checkbox" class="category-checkbox" />
+        <input type="text" class="category-input" value="New Category" />
+        <div class="category-actions">
+          <span class="delete-icon">&#128465;</span>
+          <span class="edit-icon">&#9998;</span>
+        </div>
+      `;
+
+    
+      document.querySelector(".category-form").insertBefore(newGroup, addButton);
+
+    
+      newGroup.querySelector(".category-input").setAttribute("readonly", true);
+
+    
+      newGroup.querySelector(".edit-icon").addEventListener("click", function () {
+        const input = this.closest(".category-group").querySelector(".category-input");
+        input.removeAttribute("readonly");
+        input.focus();
+      });
+
+      newGroup.querySelector(".delete-icon").addEventListener("click", function () {
+        const group = this.closest(".category-group");
+        group.remove();
+      });
+    });
+  }
+});
+
+</script>
 
 {% endblock %}
