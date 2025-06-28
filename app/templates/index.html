@@ -12,7 +12,7 @@
 <body>
   <!-- Top Navigation Bar -->
   <nav class="navbar">
-    <a href="{{ url_for('index') }}" class="logo">
+    <a href="{{ url_for('routes.index') }}" class="logo">
       <img src="{{ url_for('static', filename='/images/logo.png') }}" alt="OngeaTask Logo" class="logo" />
     </a>
     <form class="search-bar">
@@ -22,83 +22,215 @@
       <div class="dropdown">
         <img src="{{ url_for('static', filename='/images/profile.png') }}" alt="Profile" class="profile-pic" />
         <div class="dropdown-content">
-          <a href="{{ url_for('profile') }}">Profile</a>
-          <a href="{{ url_for('logout') }}">Logout</a>
+          <a href="{{ url_for('routes.profile') }}">Profile</a>
+          <a href="{{ url_for('routes.logout') }}">Logout</a>
         </div>
       </div>
       <span class="user-name">{{ user.name if user else 'User' }}</span>
     </div>
   </nav>
 
-  <!-- Flex container for sidebar and page content -->
-  <div class="layout-container">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  </head>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="top-sidebar">
-        <a href="{{ url_for('index') }}"><i class="fa-solid fa-list-check"></i>Tasks</a>
-        <a href="{{ url_for('categories') }}"><i class="fa-solid fa-layer-group"></i>Categories</a>
-        <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i>Profile</a>
-        <a href="{{ url_for('history') }}"><i class="fa-solid fa-clock-rotate-left"></i>History</a>
+  <body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+      <a href="{{ url_for('routes.index') }}" class="logo">
+        <img src="{{ url_for('static', filename='/images/logo.png') }}" alt="OngeaTask Logo" class="logo" />
+      </a>
+      <form class="search-bar">
+        <input type="text" placeholder="Search tasks..." />
+      </form>
+      <div class="profile-section">
+        <div class="dropdown">
+          <img src="{{ url_for('static', filename='/images/profile.png') }}" alt="Profile" class="profile-pic" />
+          <div class="dropdown-content">
+            <a href="{{ url_for('routes.profile') }}">Profile</a>
+            <a href="{{ url_for('routes.logout') }}">Logout</a>
+          </div>
+        </div>
+        <span class="user-name">{{ user.name if user else 'User' }}</span>
+      </div>
+    </nav>
+
+    <!-- Flex container for sidebar and page content -->
+    <div class="layout-container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="top-sidebar">
+          <a href="{{ url_for('routes.index') }}"><i class="fa-solid fa-list-check"></i>Tasks</a>
+          <a href="{{ url_for('routes.categories') }}"><i class="fa-solid fa-layer-group"></i>Categories</a>
+          <a href="{{ url_for('routes.profile') }}"><i class="fa-solid fa-user"></i>Profile</a>
+          <a href="{{ url_for('routes.history') }}"><i class="fa-solid fa-clock-rotate-left"></i>History</a>
+        </div>
+
+        <div class="bottom-sidebar">
+          <a href="{{ url_for('routes.trash') }}"><i class="fa-solid fa-trash"></i>Trash</a>
+          <a href="{{ url_for('routes.settings') }}"><i class="fa-solid fa-gear"></i>Settings</a>
+          <a href="{{ url_for('routes.logout') }}"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
+        </div>
       </div>
 
-      <div class="bottom-sidebar">
-        <a href="{{ url_for('trash') }}"><i class="fa-solid fa-trash"></i>Trash</a>
-        <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear"></i>Settings</a>
-        <a href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
-      </div>
-    </div>
+      <!-- Main content -->
+      <main class="page-content">
+        {% block content %}
 
-    <!-- Main content -->
-    <main class="page-content">
-      {% block content %}
+        <div class="header">
+          <h2>Ongoing Tasks</h2>
+          <button id="openModalBtn" class="add-task-button">
+            Add New Task
+          </button>
+        </div>
 
-      <div class="header">
-        <h2>Ongoing Tasks</h2>
-        <button class="add-task-button"> Add New Task</button>
-      </div>
+        <!-- The Modal -->
+        <div id="taskModal" class="modal" style="display: none">
+          <div class="modal-content">
+            <span id="closeModalBtn" class="close">&times;</span>
 
-      <div class="task-list">
-        <a href="#" class="task-card border-first">
-          <input type="checkbox">
-          <div class="task-info">
-            <span class="category category-home">
-            Home
-            </span>
+            <form id="createTaskForm" method="POST" action="{{ url_for('routes.create_task') }}">
+              <h2>Create New Task</h2>
+
+              <label for="name">Task Name (required):</label>
+              <input type="text" id="name" name="name" required />
+
+              <label for="description">Description:</label>
+              <textarea id="description" name="description"></textarea>
+
+              <button type="submit">Create Task</button>
+            </form>
+          </div>
+        </div>
+
+        <div id="bulk-actions" class="task-actions" style="display: none;">
+          <form id="markCompletedForm" method="POST" action="{{ url_for('routes.mark_completed') }}">
+            <input type="hidden" name="completed_ids" id="completedTaskIds">
+            <button type="submit">Mark as Completed</button>
+          </form>
+
+          <form id="moveToTrashForm" method="POST" action="{{ url_for('routes.move_to_trash') }}">
+            <input type="hidden" name="trash_ids" id="trashTaskIds">
+            <button type="submit">🗑️ Move to Trash</button>
+          </form>
+        </div>
+
+        <div class="task-list" id="taskList">
+        </div>
+        <script>
+          const modal = document.getElementById("taskModal");
+          const openBtn = document.getElementById("openModalBtn");
+          const closeBtn = document.getElementById("closeModalBtn");
+
+          openBtn.onclick = () => {
+            modal.style.display = "flex";
+          };
+
+          closeBtn.onclick = () => {
+            modal.style.display = "none";
+          };
+
+          // Close modal if user clicks outside the modal content
+          window.onclick = (event) => {
+            if (event.target === modal) {
+              modal.style.display = "none";
+            }
+          };
+        </script>
+
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const bulkActions = document.getElementById('bulk-actions');
+            const completedInput = document.getElementById('completedTaskIds');
+            const trashInput = document.getElementById('trashTaskIds');
+            const selectedTaskIds = new Set();
+
+            function updateBulkActionsVisibility() {
+              if (selectedTaskIds.size > 0) {
+                bulkActions.style.display = 'flex';
+              } else {
+                bulkActions.style.display = 'none';
+              }
+            }
+
+            fetch('/api/tasks')
+              .then(response => response.json())
+              .then(tasks => {
+                const taskList = document.getElementById('taskList');
+                taskList.innerHTML = ''; // Clear existing content
+
+                tasks.forEach(task => {
+                  const completedSubtasks = task.subtasks.filter(st => st.completed).length;
+                  const totalSubtasks = task.subtasks.length;
+
+                  // Create the card
+                  const taskCard = document.createElement('div');
+                  taskCard.className = 'task-card border-first';
+                  taskCard.style.cursor = 'pointer';
+                  taskCard.addEventListener('click', () => {
+                    window.location.href = `/${task.id}`;
+                  });
+
+                  // Create the checkbox
+                  const checkbox = document.createElement('input');
+                  checkbox.type = 'checkbox';
+                  checkbox.dataset.taskId = task.id;
+
+                  // Prevent checkbox click from triggering card navigation
+                  checkbox.addEventListener('click', event => {
+                    event.stopPropagation();
+                  });
+
+                  // Track selected tasks
+                  checkbox.addEventListener('change', () => {
+                    const taskId = checkbox.dataset.taskId;
+                    if (checkbox.checked) {
+                      selectedTaskIds.add(taskId);
+                    } else {
+                      selectedTaskIds.delete(taskId);
+                    }
+                    updateBulkActionsVisibility();
+                  });
+
+                  // Task info section
+                  const taskInfo = document.createElement('div');
+                  taskInfo.className = 'task-info';
+                  taskInfo.innerHTML = `
+            <span class="category category-home">General</span>
             <div>
-              <h4>Birthday</h4>
-              <p>5/6 completed</p>
+              <h4>${task.title}</h4>
+              <p>${completedSubtasks}/${totalSubtasks} completed</p>
             </div>
             <div class="priority priority-first"></div>
-          </div>
-          
-        </a>
-        <a href="#" class="task-card border-second">
-          <input type="checkbox">
-          <div class="task-info">
-            <span class="category category-work">
-            Work
-            </span>
-            <div>
-              <h4>Field reports</h4>
-              <p>0/4 completed</p>
-            </div>
-            <div class="priority priority-second"></div>
-          </div>
-        </a>
+          `;
 
-      </div>
-  
+                  taskCard.appendChild(checkbox);
+                  taskCard.appendChild(taskInfo);
+                  taskList.appendChild(taskCard);
+                });
+              })
+              .catch(error => {
+                console.error('Error fetching tasks:', error);
+              });
+
+            // Attach form submit handlers to pass selected task IDs
+            document.getElementById('markCompletedForm').addEventListener('submit', function () {
+              completedInput.value = Array.from(selectedTaskIds).join(',');
+            });
+
+            document.getElementById('moveToTrashForm').addEventListener('submit', function () {
+              trashInput.value = Array.from(selectedTaskIds).join(',');
+            });
+          });
+        </script>
 
 
-
-
-  {% endblock %}
-  </main>
-  </div>
-  {% block scripts %}
-  <script src="{{ url_for('static', filename='individual-task.js') }}"></script>
-  {% endblock %}
-</body>
+        {% endblock %}
+      </main>
+    </div>
+  </body>
 
 </html>
