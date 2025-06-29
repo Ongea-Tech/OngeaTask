@@ -1,10 +1,10 @@
 from app import create_app
 from app.models import db, Task, Subtask
 
-#Create the Flask app using your factory,
+# Create the Flask app using your factory
 app = create_app()
 
-#Run database setup in the app context,
+# Run database setup in the app context
 with app.app_context():
     db.create_all()
     print("✅ Database tables created.")
