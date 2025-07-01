@@ -81,3 +81,11 @@ def update_task(task_id):
     task.completed = data.get('completed', task.completed)
     db.session.commit()
     return jsonify({'message': 'Task updated'}), 200
+
+@api.route('/api/subtasks/<int:subtask_id>', methods=['DELETE'])
+def delete_subtask(subtask_id):
+    subtask = Subtask.query.get_or_404(subtask_id)
+    db.session.delete(subtask)
+    db.session.commit()
+    return jsonify({'message': 'Subtask deleted'}), 200
+
