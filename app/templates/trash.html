@@ -8,22 +8,18 @@
 <h1 class="trash-title">Trash</h1>
 <div class="trash-divider"></div>
 
-<form method="POST" action="{{ url_for('routes.trash') }}">
-{% for task in tasks %}
- <h2>{{ task.title }}</h2>
-
-  {% if task.deleted_date == today %}
+<form method="POST" action="{{ url_for('routes.restore_bulk') }}">
+  {% if today_deleted %}
     <div class="trash-section">
       <div class="trash-header-row">
-        <h2>Today {{ today }}</h2>
-        
-      </div>
-
-      <div class="trash-controls">
-        <input type="checkbox" class="master-checkbox" />
-        <button type="submit" class="btn-blue">Restore</button>
-        <button type="submit" formaction="{{ url_for('routes.delete_tasks_permanently') }}" class="btn-blue">Delete Permanently</button>
-      </div>
+        <h2>Today ({{ today_date }})</h2>
+    </div>
+<div class="trash-controls trash-actions">
+  <input type="checkbox" class="master-checkbox" />
+  <button type="submit" class="btn-blue">Restore</button>
+   <button type="submit" formaction="{{ url_for('routes.delete_tasks_permanently') }}" class="btn-blue">Delete Permanently</button>
+</div>
+    </div>
 
       {% for task in today_deleted %}
         <div class="trash-task-item">
@@ -44,12 +40,6 @@
         <h2>Yesterday ({{ yesterday_date }})</h2>
       </div>
 
-      <div class="trash-controls">
-        <input type="checkbox" class="master-checkbox" />
-        <button type="submit" class="btn-blue">Restore</button>
-        <button type="submit" formaction="{{ url_for('routes.delete_tasks_permanently') }}" class="btn-blue">Delete Permanently</button>
-      </div>
-
       {% for task in yesterday_deleted %}
         <div class="trash-task-item">
           <input type="checkbox" name="task_ids" value="{{ task.id }}" />
@@ -66,6 +56,19 @@
   {% if not today_deleted and not yesterday_deleted %}
     <p class="empty-state">Nothing in Trash.</p>
   {% endif %}
-{% endfor %}
 </form>
+<!-- checkbox -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.master-checkbox').forEach(masterCheckbox => {
+      masterCheckbox.addEventListener('change', () => {
+        const form = masterCheckbox.closest('form');
+        form.querySelectorAll('input[type="checkbox"][name="task_ids"]').forEach(cb => {
+          cb.checked = masterCheckbox.checked;
+        });
+      });
+    });
+  });
+</script>
+
 {% endblock %}

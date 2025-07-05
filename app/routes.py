@@ -106,18 +106,46 @@ def settings():
 
 @routes.route('/trash', methods=['GET'])
 def trash():
-    tasks = Task.query.filter_by(deleted=True).all()
     today = date.today()
-    return render_template('trash.html', tasks=tasks, today=today)
+    yesterday = today - timedelta(days=1)
+
+    today_deleted = Task.query.filter(
+        Task.deleted == True,
+        Task.deleted_date == today
+    ).all()
+
+    yesterday_deleted = Task.query.filter(
+        Task.deleted == True,
+        Task.deleted_date == today - timedelta(days=1)
+    ).all()
+
+    def summarize(task):
+        total = len(task.subtasks)
+        done = sum(1 for sub in task.subtasks if sub.completed)
+        return f"{done}/{total} completed" if total > 0 else "Completed"
+
+    for task in today_deleted + yesterday_deleted:
+        task.category = "Home"
+        task.color = "red"
+        task.subtask_summary = summarize(task)
+
+    return render_template(
+        'trash.html',
+        today_deleted=today_deleted,
+        yesterday_deleted=yesterday_deleted,
+        today_date=today.strftime("%B %d, %Y"),
+        yesterday_date=yesterday.strftime("%B %d, %Y")
+    )
 
 @routes.route('/trash/<int:task_id>', methods=['POST'])
-def restore_tasks(task_id):
+def restore_single_task(task_id):
     task = Task.query.get_or_404(task_id)
     task.deleted = False
     task.deleted_date = None
     db.session.commit()
     flash("Task restored successfully", "success")
     return redirect(url_for('routes.trash'))
+
 
 @routes.route('/mark-completed', methods=['POST'])
 def mark_completed():
@@ -128,6 +156,9 @@ def mark_completed():
             task = Task.query.get(task_id)
             if task:
                 task.completed = True
+                task.completed_date = date.today()
+                task.deleted = False
+                task.deleted_date = None
         db.session.commit()
     return redirect(url_for('routes.index'))
 
@@ -139,6 +170,67 @@ def move_to_trash():
         for task_id in task_ids:
             task = Task.query.get(task_id)
             if task:
-                db.session.delete(task)
+                task.deleted = True
+                task.deleted_date = date.today()
+                task.completed = False
+                task.completed_date = None
         db.session.commit()
     return redirect(url_for('routes.index'))
+
+@routes.route('/restore_bulk', methods=['POST'])
+def restore_bulk():
+    task_ids = request.form.getlist('task_ids')
+    for task_id in task_ids:
+        task = Task.query.get(int(task_id))
+        if task and task.deleted:
+            task.deleted = False
+            task.deleted_date = None
+    db.session.commit()
+    flash(f"{len(task_ids)} task(s) restored.", "success")
+    return redirect(url_for('routes.trash'))
+
+@routes.route('/delete_tasks_permanently', methods=['POST'])
+def delete_tasks_permanently():
+    task_ids = request.form.getlist('task_ids')
+    for task_id in task_ids:
+        task = Task.query.get(int(task_id))
+        if task and task.deleted:
+            db.session.delete(task)
+    db.session.commit()
+    flash(f"{len(task_ids)} task(s) permanently deleted.", "success")
+    return redirect(url_for('routes.trash'))
+
+@routes.route('/history_action', methods=['POST'])
+def history_action():
+    action = request.form.get('action')
+    task_ids = request.form.getlist('task_ids')
+
+    if not task_ids:
+        flash("No tasks selected.", "error")
+        return redirect(url_for('routes.history'))
+
+    for task_id in task_ids:
+        task = Task.query.get(int(task_id))
+        if not task:
+            continue
+
+        if action == 'reopen':
+            task.completed = False
+            task.completed_date = None
+            task.deleted = False
+            task.deleted_date = None
+        elif action == 'trash':
+            task.deleted = True
+            task.deleted_date = date.today()
+        else:
+            flash("Invalid action.", "error")
+            return redirect(url_for('routes.history'))
+
+    db.session.commit()
+
+    if action == 'reopen':
+        flash(f"{len(task_ids)} task(s) reopened.", "success")
+    elif action == 'trash':
+        flash(f"{len(task_ids)} task(s) moved to trash.", "success")
+
+    return redirect(url_for('routes.history'))

@@ -63,5 +63,18 @@
     </div>
   </form>
 {% endif %}
+<!-- checkbox -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.master-checkbox').forEach(masterCheckbox => {
+      masterCheckbox.addEventListener('change', () => {
+        const form = masterCheckbox.closest('form');
+        form.querySelectorAll('input[type="checkbox"][name="task_ids"]').forEach(cb => {
+          cb.checked = masterCheckbox.checked;
+        });
+      });
+    });
+  });
+</script>
 
 {% endblock %}
