@@ -64,9 +64,11 @@ def history():
 def logout():
     return render_template('logout.html')
 
-@routes.route('/individual-task')
-def individual():
-    return render_template('individual-task.html')
+@routes.route('/individual-task/<int:task_id>')
+def individual(task_id):
+    task = Task.query.get_or_404(task_id)
+    return render_template('individual-task.html', task=task)
+
 
 @routes.route('/settings')
 def settings():
