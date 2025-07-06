@@ -5,59 +5,76 @@
 {% endblock %}
 
 {% block content %}
-
 <h1 class="history-title">History</h1>
 <hr class="divider" />
 
-<div class="today-header-row">
-  <h2>Today (March 17, 2025)</h2>
-</div>
-
-<div class="history-controls">
-  <input type="checkbox" class="master-checkbox" />
-  <button class="btn-blue">Reopen task</button>
-  <button class="btn-icon">🗑</button>
-</div>
-
-<!-- Example Task Items -->
-<div class="history-task-item">
-  <input type="checkbox" />
-  <div>
-    <span class="task-label home">Home</span>
-    <p>Birthday<br /><small>5/6 completed</small></p>
-  </div>
-  <div class="task-color-bar red"></div>
-</div>
-
-<div class="history-task-item">
-  <input type="checkbox" />
-  <div>
-    <span class="task-label work">Work</span>
-    <p>Meeting<br /><small>3/4 completed</small></p>
-  </div>
-  <div class="task-color-bar yellow"></div>
-</div>
-
-<div class="history-task-item">
-  <input type="checkbox" />
-  <div>
-    <span class="task-label work">Home</span>
-    <p>Birthday<br /><small>5/6 completed</small></p>
-  </div>
-  <div class="task-color-bar yellow"></div>
-</div>
-
-<div class="history-section">
-  <h2>Yesterday (March 16, 2025)</h2>
-  
-  <div class="history-task-item">
-    <input type="checkbox" />
-    <div>
-      <span class="task-label home">Home</span>
-      <p>Groceries<br /><small>Completed</small></p>
+<!-- Today Section -->
+{% if today_tasks %}
+  <form method="POST" action="{{ url_for('routes.history_action') }}">
+    <div class="today-header-row">
+      <h2>Today ({{ today_date }})</h2>
     </div>
-    <div class="task-color-bar gray"></div>
-  </div>
-</div>
+
+    <div class="history-controls">
+      <input type="checkbox" class="master-checkbox" />
+      <button type="submit" name="action" value="reopen" class="btn-blue">Reopen task</button>
+      <button type="submit" name="action" value="trash" class="btn-icon">🗑</button>
+    </div>
+
+    {% for task in today_tasks %}
+      <div class="history-task-item">
+        <input type="checkbox" name="task_ids" value="{{ task.id }}" />
+        <div>
+          <span class="task-label {{ task.category | lower }}">{{ task.category }}</span>
+          <p>{{ task.title }}<br />
+            <small>{{ task.subtask_summary }}</small>
+          </p>
+        </div>
+        <div class="task-color-bar {{ task.color }}"></div>
+      </div>
+    {% endfor %}
+  </form>
+{% endif %}
+
+<!-- Yesterday Section -->
+{% if yesterday_tasks %}
+  <form method="POST" action="{{ url_for('routes.history_action') }}">
+    <div class="history-section">
+      <h2>Yesterday ({{ yesterday_date }})</h2>
+
+      <div class="history-controls">
+        <input type="checkbox" class="master-checkbox" />
+        <button type="submit" name="action" value="reopen" class="btn-blue">Reopen task</button>
+        <button type="submit" name="action" value="trash" class="btn-icon">🗑</button>
+      </div>
+
+      {% for task in yesterday_tasks %}
+        <div class="history-task-item">
+          <input type="checkbox" name="task_ids" value="{{ task.id }}" />
+          <div>
+            <span class="task-label {{ task.category | lower }}">{{ task.category }}</span>
+            <p>{{ task.title }}<br />
+              <small>{{ task.subtask_summary }}</small>
+            </p>
+          </div>
+          <div class="task-color-bar {{ task.color }}"></div>
+        </div>
+      {% endfor %}
+    </div>
+  </form>
+{% endif %}
+<!-- checkbox -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.master-checkbox').forEach(masterCheckbox => {
+      masterCheckbox.addEventListener('change', () => {
+        const form = masterCheckbox.closest('form');
+        form.querySelectorAll('input[type="checkbox"][name="task_ids"]').forEach(cb => {
+          cb.checked = masterCheckbox.checked;
+        });
+      });
+    });
+  });
+</script>
 
 {% endblock %}

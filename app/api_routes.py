@@ -10,8 +10,8 @@ def ping():
 
 
 @api.route('/api/tasks', methods=['GET'])
-def get_tasks():
-    tasks = Task.query.all()
+def get_active_tasks():
+    tasks = Task.query.filter_by(completed=False, deleted=False).all()  # ✅ Only ongoing tasks
     result = []
     for task in tasks:
         subtasks = [{'id': st.id, 'title': st.title, 'completed': st.completed} for st in task.subtasks]
@@ -23,6 +23,7 @@ def get_tasks():
             'subtasks': subtasks
         })
     return jsonify(result)
+
 
 @api.route('/api/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):

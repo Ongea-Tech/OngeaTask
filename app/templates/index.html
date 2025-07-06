@@ -15,9 +15,13 @@
     <a href="{{ url_for('routes.index') }}" class="logo">
       <img src="{{ url_for('static', filename='/images/logo.png') }}" alt="OngeaTask Logo" class="logo" />
     </a>
-    <form class="search-bar">
-      <input type="text" placeholder="Search tasks..." />
-    </form>
+
+   <form class="search-bar" action="/search" method="GET">
+  <span class="search-icon">🔍</span>
+  <input type="text" name="q" placeholder="Search" />
+</form>
+
+</div>
     <div class="profile-section">
       <div class="dropdown">
         <img src="{{ url_for('static', filename='/images/profile.png') }}" alt="Profile" class="profile-pic" />
