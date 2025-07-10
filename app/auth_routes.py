@@ -1,6 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app import db
 from app.models import User
+from itsdangerous import URLSafeTimedSerializer
+from flask import current_app
+from flask_mail import Message
+from app import mail
+
 
 auth = Blueprint('auth', __name__)
 
@@ -59,17 +64,31 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
 
         if user:
-            # In a real app, you'd send a reset email. For now, flash message.
-            flash('If this email is registered, a reset link would be sent.')
-            return redirect(url_for('auth.reset_password', user_id=user.id))  # Simulated step
+            token = generate_token(user.email)
+            reset_url = url_for('auth.reset_password', token=token, _external=True)
+
+            msg = Message("Password Reset",
+              sender="your-email@gmail.com",
+              recipients=[user.email])
+            msg.body = f"Click the link to reset your password: {reset_url}"
+            mail.send(msg)
+
+            flash('password reset link has been sent to your email.')
+            return redirect(url_for('auth.login'))
         else:
             flash('No account found with that email.')
     return render_template('forgot_password.html')
 
 
-@auth.route('/reset-password/<int:user_id>', methods=['GET', 'POST'])
-def reset_password(user_id):
-    user = User.query.get_or_404(user_id)
+@auth.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    email = confirm_token(token)  
+
+    if not email:
+        flash('Invalid or expired reset link.')
+        return redirect(url_for('auth.forgot_password'))
+
+    user = User.query.filter_by(email=email).first_or_404()
 
     if request.method == 'POST':
         new_password = request.form.get('new_password')
@@ -85,9 +104,20 @@ def reset_password(user_id):
 
     return render_template('reset_password.html', user=user)
 
-
 @auth.route('/logout')
 def logout():
     session.clear()
     flash('Logged out.')
     return redirect(url_for('auth.login'))
+
+def generate_token(email):
+    serializer = URLSafeTimedSerializer(current_app.secret_key)
+    return serializer.dumps(email, salt='password-reset-salt')
+
+def confirm_token(token, expiration=3600):
+    serializer = URLSafeTimedSerializer(current_app.secret_key)
+    try:
+        email = serializer.loads(token, salt='password-reset-salt', max_age=expiration)
+    except Exception:
+        return None
+    return email

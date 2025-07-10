@@ -13,5 +13,5 @@ services:
     volumes:
       - ongea_mysql_data:/var/lib/mysql
 
-volumes:
-  ongea_mysql_data:
+volumes: 
+  ongea_mysql_data: 
