@@ -19,8 +19,6 @@ def index():
 
 @routes.route("/reset-db")
 def reset_db():
-    if os.environ.get("FLASK_ENV") != "development":
-        return "Not allowed in production"
     db.drop_all()
     db.create_all()
     return "✅ Reset complete"
