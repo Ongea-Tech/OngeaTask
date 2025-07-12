@@ -3,6 +3,7 @@ from flask import flash, render_template, request, redirect, url_for
 from flask import Blueprint
 from app.models import Task
 from . import db
+import os
 
 routes = Blueprint('routes', __name__)
 
@@ -15,6 +16,16 @@ def index():
         )
     ).all()
     return render_template('index.html', tasks=active_tasks)
+
+@routes.route("/reset-db")
+def reset_db():
+    if os.environ.get("FLASK_ENV") != "development":
+        return "Not allowed in production"
+    db.drop_all()
+    db.create_all()
+    return "✅ Reset complete"
+
+
 
 @routes.route('/login')
 def login():
