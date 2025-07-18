@@ -89,3 +89,30 @@ def delete_subtask(subtask_id):
     db.session.commit()
     return jsonify({'message': 'Subtask deleted'}), 200
 
+@api.route('/api/tasks/<int:task_id>/description', methods=['PATCH'])
+def update_description(task_id):
+    data = request.get_json()
+    new_description = data.get('description', '').strip()
+
+    task = Task.query.get_or_404(task_id)
+    task.description = new_description
+    db.session.commit()
+
+    return jsonify({"message": "Description updated"}), 200
+
+@api.route('/mark_completed', methods=['POST'])
+def mark_completed():
+    data = request.get_json()
+    completed_ids = data.get('completed_ids', [])
+
+    for subtask_id in completed_ids:
+        subtask = Subtask.query.get(int(subtask_id))
+        if subtask:
+            subtask.completed = True
+
+    db.session.commit()
+    return jsonify({"success": True})
+
+
+
+

@@ -102,3 +102,14 @@ def move_to_trash():
         db.session.commit()
     return redirect(url_for('routes.index'))
 
+@routes.route('/delete-selected', methods=['POST'])
+def delete_selected():
+    ids_str = request.form.get('delete_ids', '')
+    ids = [int(id.strip()) for id in ids_str.split(',') if id.strip().isdigit()]
+
+    if ids:
+        from app.models import Subtask
+        Subtask.query.filter(Subtask.id.in_(ids)).delete(synchronize_session=False)
+        db.session.commit()
+
+    return redirect(request.referrer or url_for('routes.index'))
