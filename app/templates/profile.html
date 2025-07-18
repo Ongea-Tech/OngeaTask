@@ -4,7 +4,7 @@
 <div class="profile-page">
   <h2 class="profile-title">Profile</h2>
 
-  <!-- ✅ Profile Picture Section -->
+  
   <div class="profile-image-container">
     <img 
       src="" 
@@ -14,7 +14,7 @@
     <input type="file" id="profile-image-input" accept="image/*" style="display: none;">
   </div>
 
-  <!-- ✅ Editable Profile Form -->
+ 
   <form class="profile-form">
     <div class="form-group">
       <label for="username">Username</label>
@@ -52,24 +52,23 @@
   </form>
 </div>
 
-<!-- ✅ Reusable Popup for BOTH Success & Error Messages -->
+
 <div id="profile-popup" class="popup-overlay">
-  <!-- `success` or `error` class will be added dynamically -->
   <div class="popup-box">
-    <p id="popup-message">Profile saved successfully.</p>
+    <p id="popup-message"></p>
     <button id="popup-ok">OK</button>
   </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const profileId = 1; // TODO: Replace with dynamic user ID
-  let selectedImageFile = null; // store new image file
+  const profileId = 1; 
+  let selectedImageFile = null;
+  let manualSaveTriggered = false;  
 
   const inputs = document.querySelectorAll(".profile-form input");
   inputs.forEach(input => input.setAttribute("readonly", true));
 
-  // ✅ Enable text editing
   document.querySelectorAll(".edit-icon").forEach(icon => {
     icon.addEventListener("click", function () {
       const input = this.previousElementSibling;
@@ -89,17 +88,17 @@ document.addEventListener("DOMContentLoaded", function () {
   const profileImg = document.querySelector('.profile-image');
   const imageInput = document.getElementById('profile-image-input');
 
-  // ✅ Load profile from backend
+  
   fetch(`/api/profiles/${profileId}`)
     .then(res => {
       if (!res.ok) throw new Error("Profile not found");
       return res.json();
     })
     .then(data => {
-      document.getElementById('username').value = data.username;
-      document.getElementById('firstname').value = data.first_name;
-      document.getElementById('lastname').value = data.last_name;
-      document.getElementById('email').value = data.email;
+      document.getElementById('username').value = data.username || '';
+      document.getElementById('firstname').value = data.first_name || '';
+      document.getElementById('lastname').value = data.last_name || '';
+      document.getElementById('email').value = data.email || '';
 
       const imagePath = data.image_filename ? `/static/${data.image_filename}` : '/static/images/profile.png';
       profileImg.src = imagePath;
@@ -108,54 +107,42 @@ document.addEventListener("DOMContentLoaded", function () {
       profileImg.src = '/static/images/profile.png';
     });
 
-  // ✅ Click profile picture to choose new image
-  profileImg.addEventListener('click', () => {
-    imageInput.click();
-  });
+  
+  profileImg.addEventListener('click', () => imageInput.click());
 
-  // ✅ Preview selected image
+  
   imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
       selectedImageFile = file;
       const reader = new FileReader();
       reader.onload = (event) => {
-        profileImg.src = event.target.result; // preview
+        profileImg.src = event.target.result;
       };
       reader.readAsDataURL(file);
     }
   });
 
-  // ✅ Show popup (handles success & error styles)
+  
   function showPopup(message, isError = false) {
     const popup = document.getElementById('profile-popup');
     const popupBox = popup.querySelector('.popup-box');
     const popupText = popup.querySelector("p");
 
-    // Reset any previous styling
     popupBox.classList.remove("success", "error");
-
-    // Apply the message
     popupText.textContent = message;
-
-    // ✅ Add proper class based on state
-    if (isError) {
-      popupBox.classList.add("error");
-    } else {
-      popupBox.classList.add("success");
-    }
-
-    // Show the popup
+    popupBox.classList.add(isError ? "error" : "success");
     popup.style.display = 'flex';
   }
 
-  // ✅ Close popup on OK
   document.getElementById('popup-ok').addEventListener('click', () => {
     document.getElementById('profile-popup').style.display = 'none';
   });
 
-  // ✅ Save profile
+  
   document.getElementById('save-profile').addEventListener('click', function () {
+    manualSaveTriggered = true; 
+
     const payload = {
       username: document.getElementById('username').value.trim(),
       first_name: document.getElementById('firstname').value.trim(),
@@ -163,7 +150,6 @@ document.addEventListener("DOMContentLoaded", function () {
       email: document.getElementById('email').value.trim()
     };
 
-    // ✅ Basic validation with styled error popup
     if (!payload.username || !payload.first_name || !payload.last_name || !payload.email) {
       showPopup("All fields are required.", true);
       return;
@@ -173,38 +159,40 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // ✅ Create FormData to include text + optional image
     const formData = new FormData();
     formData.append("username", payload.username);
     formData.append("first_name", payload.first_name);
     formData.append("last_name", payload.last_name);
     formData.append("email", payload.email);
-
     if (selectedImageFile) {
       formData.append("profile_image", selectedImageFile);
     }
 
     fetch(`/api/profiles/${profileId}`, {
       method: "PUT",
-      body: formData // sending multipart/form-data now
+      body: formData
     })
     .then(res => {
       if (res.status === 404) {
-        return fetch("/api/profiles", {
-          method: "POST",
-          body: formData
-        });
+        throw new Error("Profile does not exist. Create it first.");
       }
       return res;
     })
     .then(res => res.json())
     .then(() => {
-      showPopup("Profile saved successfully.");  // ✅ success styled popup
-      selectedImageFile = null; // reset after successful save
+      if (manualSaveTriggered) {
+        showPopup("Profile saved successfully.");
+      }
+      selectedImageFile = null;
     })
     .catch(err => {
-      showPopup("Error saving profile.", true); // 🔴 error styled popup
+      if (manualSaveTriggered) {
+        showPopup("Error saving profile.", true);
+      }
       console.error(err);
+    })
+    .finally(() => {
+      manualSaveTriggered = false; 
     });
   });
 });

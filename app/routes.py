@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for
 from flask import Blueprint
-from app.models import Task, Category  
+from app.models import Task, Category, Profile  
 from . import db
 
 routes = Blueprint('routes', __name__)
@@ -36,7 +36,7 @@ def settings():
 @routes.route('/categories', methods=['GET'])
 def categories():
     categories = Category.query.all()
-    return render_template('categories.html', categories=categories)
+    return render_template('categories.html')
 
 @routes.route('/logout')
 def logout():
@@ -72,6 +72,23 @@ def create_task():
 
     return render_template('index.html')
 
+@routes.route("/mark_completed", methods=["POST"])
+def mark_completed():
+    task_id = request.form.get("task_id")
+
+    if not task_id:
+        flash("No task selected.", "error")
+        return redirect(url_for("routes.index"))
+
+    task = Task.query.get(task_id)
+    if task:
+        task.completed = True
+        db.session.commit()
+        flash("Task marked as completed!", "success")
+    else:
+        flash("Task not found!", "error")
+
+    return redirect(url_for("routes.index"))
 @routes.route('/individual-task')
 def individual():
     return render_template('individual-task.html')

@@ -136,7 +136,7 @@ body {
   display: block;
 }
 
-#save-profile {
+#save-profile { 
   background-color: #3F7EE8;
   color: white;
   padding: 12px 24px;
@@ -147,10 +147,9 @@ body {
   transition: background-color 0.3s ease, box-shadow 0.2s ease;
   margin-top: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 92%;
+  width: 92%; 
   display: block;
 }
-
 
 #save-profile:hover {
   background-color: #3F7EE8;
@@ -161,8 +160,11 @@ body {
   transform: scale(0.98);
 }
 
+#profile-popup {
+  display: none; 
+}
 
-/* ✅ Popup overlay background */
+
 .popup-overlay {
   display: none; 
   position: fixed;
@@ -175,7 +177,7 @@ body {
   z-index: 1000;
 }
 
-/* ✅ Popup box styling (default) */
+
 .popup-box {
   background: white;
   padding: 20px;
@@ -185,16 +187,16 @@ body {
   box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
 }
 
-/* ✅ Popup text (default) */
+
 .popup-box p {
   margin-bottom: 15px;
   font-size: 16px;
   color: #333;
 }
 
-/* ✅ Popup OK button */
+
 .popup-box button {
-  background: #ccc;  /* Grey button */
+  background: #ccc;  
   color: #000;
   border: none;
   padding: 8px 16px;
@@ -204,20 +206,20 @@ body {
 }
 
 .popup-box button:hover {
-  background: #bbb; /* Slightly darker grey on hover */
+  background: #bbb; 
 }
 
-/* ✅ SUCCESS state for popup */
+
 .popup-box.success p {
-  color: #2e7d32; /* Green text for success */
+  color: #2e7d32; 
   font-weight: 500;
   border-left: 4px solid #4caf50;
   padding-left: 8px;
 }
 
-/* ✅ ERROR state for popup */
+
 .popup-box.error p {
-  color: #c62828; /* Red text for error */
+  color: #c62828; 
   font-weight: 500;
   border-left: 4px solid #e53935;
   padding-left: 8px;
@@ -640,7 +642,7 @@ input[type="checkbox"] {
 .profile-image-container {
   margin-bottom: 1.5rem;
   margin-left: 195px;
-  position: relative; /* useful for potential hover overlays */
+  position: relative; 
 }
 
 .profile-image {
@@ -651,8 +653,6 @@ input[type="checkbox"] {
   object-fit: cover;
   margin-top: -40px;
   margin-bottom: 5px;
-
-  /* ✅ Add these for edit behavior */
   cursor: pointer;
   transition: opacity 0.3s ease, border-color 0.3s ease;
 }
@@ -669,18 +669,21 @@ input[type="checkbox"] {
   flex-direction: column;
   gap: 1.2rem;
   padding: 0 1rem;
+  align-items: center;
 }
-
 
 .form-group {
-  width: 100%;
+  width: 92%; 
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center; 
+  justify-content: flex-start;
+  gap: 1rem; 
 }
 
-.modal-content {
-  background-color: #fff;
+.form-group label {
+  flex: 0 0 120px; 
+  font-weight: 500;
+  text-align: left; 
 }
 
 .input-wrapper {
@@ -688,9 +691,25 @@ input[type="checkbox"] {
   align-items: center;
   border: 1px solid #ccc;
   border-radius: 6px;
-  width: 400px;
-  max-width: 90%;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  width: 100%; 
+  background: white; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding-right: 8px; 
+}
+
+.input-wrapper input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+  background: white;
+  font-size: 16px; 
+}
+
+.edit-icon {
+  padding: 8px;
+  cursor: pointer;
+  font-size: 18px; 
 }
 
 .edit-icon:hover {
@@ -778,10 +797,11 @@ input[type="checkbox"] {
 .delete-icon {
   margin-left: 10px;
   color: black;
-  font-size: .9rem;
   cursor: pointer;
   flex-shrink: 0;
   transition: color 0.2s ease;
+  font-size: 18px;
+  padding: 8px;
 }
 
 .delete-icon:hover {
@@ -1095,7 +1115,7 @@ input[type="checkbox"] {
   
   border-radius: 10px;
   width: 400px;
-  height: 400px;
+  height: 430px;
 
   display: flex;
   flex-direction: column;
@@ -1109,11 +1129,10 @@ input[type="checkbox"] {
 
 .modal-buttons {
   margin-top: auto;
-
   display: flex;
   justify-content: flex-end;
-  
   gap: 0.5rem;
+  /* margin-top: -15px; */
 }
 
 .modal-buttons button {

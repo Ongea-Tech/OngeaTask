@@ -172,6 +172,18 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+@api.route('/api/profiles/<int:id>', methods=['GET'])
+def get_profile(id):
+    profile = Profile.query.get_or_404(id)
+    return jsonify({
+        'id': profile.id,
+        'username': profile.username,
+        'first_name': profile.first_name,
+        'last_name': profile.last_name,
+        'email': profile.email,
+        'image_filename': profile.image_filename
+    }), 200
+
 @api.route('/api/profiles/<int:id>', methods=['PUT'])
 def update_profile(id):
     profile = Profile.query.get_or_404(id)
