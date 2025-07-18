@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.models import Task, Subtask
+from app.models import Task, Subtask, Category, Profile
 from . import db
 
 api = Blueprint('api', __name__)
@@ -83,29 +83,15 @@ def update_task(task_id):
     db.session.commit()
     return jsonify({'message': 'Task updated'}), 200
 
-from flask import Blueprint, request, jsonify
-from app.models import Category, CategoryItem
-from . import db
-
-api = Blueprint('api', __name__)
-
-
-@api.route('/api/ping')
-def ping():
-    return jsonify({'message': 'pong'})
-
-
-
 @api.route('/api/categories', methods=['GET'])
 def get_categories():
     categories = Category.query.all()
     result = []
     for category in categories:
-        items = [{'id': item.id, 'title': item.title, 'selected': item.selected} for item in category.items]
         result.append({
             'id': category.id,
             'name': category.name,
-            'items': items
+            'color': category.color
         })
     return jsonify(result)
 
@@ -113,11 +99,10 @@ def get_categories():
 @api.route('/api/categories/<int:category_id>', methods=['GET'])
 def get_category(category_id):
     category = Category.query.get_or_404(category_id)
-    items = [{'id': item.id, 'title': item.title, 'selected': item.selected} for item in category.items]
     return jsonify({
         'id': category.id,
         'name': category.name,
-        'items': items
+        'color': category.color
     })
 
 
@@ -125,30 +110,15 @@ def get_category(category_id):
 def create_category():
     data = request.get_json()
     name = data.get('name')
+    color = data.get('color', '#cccccc')
 
     if not name:
         return jsonify({'error': 'Category name is required'}), 400
 
-    new_category = Category(name=name)
+    new_category = Category(name=name, color=color)
     db.session.add(new_category)
     db.session.commit()
     return jsonify({'message': 'Category created', 'category_id': new_category.id}), 201
-
-
-@api.route('/api/categories/<int:category_id>/items', methods=['POST'])
-def create_category_item(category_id):
-    category = Category.query.get_or_404(category_id)
-    data = request.get_json()
-    title = data.get('title')
-
-    if not title:
-        return jsonify({'error': 'Item title is required'}), 400
-
-    item = CategoryItem(title=title, category=category)
-    db.session.add(item)
-    db.session.commit()
-
-    return jsonify({'message': 'Item added', 'item_id': item.id}), 201
 
 
 @api.route('/api/categories/<int:category_id>', methods=['PUT'])
@@ -156,8 +126,10 @@ def update_category(category_id):
     category = Category.query.get_or_404(category_id)
     data = request.get_json()
     category.name = data.get('name', category.name)
+    category.color = data.get('color', category.color)
     db.session.commit()
     return jsonify({'message': 'Category updated'}), 200
+
 
 @api.route('/api/categories/<int:category_id>', methods=['DELETE'])
 def delete_category(category_id):
@@ -190,56 +162,46 @@ def delete_multiple_categories():
         return jsonify({'error': str(e)}), 500
 
 
-from flask import Blueprint, request, jsonify
-from app.models import Profile
-from app import db
-
-profile_api = Blueprint('profile_api', __name__)
+import os
+from werkzeug.utils import secure_filename
+from flask import current_app
 
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-
-@api.route('/api/profiles/<int:id>', methods=['GET'])
-def get_profile(id):
-    profile = Profile.query.get_or_404(id)
-    return jsonify({
-        'id': profile.id,
-        'username': profile.username,
-        'first_name': profile.first_name,
-        'last_name': profile.last_name,
-        'email': profile.email,
-        'image_filename': profile.image_filename
-    })
-
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @api.route('/api/profiles/<int:id>', methods=['PUT'])
 def update_profile(id):
     profile = Profile.query.get_or_404(id)
-    data = request.get_json()
+    username = request.form.get('username', profile.username)
+    first_name = request.form.get('first_name', profile.first_name)
+    last_name = request.form.get('last_name', profile.last_name)
+    email = request.form.get('email', profile.email)
 
-    profile.username = data.get('username', profile.username)
-    profile.first_name = data.get('first_name', profile.first_name)
-    profile.last_name = data.get('last_name', profile.last_name)
-    profile.email = data.get('email', profile.email)
-    profile.image_filename = data.get('image_filename', profile.image_filename)
+    profile.username = username
+    profile.first_name = first_name
+    profile.last_name = last_name
+    profile.email = email
 
+    
+    if 'profile_image' in request.files:
+        file = request.files['profile_image']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            file_path = os.path.join(upload_folder, filename)
+            file.save(file_path)
+
+          
+            profile.image_filename = f'uploads/{filename}'
+
+    
     db.session.commit()
 
-    return jsonify({'message': 'Profile updated successfully'}), 200
-
-@api.route('/api/profiles', methods=['POST'])
-def create_profile():
-    data = request.get_json()
-    if not data.get('username') or not data.get('email'):
-        return jsonify({'error': 'Username and Email are required'}), 400
-
-    profile = Profile(
-        username=data['username'],
-        first_name=data.get('first_name', ''),
-        last_name=data.get('last_name', ''),
-        email=data['email'],
-        image_filename=data.get('image_filename', 'images/profile.png')
-    )
-    db.session.add(profile)
-    db.session.commit()
-    return jsonify({'message': 'Profile created', 'id': profile.id}), 201
+    return jsonify({
+        'message': 'Profile updated successfully',
+        'image_filename': profile.image_filename
+    }), 200

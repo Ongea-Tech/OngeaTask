@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for
 from flask import Blueprint
-from app.models import Task
+from app.models import Task, Category  
 from . import db
 
 routes = Blueprint('routes', __name__)
@@ -33,9 +33,10 @@ def profile():
 def settings():
     return render_template('settings.html')
 
-@routes.route('/categories')
+@routes.route('/categories', methods=['GET'])
 def categories():
-    return render_template('categories.html')
+    categories = Category.query.all()
+    return render_template('categories.html', categories=categories)
 
 @routes.route('/logout')
 def logout():
@@ -44,7 +45,7 @@ def logout():
 @routes.route('/tasks', methods=['GET'])
 def tasks():
     active_tasks = Task.get_active_tasks()
-    print(f"Active tasks count: {len(active_tasks)}") 
+    print(f"Active tasks count: {len(active_tasks)}")
     return render_template('tasks.html', tasks=active_tasks)
 
 @routes.route('/<int:task_id>')
@@ -71,52 +72,11 @@ def create_task():
 
     return render_template('index.html')
 
-@routes.route('/complete/<int:task_id>', methods=['POST'])
-def mark_completed_single(task_id):
-    try:
-        task = db.session.query(Task).with_for_update().get(task_id)
-        task.completed = True
-        task.completed_date = date.today()
-        task.deleted = False
-        task.deleted_date = None
-        db.session.flush() 
-        db.session.commit()
-        db.session.expire_all()
-        return redirect(url_for('routes.index')) 
-    except Exception as e:
-        db.session.rollback()
-        flash("Error marking task as completed", "error")
-        return redirect(url_for('routes.index'))
+@routes.route('/individual-task')
+def individual():
+    return render_template('individual-task.html')
 
-@routes.route('/trash_single/<int:task_id>', methods=['POST'])
-def move_to_trash_single(task_id):
-    try:
-        task = Task.query.get_or_404(task_id)
-        task.deleted = True
-        task.deleted_date = date.today()
-        task.completed = False
-        task.completed_date = None
-        db.session.flush()
-        db.session.commit()
-        db.session.expire_all()
-        return redirect(url_for('routes.trash')) 
-    except Exception as e:
-        db.session.rollback()
-        flash("Error moving task to trash", "error")
-        return redirect(url_for('routes.index'))
 
-@routes.route('/mark-completed', methods=['POST'])
-def mark_completed():
-    ids = request.form.get('completed_ids', '')
-    if ids:
-        task_ids = [int(tid) for tid in ids.split(',')]
-        for task_id in task_ids:
-            task = Task.query.get(task_id)
-            if task:
-                task.mark_as_completed()
-               
-        db.session.commit()
-    return redirect(url_for('routes.index'))
 
 @routes.route('/history')
 def history():
@@ -172,7 +132,7 @@ def history_action():
             task.completed_date = None
             task.deleted = False
             task.deleted_date = None
-            db.session.flush() 
+            db.session.flush()
             db.session.refresh(task)
         elif action == 'trash':
             task.move_to_trash()
