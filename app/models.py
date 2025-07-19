@@ -1,5 +1,5 @@
 from datetime import date
-from app import db 
+from app import db   
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -49,3 +49,22 @@ class Subtask(db.Model):
     title = db.Column(db.String(100), nullable=False)
     completed = db.Column(db.Boolean, default=False)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
+
+class Profile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    image_filename = db.Column(db.String(200), default='images/profile.png')
+
+    def __repr__(self):
+        return f"<Profile {self.username}>"
+    
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    color = db.Column(db.String(20), default='#cccccc')  # New field for urgency color
+
+    def __repr__(self):
+        return f"<Category {self.name}>"
