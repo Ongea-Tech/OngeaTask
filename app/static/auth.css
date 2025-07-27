@@ -140,13 +140,9 @@ label{
 .form-group1 input{
     display: flex;
     flex-direction: column;
-    max-width: 232px;
+    width: 242px;
 }
-.form-group input{
-    display: flex;
-    flex-direction: column;
-    max-width: 250px;
-}
+
 .butn{
     width: 260px;
     display: block;
@@ -168,4 +164,93 @@ label{
 .signup-container input:focus{
     background: #f2f1f1;
     border: 2px solid #6198f8;
+}
+
+
+html, body {
+    margin: 0;       
+    padding: 0;      
+    height: 100%;    
+    width: 100%;     
+    overflow: hidden; 
+}
+.forgot-form{
+    background-color: #e5e7eb;
+    min-height: 10vh;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+    height: 100vh;
+    
+}
+.reset-form-container {
+    background-color: #ffffff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.reset-form-container h2 {
+    margin-bottom: 24px;
+    font-size: 24px;
+    color: #333;
+}
+
+.reset-form-container form label {
+    display: block;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    text-align: left;
+    font-weight: 500;
+    color: #444;
+}
+
+.reset-form-container form input[type="email"],
+.reset-form-container form input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 16px;
+    outline: none;
+    transition: border 0.2s ease;
+}
+
+.reset-form-container form input:focus {
+    border-color: #4379EE;
+    box-shadow: 0 0 0 3px rgba(67, 121, 238, 0.2);
+}
+
+.reset-form-container form button {
+    margin-top: 24px;
+    width: 100%;
+    background-color: #4379EE;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.reset-form-container form button:hover {
+    background-color: #3367d6;
+}
+
+.reset-form-container p a {
+    display: inline-block;
+    margin-top: 20px;
+    font-size: 16px;
+    color: #4379EE;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.reset-form-container p a:hover {
+    color: #224fb6;
 }
