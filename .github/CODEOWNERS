@@ -1,0 +1,7 @@
+# CODEOWNERS
+# This file defines code ownership rules for this repository.
+# Lines are evaluated from top to bottom.
+# The last matching pattern takes the most precedence.
+
+# Default owner for everything in the repo
+*       @mercytum
