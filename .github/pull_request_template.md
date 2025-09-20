@@ -1,17 +1,15 @@
 # Pull Request (PR) Template
 
-# Pull Request Title
+## Pull Request Title
 <!-- Provide a clear and concise title for your pull request (e.g., "Add subtask completion tracking"). -->
 
-# Description
+## Description
 <!-- Provide a summary of the changes in this PR. Focus on what functionality has been added, updated, or fixed. -->
 
-- 
 
-# Related Issues
+## Related Issues
 <!-- Link to related issues if applicable (e.g., Closes #12). -->
 
-- 
 
 # Type of Change
 <!-- Please delete options that are not relevant. -->
@@ -25,9 +23,9 @@
 # How Has This Been Tested?
 <!-- Describe the tests you ran to verify your changes. Include steps so others can reproduce. -->
 
-- Manual testing (e.g., created/deleted/updated tasks/subtasks)
-- API testing via Postman/cURL
-- Automated tests (Pytest/Unittest/Playwright if UI involved)
+- [ ] Manual testing (e.g., created/deleted/updated tasks/subtasks)
+- [ ] API testing via Postman/cURL
+- [ ] Automated tests (Pytest/Unittest/Playwright if UI involved)
 
 # Checklist
 - [ ] Code follows Flask + SQLAlchemy conventions.
