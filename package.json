@@ -1,0 +1,30 @@
+{
+  "name": "ongeatask",
+  "description": "**Ongea Task** is a simple To-Do List web application created by young developers from **Ongea Tech**  as a learning project to practice full-stack development.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.13",
+    "autoprefixer": "^10.4.21",
+    "browser-sync": "^3.0.4",
+    "chokidar-cli": "^3.0.0",
+    "concurrently": "^9.2.1",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "tailwindcss": "^4.1.13"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev:css": "postcss app/static/src/input.css -o app/static/dist/output.css -w",
+    "dev:tw": "chokidar \"app/templates/**/*.html\" \"app/static/**/*.js\" \"**/*.py\" -c \"npm run build:css\"",
+    "live": "browser-sync start --proxy http://127.0.0.1:5000 --files 'app/templates/**/*.html' 'app/static/dist/output.css' 'app/static/**/*.js' --no-open --no-ui --reload-delay 100",
+    "build:css": "NODE_ENV=production postcss app/static/src/input.css -o app/static/dist/output.css",
+    "dev": "concurrently \"npm run dev:css\" \"npm run dev:tw\" \"flask run --debug\"",
+    "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
