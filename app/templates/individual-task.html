@@ -13,13 +13,13 @@
 
     <div class="check-all">
         <label for="" class="checkbox">
-            <input type="checkbox"/>
+            <input type="checkbox" id="checkAllBox"/>
         </label>
-        <button class="delete"> Delete all <a href="" class="deleteIcon"><i class="fa-solid fa-trash-can"></i></a></button>
+        <button class="delete" id="deleteAllBtn"> Delete all <a href="" class="deleteIcon"><i class="fa-solid fa-trash-can"></i></a></button>
     </div>
 
-    <div class="subtasks">
-        <label for="" class="checkbox">
+    <div class="subtasks" id="subtaskList">
+        <label for="" class="checkbox" >
         <input type="checkbox"> 
         <p>Send invites</p> 
         <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
@@ -44,13 +44,17 @@
         <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
         </label>
         <br>
-    </div>
+    </div> 
     <div class="addSubtask">
-        <input type="text" placeholder="Add a new list item" >
-        <button class="inputButton">Add</button>
+        <input id="subtaskInput" type="text" placeholder="Add a new list item" >
+        <button class="inputButton" id="addSubtaskBtn">Add</button>
     </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='individual-task.js') }}"></script>
 {% endblock %}
 
 

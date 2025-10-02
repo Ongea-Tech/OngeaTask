@@ -7,7 +7,7 @@ app = create_app()
 # Run database setup in the app context
 with app.app_context():
     db.create_all()
-    print("✅ Database tables created.")
+    print("Database tables created.")
 
     # Optional: Add sample data only if no tasks exist
     if Task.query.count() == 0:
@@ -18,4 +18,4 @@ with app.app_context():
         db.session.add(task)
         db.session.add_all([subtask1, subtask2])
         db.session.commit()
-        print("✅ Sample data inserted.")
+        print("Sample data inserted.")
