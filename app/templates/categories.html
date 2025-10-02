@@ -3,50 +3,160 @@
 
 <div class="categories-page">
   <h2 class="categories-title">Categories</h2>
-   <div class="delete-header">
+  <div class="delete-header">
     <input type="checkbox" class="category-checkbox" />
     <span class="delete-icon">&#128465;</span>
     <span class="delete-label">Delete</span>
   </div>
 
   <form class="category-form">
-    <div class="category-group">
+    {% for category in categories %}
+    <div class="category-group" data-id="{{ category.id }}">
       <input type="checkbox" class="category-checkbox" />
-      <input type="text" class="category-input" value="Work" />
+      <input type="text" class="category-input" value="{{ category.name }}" />
       <div class="category-actions">
         <span class="delete-icon">&#128465;</span>
         <span class="edit-icon">&#9998;</span>
       </div>
     </div>
-
-    <div class="category-group">
-      <input type="checkbox" class="category-checkbox" />
-      <input type="text" class="category-input" value="School" />
-      <div class="category-actions">
-        <span class="delete-icon">&#128465;</span>
-        <span class="edit-icon">&#9998;</span>
-      </div>
-    </div>
-
-    <div class="category-group">
-      <input type="checkbox" class="category-checkbox" />
-      <input type="text" class="category-input" value="Personal" />
-      <div class="category-actions">
-        <span class="delete-icon">&#128465;</span>
-        <span class="edit-icon">&#9998;</span>
-      </div>
-    </div>
-
-    <div class="category-group">
-      <input type="checkbox" class="category-checkbox" />
-      <input type="text" class="category-input" value="Home" />
-      <div class="category-actions">
-        <span class="delete-icon">&#128465;</span>
-        <span class="edit-icon">&#9998;</span>
-      </div>
-    </div>
+    {% endfor %}
     <button class="add-category-button">Add Category</button>
   </form>
 </div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.querySelector(".category-form");
+  const addButton = document.querySelector(".add-category-button");
+  const topDeleteIcon = document.querySelector(".delete-header .delete-icon");
+
+  // 🔁 1. Fetch categories from backend and render them
+  fetch('/api/categories')
+    .then(res => res.json())
+    .then(categories => {
+      categories.forEach(renderCategoryGroup);
+    });
+
+  // 🧱 2. Render one category DOM block
+  function renderCategoryGroup(category) {
+    const div = document.createElement("div");
+    div.className = "category-group";
+    div.setAttribute("data-id", category.id);
+    div.innerHTML = `
+      <input type="checkbox" class="category-checkbox" />
+      <input type="text" class="category-input" value="${category.name}" readonly />
+      <div class="category-actions">
+        <span class="delete-icon">&#128465;</span>
+        <span class="edit-icon">&#9998;</span>
+      </div>
+    `;
+    form.insertBefore(div, addButton);
+
+    // 📝 Edit category
+    const input = div.querySelector(".category-input");
+    const editBtn = div.querySelector(".edit-icon");
+    editBtn.addEventListener("click", function () {
+      input.removeAttribute("readonly");
+      input.focus();
+      input.addEventListener("blur", function () {
+        input.setAttribute("readonly", true);
+        const newName = input.value.trim();
+        const id = div.dataset.id;
+
+        if (id && newName) {
+          fetch(`/api/categories/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: newName })
+          }).catch(err => console.error("Update failed", err));
+        }
+      }, { once: true });
+    });
+
+    // ❌ Delete one category
+    div.querySelector(".delete-icon").addEventListener("click", function () {
+      const id = div.dataset.id;
+      if (id && confirm("Delete this category?")) {
+        fetch(`/api/categories/${id}`, {
+          method: "DELETE"
+        }).then(res => {
+          if (res.ok) div.remove();
+          else alert("Failed to delete.");
+        });
+      }
+    });
+  }
+
+  // ➕ 3. Add new category (POST)
+  addButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    const name = prompt("Enter new category name:");
+    if (!name) return;
+
+    fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.category_id) {
+          renderCategoryGroup({ id: data.category_id, name });
+        } else {
+          alert("Error creating category.");
+        }
+      });
+  });
+
+  
+  const topCheckbox = document.querySelector(".delete-header .category-checkbox");
+  if (topCheckbox) {
+    topCheckbox.addEventListener("change", function () {
+      const allCheckboxes = document.querySelectorAll(".category-group .category-checkbox");
+      allCheckboxes.forEach(cb => cb.checked = topCheckbox.checked);
+    });
+  }
+
+  
+  if (topDeleteIcon) {
+    topDeleteIcon.addEventListener("click", function () {
+      const selectedGroups = Array.from(document.querySelectorAll(".category-group")).filter(group => {
+        const checkbox = group.querySelector(".category-checkbox");
+        return checkbox && checkbox.checked;
+      });
+
+      if (selectedGroups.length === 0) {
+        alert("Please select at least one category to delete.");
+        return;
+      }
+
+      const confirmDelete = confirm("Are you sure you want to delete all selected categories?");
+      if (!confirmDelete) return;
+
+      const idsToDelete = selectedGroups.map(group => group.dataset.id);
+
+      fetch("/api/categories/delete-multiple", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: idsToDelete })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            selectedGroups.forEach(group => group.remove());
+          } else {
+            alert("Failed to delete categories.");
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          alert("An error occurred while deleting.");
+        });
+    });
+  }
+});
+</script>
+
 
 {% endblock %}

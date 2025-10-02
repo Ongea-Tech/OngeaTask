@@ -133,6 +133,28 @@ html, body {
 .dropdown:hover .dropdown-content {
   display: block;
 }
+#save-profile {
+  background-color: #3F7EE8; /* Green */
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.2s ease;
+  margin-top: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#save-profile:hover {
+  background-color: #3F7EE8;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+#save-profile:active {
+  transform: scale(0.98);
+}
+
 
 .sidebar {
   position: fixed;
@@ -715,4 +737,5 @@ input[type="checkbox"] {
   color: white;
   transition: background-color 0.3s ease;
 }
+
 
