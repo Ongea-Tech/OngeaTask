@@ -237,20 +237,137 @@ html, body {
   font-weight: bold;
   margin-top: 1rem;
 }
-.title .category{
+.title .category {
   height: 60px;
   width: 85px;
-  background-color: #4CAF50;
+  background-color: #4CAF50; /* Default green */
   border: none;
   box-shadow: 0 5px 6px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   cursor: pointer;
   margin-right: 0rem;
+  display: inline-block;
+  padding: 0;
+  text-indent: -9999px; /* Hide any text visually */
+}
+
+
+.category-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.category {
+  background-color: #ddd;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  margin-top: 5px;
+  padding: 5px 0;
+  z-index: 10;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   
 }
-.deleteIcon{
-  color: red;
+
+.dropdown-option {
+  padding: 6px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+.color-circle {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dropdown-option:hover {
+  background-color: #f2f2f2;
+}
+.save-button {
+  margin-top: 5px;
+  padding: 6px 12px;
+  background-color: grey;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: not-allowed;
+  opacity: 0.6;
+  position: relative;
+  left: 0;
+}
+
+.save-button.active {
+  background-color: #3F7EE8; 
+  cursor: pointer;
+  opacity: 1;
+}
+.checkAll {
+  background-color: white;
+  padding: 15px 13px 5px 8px;
+  border: 2px solid #929191;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 8px;
+  margin-top: 8px;
+  height: 20px;
+}
+
+.checkAll:hover {
+  background-color: #cccccc;
+}
+
+
+.bulk-actions {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    gap: 10px;
+}
+.markComplete{
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  height: 40px;
+  border-radius: 4px;
+  width: 130px;
+  font-weight: bold;
+  padding: 4px 4px;
+}
+.deleteSelected{
+  background-color: red;
+  color: white;
+  border: none;
+  height: 40px;
+  border-radius: 4px;
+  width: 130px;
+  font-weight: bold;
+  padding: 7px 7px;
+}
+.checkbox.completed p {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
 .subtasks{
   align-items: center;
   position: relative;
@@ -277,18 +394,62 @@ html, body {
   cursor: pointer;
   color: red;
 }
-.addSubtask{
-  position: relative;
-  display: inline-block;
-  margin-top: 4rem;
-  width: 100%;
+.addSubtask {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 999;
+  background-color: #f2f2f2;
+  height: 50px;
+  border-radius: 20px 20px 20px 20px;
 }
-.addSubtask input{
-  width: 100%;
-  height: 62px;
-  padding-left: 5px;
+
+#subtaskInput.collapsed {
+  width: 0;
+  opacity: 0;
+  padding: 0;
   border: none;
+  transition: width 0.3s ease, opacity 0.3s ease;
 }
+
+#subtaskInput.expanded {
+  width: 600px;
+  opacity: 1;
+  padding-left: 10px;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.expand-btn {
+  height: 100%;
+  width: 40px;
+  font-size: 20px;
+  background-color: #f2f2f2;
+  border: none;
+  border-radius: 0 0 0 10px;
+  cursor: pointer;
+}
+
+
+.inputButton {
+  height: 100%;
+  width: 60px;
+  background-color: #3F7EE8;
+  color: white;
+  font-size: 20px;
+  border: none;
+  border-radius: 0px 0 10px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .check-all{
   margin: 1rem 0 1rem 0.5rem;
   height: 28px;
@@ -301,18 +462,7 @@ html, body {
   width: 95px;
   background-color: #FFFFFF;
 }
-.addSubtask button{
-  background-color: #3F7EE8;
-  color: white;
-  height: 100%;
-  width: 100px;
-  position: absolute;
-  right: 0;
-  top: 0;
-  padding: 0 12px;
-  border: none;
-  cursor: pointer;
-}
+
 
 .settings{
   font-weight: bold;
