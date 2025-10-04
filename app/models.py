@@ -1,5 +1,6 @@
 from datetime import date
 from app import db   
+from app import db   
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -50,6 +51,13 @@ class Subtask(db.Model):
     completed = db.Column(db.Boolean, default=False)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "completed": self.completed
+        }
+
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
@@ -68,3 +76,12 @@ class Category(db.Model):
 
     def __repr__(self):
         return f"<Category {self.name}>"
+
+class CategoryItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    selected = db.Column(db.Boolean, default=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+
+    def __repr__(self):
+        return f"<CategoryItem {self.title} (Category {self.category_id})>"

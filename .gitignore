@@ -1,16 +1,93 @@
-# Python
+# ---- Python / Flask ----
 __pycache__/
-*.pyc
-
-# Virtual environment
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+.python-version
+.venv/
 venv/
+env/
+ENV/
+pip-wheel-metadata/
+.eggs/
+*.egg
+*.egg-info/
+dist/
+build/
 
-# Environment variables
-.env
-
-# Flask cache
+# Flask instance folder (local configs, sqlite, etc.)
 instance/
-.webassets-cache/
+*.db
+*.sqlite
+*.sqlite3
 
-# VS Code settings (if you use VS Code)
+# Logs & runtime
+logs/
+*.log
+*.pid
+*.seed
+*.bak
+tmp/
+temp/
+.cache/
+.ipynb_checkpoints/
+
+# Testing / Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.pytype/
+.pyre/
+.ruff_cache/
+
+# ---- Playwright (if/when used) ----
+playwright-report/
+test-results/
+.playwright/
+
+# ---- Environment / Secrets ----
+.env
+.env.*
+!.env.example
+.envrc
+*.pem
+*.key
+
+# ---- Node / Tailwind build artifacts (if using Tailwind via Node) ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+.cache/
+.parcel-cache/
+.eslintcache
+# If you build CSS at deploy, ignore compiled assets; otherwise comment these out:
+# public/build/
+# build/
+# dist/
+
+# ---- Editors / OS ----
 .vscode/
+.idea/
+*.iml
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ---- Docker (local only data) ----
+docker-data/
+*.local.yml
+
+# ---- DO NOT ignore database migrations ----
+# Keep Alembic/Flask-Migrate scripts in version control:
+# migrations/  <-- should be committed (so do NOT ignore)

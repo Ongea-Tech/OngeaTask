@@ -118,12 +118,23 @@ def create_category():
     new_category = Category(name=name, color=color)
     db.session.add(new_category)
     db.session.commit()
+    return jsonify({'message': 'Subtask deleted'}), 200
+
+@api.route('/api/tasks/<int:task_id>/description', methods=['PATCH'])
+def update_description(task_id):
+    data = request.get_json()
+    new_description = data.get('description', '').strip()
+
+    task = Task.query.get_or_404(task_id)
+    task.description = new_description
+    db.session.commit()
+
+    return jsonify({"message": "Description updated"}), 200
     return jsonify({'message': 'Category created', 'category_id': new_category.id}), 201
 
 
-@api.route('/api/categories/<int:category_id>', methods=['PUT'])
-def update_category(category_id):
-    category = Category.query.get_or_404(category_id)
+@api.route('/mark_completed', methods=['POST'])
+def mark_completed():
     data = request.get_json()
     category.name = data.get('name', category.name)
     category.color = data.get('color', category.color)

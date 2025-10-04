@@ -235,6 +235,9 @@
         {% endblock %}
       </main>
     </div>
-  </body>
+    {% block scripts %}
+  <script src="{{ url_for('static', filename='individual-task.js') }}"></script>
+  {% endblock %}
+</body>
 
 </html>

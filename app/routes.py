@@ -71,8 +71,46 @@ def create_task():
         return redirect(url_for('routes.show_task', task_id=new_task.id))
 
     return render_template('index.html')
+@routes.route('/individual-task/<int:task_id>')
+def individual(task_id):
+    task = Task.query.get_or_404(task_id)
+    return render_template('individual-task.html', task=task)
 
-@routes.route("/mark_completed", methods=["POST"])
+@routes.route('/complete/<int:task_id>', methods=['POST'])
+def mark_completed_single(task_id):
+    try:
+        task = db.session.query(Task).with_for_update().get(task_id)
+        task.completed = True
+        task.completed_date = date.today()
+        task.deleted = False
+        task.deleted_date = None
+        db.session.flush() 
+        db.session.commit()
+        db.session.expire_all()
+        return redirect(url_for('routes.index')) 
+    except Exception as e:
+        db.session.rollback()
+        flash("Error marking task as completed", "error")
+        return redirect(url_for('routes.index'))
+
+@routes.route('/trash_single/<int:task_id>', methods=['POST'])
+def move_to_trash_single(task_id):
+    try:
+        task = Task.query.get_or_404(task_id)
+        task.deleted = True
+        task.deleted_date = date.today()
+        task.completed = False
+        task.completed_date = None
+        db.session.flush()
+        db.session.commit()
+        db.session.expire_all()
+        return redirect(url_for('routes.trash')) 
+    except Exception as e:
+        db.session.rollback()
+        flash("Error moving task to trash", "error")
+        return redirect(url_for('routes.index'))
+
+@routes.route('/mark-completed', methods=['POST'])
 def mark_completed():
     task_id = request.form.get("task_id")
 
@@ -242,3 +280,15 @@ def move_to_trash():
         print(f"Error moving tasks to trash: {str(e)}")
         flash("Error moving tasks to trash", "error")
         return redirect(url_for('routes.index'))
+    
+@routes.route('/delete-selected', methods=['POST'])
+def delete_selected():
+    ids_str = request.form.get('delete_ids', '')
+    ids = [int(id.strip()) for id in ids_str.split(',') if id.strip().isdigit()]
+
+    if ids:
+        from app.models import Subtask
+        Subtask.query.filter(Subtask.id.in_(ids)).delete(synchronize_session=False)
+        db.session.commit()
+
+    return redirect(request.referrer or url_for('routes.index'))
