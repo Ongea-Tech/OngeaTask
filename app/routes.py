@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for
 from flask import Blueprint
-from app.models import Task, Category, Profile  
+from app.models import Task
 from . import db
 
 routes = Blueprint('routes', __name__)
@@ -33,9 +33,8 @@ def profile():
 def settings():
     return render_template('settings.html')
 
-@routes.route('/categories', methods=['GET'])
+@routes.route('/categories')
 def categories():
-    categories = Category.query.all()
     return render_template('categories.html')
 
 @routes.route('/logout')
@@ -45,7 +44,7 @@ def logout():
 @routes.route('/tasks', methods=['GET'])
 def tasks():
     active_tasks = Task.get_active_tasks()
-    print(f"Active tasks count: {len(active_tasks)}")
+    print(f"Active tasks count: {len(active_tasks)}") 
     return render_template('tasks.html', tasks=active_tasks)
 
 @routes.route('/<int:task_id>')
@@ -112,26 +111,16 @@ def move_to_trash_single(task_id):
 
 @routes.route('/mark-completed', methods=['POST'])
 def mark_completed():
-    task_id = request.form.get("task_id")
-
-    if not task_id:
-        flash("No task selected.", "error")
-        return redirect(url_for("routes.index"))
-
-    task = Task.query.get(task_id)
-    if task:
-        task.completed = True
+    ids = request.form.get('completed_ids', '')
+    if ids:
+        task_ids = [int(tid) for tid in ids.split(',')]
+        for task_id in task_ids:
+            task = Task.query.get(task_id)
+            if task:
+                task.mark_as_completed()
+               
         db.session.commit()
-        flash("Task marked as completed!", "success")
-    else:
-        flash("Task not found!", "error")
-
-    return redirect(url_for("routes.index"))
-@routes.route('/individual-task')
-def individual():
-    return render_template('individual-task.html')
-
-
+    return redirect(url_for('routes.index'))
 
 @routes.route('/history')
 def history():
@@ -187,7 +176,7 @@ def history_action():
             task.completed_date = None
             task.deleted = False
             task.deleted_date = None
-            db.session.flush()
+            db.session.flush() 
             db.session.refresh(task)
         elif action == 'trash':
             task.move_to_trash()
