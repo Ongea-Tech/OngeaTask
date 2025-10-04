@@ -270,7 +270,7 @@ def move_to_trash():
         flash("Error moving tasks to trash", "error")
         return redirect(url_for('routes.index'))
     
-    @routes.route('/delete-selected', methods=['POST'])
+@routes.route('/delete-selected', methods=['POST'])
 def delete_selected():
     ids_str = request.form.get('delete_ids', '')
     ids = [int(id.strip()) for id in ids_str.split(',') if id.strip().isdigit()]
