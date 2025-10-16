@@ -1,62 +1,92 @@
 {% extends "index.html" %}
 
 {% block content %}
-<div class="profile-page">
-  <h2 class="profile-title">Profile</h2>
+<div class="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
 
-  
-  <div class="profile-image-container">
-    <img 
-      src="" 
-      alt="Profile" 
-      class="profile-image" 
-      title="Click to change profile picture" />
-    <input type="file" id="profile-image-input" accept="image/*" style="display: none;">
+  <div class="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Profile</h2>
+
+    <div class="flex flex-col items-center mb-6">
+      <div class="relative">
+        <img 
+          src="" 
+          alt="Profile" 
+          class="w-32 h-32 object-cover rounded-full border-4 border-blue-500 shadow cursor-pointer hover:opacity-80 transition"
+          title="Click to change profile picture" 
+        />
+        <input type="file" id="profile-image-input" accept="image/*" class="hidden">
+      </div>
+      <p class="text-gray-500 text-sm mt-2">Click image to change</p>
+    </div>
+
+    <form class="space-y-4 profile-form">
+      <!-- Username -->
+      <div>
+        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+        <div class="relative">
+          <input 
+            type="text" id="username"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+          <span class="absolute right-3 top-2.5 text-gray-500 hover:text-blue-500 cursor-pointer edit-icon" tabindex="0" role="button">&#9998;</span>
+        </div>
+      </div>
+
+      <!-- First Name -->
+      <div>
+        <label for="firstname" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+        <div class="relative">
+          <input 
+            type="text" id="firstname"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+          <span class="absolute right-3 top-2.5 text-gray-500 hover:text-blue-500 cursor-pointer edit-icon" tabindex="0" role="button">&#9998;</span>
+        </div>
+      </div>
+
+      <!-- Last Name -->
+      <div>
+        <label for="lastname" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+        <div class="relative">
+          <input 
+            type="text" id="lastname"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+          <span class="absolute right-3 top-2.5 text-gray-500 hover:text-blue-500 cursor-pointer edit-icon" tabindex="0" role="button">&#9998;</span>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <div class="relative">
+          <input 
+            type="email" id="email"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+          <span class="absolute right-3 top-2.5 text-gray-500 hover:text-blue-500 cursor-pointer edit-icon" tabindex="0" role="button">&#9998;</span>
+        </div>
+      </div>
+
+      <!-- Save Button -->
+      <button 
+        id="save-profile" 
+        type="button" 
+        class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition"
+      >
+        Save Profile
+      </button>
+    </form>
   </div>
-
- 
-  <form class="profile-form">
-    <div class="form-group">
-      <label for="username">Username</label>
-      <div class="input-wrapper">
-        <input type="text" id="username" />
-        <span class="edit-icon" tabindex="0" role="button">&#9998;</span>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="firstname">First Name</label>
-      <div class="input-wrapper">
-        <input type="text" id="firstname" />
-        <span class="edit-icon" tabindex="0" role="button">&#9998;</span>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="lastname">Last Name</label>
-      <div class="input-wrapper">
-        <input type="text" id="lastname" />
-        <span class="edit-icon" tabindex="0" role="button">&#9998;</span>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="email">Email</label>
-      <div class="input-wrapper">
-        <input type="email" id="email" />
-        <span class="edit-icon" tabindex="0" role="button">&#9998;</span>
-      </div>
-    </div>
-
-    <button id="save-profile" type="button">Save Profile</button>
-  </form>
 </div>
 
-
-<div id="profile-popup" class="popup-overlay">
-  <div class="popup-box">
-    <p id="popup-message"></p>
-    <button id="popup-ok">OK</button>
+<!-- Popup -->
+<div id="profile-popup" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden">
+  <div class="bg-white rounded-xl shadow-lg p-6 w-80 text-center popup-box">
+    <p id="popup-message" class="text-gray-800 mb-4"></p>
+    <button id="popup-ok" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+      OK
+    </button>
   </div>
 </div>
 
@@ -75,7 +105,6 @@ document.addEventListener("DOMContentLoaded", function () {
       input.removeAttribute("readonly");
       input.focus();
     });
-
     icon.addEventListener("keypress", function (e) {
       if (e.key === "Enter" || e.key === " ") {
         const input = this.previousElementSibling;
@@ -88,7 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const profileImg = document.querySelector('.profile-image');
   const imageInput = document.getElementById('profile-image-input');
 
-  
   fetch(`/api/profiles/${profileId}`)
     .then(res => {
       if (!res.ok) throw new Error("Profile not found");
@@ -107,10 +135,8 @@ document.addEventListener("DOMContentLoaded", function () {
       profileImg.src = '/static/images/profile.png';
     });
 
-  
   profileImg.addEventListener('click', () => imageInput.click());
 
-  
   imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -123,23 +149,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  
   function showPopup(message, isError = false) {
     const popup = document.getElementById('profile-popup');
     const popupBox = popup.querySelector('.popup-box');
-    const popupText = popup.querySelector("p");
+    const popupText = popup.querySelector("#popup-message");
 
     popupBox.classList.remove("success", "error");
     popupText.textContent = message;
-    popupBox.classList.add(isError ? "error" : "success");
-    popup.style.display = 'flex';
+    popupBox.classList.add(isError ? "border-red-500" : "border-green-500");
+    popup.classList.remove("hidden");
   }
 
   document.getElementById('popup-ok').addEventListener('click', () => {
-    document.getElementById('profile-popup').style.display = 'none';
+    document.getElementById('profile-popup').classList.add('hidden');
   });
 
-  
   document.getElementById('save-profile').addEventListener('click', function () {
     manualSaveTriggered = true; 
 
@@ -173,12 +197,9 @@ document.addEventListener("DOMContentLoaded", function () {
       body: formData
     })
     .then(res => {
-      if (res.status === 404) {
-        throw new Error("Profile does not exist. Create it first.");
-      }
-      return res;
+      if (res.status === 404) throw new Error("Profile does not exist. Create it first.");
+      return res.json();
     })
-    .then(res => res.json())
     .then(() => {
       if (manualSaveTriggered) {
         showPopup("Profile saved successfully.");
