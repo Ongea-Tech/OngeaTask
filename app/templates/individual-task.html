@@ -1,54 +1,289 @@
-{% extends "index.html" %}
-{% block content %}
+{% extends "index.html" %} {% block content %}
 
-<div class="taskContainer">
-    <a href="{{ url_for('routes.index') }}"><i class="fa-solid fa-arrow-left"></i></a>
-    <div class="title"> 
-        <h2>{{task.title}}</h2>
-        <label class="category"></label>
-    </div>
-    <div class="description">
-        <textarea placeholder="Add a description here...">{{task.description}}</textarea> 
-    </div>
+<div class="taskContainer" data-task-id="{{ task.id }}">
+  <a href="{{ url_for('routes.index') }}"
+    ><i class="fa-solid fa-arrow-left"></i
+  ></a>
 
-    <div class="check-all">
-        <label for="" class="checkbox">
-            <input type="checkbox"/>
-        </label>
-        <button class="delete"> Delete all <a href="" class="deleteIcon"><i class="fa-solid fa-trash-can"></i></a></button>
+  <div class="title">
+    <h2>{{ task.title }}</h2>
+    <div class="category-dropdown">
+      <label class="category" id="categoryLabel">Select Category</label>
+      <div class="dropdown-menu" id="categoryMenu">
+        <div class="dropdown-option" data-color="red">
+          <span class="color-circle" style="background-color: red"></span> High
+        </div>
+        <div class="dropdown-option" data-color="grey">
+          <span class="color-circle" style="background-color: grey"></span>
+          Medium
+        </div>
+        <div class="dropdown-option" data-color="green">
+          <span class="color-circle" style="background-color: #4caf50"></span>
+          Low
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="subtasks">
-        <label for="" class="checkbox">
-        <input type="checkbox"> 
-        <p>Send invites</p> 
-        <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
-        </label>
-        <br>
-        <label for="" class="checkbox">
-        <input type="checkbox"> <p>Order cake</p>
-        <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
-        </label>
-        <br>
-        <label for="" class="checkbox">
-        <input type="checkbox"> <p>Buy outfit</p> 
-        <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a></label>
-        <br>
-        <label for="" class="checkbox">
-        <input type="checkbox"> <p>Shop for food and drinks</p>
-        <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
-        </label>
-        <br>
-        <label for="" class="checkbox">
-        <input type="checkbox"> <p>Create birthday party playlist</p>
-        <a href="" class="icon"><i class="fa-solid fa-trash-can"></i></a>
-        </label>
-        <br>
-    </div>
-    <div class="addSubtask">
-        <input type="text" placeholder="Add a new list item" >
-        <button class="inputButton">Add</button>
-    </div>
+  <div class="description">
+    <textarea id="descriptionBox" placeholder="Add a description here...">
+{{ task.description }}</textarea
+    >
+    <button id="saveDescriptionBtn" class="save-button" disabled>Save</button>
+  </div>
+
+  <div id="bulkActions" style="display: none" class="bulk-actions">
+    <button type="button" id="checkAllBtn" class="checkAll"></button>
+
+    <form
+      id="markCompletedForm"
+      method="POST"
+      action="{{ url_for('routes.mark_completed') }}"
+    >
+      <input type="hidden" name="completed_ids" id="completedTaskIds" />
+      <div>
+        <button id="markCompleteBtn" class="markComplete" type="submit">
+          Mark as Completed
+        </button>
+      </div>
+    </form>
+
+    <form
+      id="deleteSelectedForm"
+      method="POST"
+      action="{{ url_for('routes.delete_selected') }}"
+    >
+      <input type="hidden" name="delete_ids" id="deleteTaskIds" />
+      <button type="submit" id="deleteSelectedBtn" class="deleteSelected">
+        🗑️ Delete Selected
+      </button>
+    </form>
+  </div>
+
+  <div class="subtasks" id="subtaskList">
+    {% for subtask in task.subtasks %}
+    <label class="checkbox" data-subtask-id="{{ subtask.id }}">
+      <input type="checkbox" {% if subtask.completed %}checked{% endif %} />
+      <p>{{ subtask.title }}</p>
+      <a href="#" class="icon"><i class="fa-solid fa-trash-can"></i></a>
+    </label>
+    <br />
+    {% endfor %}
+  </div>
+
+  <div class="addSubtask" id="addSubtaskContainer">
+    <button id="expandInputBtn" class="expand-btn">➕</button>
+    <input type="text" placeholder="Add a new list item" id="subtaskInput" class="collapsed" />
+    <button class="inputButton" id="addSubtaskBtn">Add</button>
+  </div>
+
+
 </div>
 
+<script>
+           document.addEventListener("DOMContentLoaded", function () {
+    const taskId = {{ task.id }};
+    const subtaskList = document.getElementById("subtaskList");
+    let allChecked = false;
+
+    // Add subtask
+    document.getElementById("addSubtaskBtn").addEventListener("click", async function () {
+      const input = document.getElementById("subtaskInput");
+      const subtaskText = input.value.trim();
+
+      if (subtaskText === "") {
+        alert("Please enter a new item.");
+        return;
+      }
+
+      const response = await fetch(`/api/tasks/${taskId}/subtasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: subtaskText })
+      });
+
+      if (response.ok) {
+        location.reload();
+      } else {
+        alert("Failed to add subtask.");
+      }
+    });
+
+    // Delete individual subtask
+    subtaskList.addEventListener("click", async function (event) {
+      if (event.target.classList.contains("fa-trash-can")) {
+        event.preventDefault();
+        const label = event.target.closest(".checkbox");
+        const subtaskId = label.getAttribute("data-subtask-id");
+
+        if (confirm("Are you sure you want to delete this subtask?")) {
+          const res = await fetch(`/api/subtasks/${subtaskId}`, { method: "DELETE" });
+          if (res.ok) {
+            label.remove();
+          } else {
+            alert("Failed to delete subtask.");
+          }
+        }
+      }
+    });
+
+    // Show/hide bulk action bar when individual checkboxes change
+    subtaskList.addEventListener("change", function () {
+      const checkboxes = subtaskList.querySelectorAll("input[type='checkbox']");
+      const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+      document.getElementById("bulkActions").style.display = anyChecked ? "flex" : "none";
+    });
+
+    // Check All button toggle
+    const checkAllBtn = document.getElementById("checkAllBtn");
+    checkAllBtn.addEventListener("click", function () {
+      const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']");
+      allChecked = !allChecked;
+      checkboxes.forEach(cb => cb.checked = allChecked);
+      checkAllBtn.textContent = allChecked ? "" : "";
+
+      const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+      document.getElementById("bulkActions").style.display = anyChecked ? "flex" : "none";
+    });
+
+   // Mark as completed
+   document.getElementById("markCompletedForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']:checked");
+    const ids = Array.from(checkboxes).map(cb =>
+      cb.closest(".checkbox").getAttribute("data-subtask-id")
+    );
+
+    if (ids.length === 0) {
+      alert("Please select at least one subtask to mark as complete.");
+      return;
+    }
+
+    // Send to backend
+    const response = await fetch("{{ url_for('routes.mark_completed') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ completed_ids: ids })
+    });
+
+    if (response.ok) {
+      // Apply visual feedback: strikethrough
+      checkboxes.forEach(cb => {
+        const label = cb.closest(".checkbox");
+        label.classList.add("completed");
+        cb.checked = false;
+      });
+
+      // Hide bulk actions bar
+      document.getElementById("bulkActions").style.display = "none";
+    } else {
+      alert("Failed to mark tasks as complete.");
+    }
+  });
+
+
+    // Delete selected form handler
+    document.getElementById("deleteSelectedForm").addEventListener("submit", function (e) {
+      const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']:checked");
+      const ids = Array.from(checkboxes).map(cb => cb.closest(".checkbox").getAttribute("data-subtask-id"));
+
+      if (ids.length === 0) {
+        e.preventDefault();
+        alert("Please select at least one subtask to delete.");
+        return;
+      }
+
+      if (!confirm("Are you sure you want to delete selected subtasks?")) {
+        e.preventDefault();
+        return;
+      }
+
+      document.getElementById("deleteTaskIds").value = ids.join(",");
+    });
+
+    // Category dropdown functionality
+    const categoryLabel = document.getElementById("categoryLabel");
+    const categoryMenu = document.getElementById("categoryMenu");
+
+    categoryLabel.addEventListener("click", function () {
+      categoryMenu.style.display = categoryMenu.style.display === "block" ? "none" : "block";
+    });
+
+    categoryMenu.addEventListener("click", function (event) {
+      const selectedColor = event.target.getAttribute("data-color");
+      if (selectedColor) {
+        categoryLabel.textContent = "";
+        categoryLabel.style.backgroundColor = selectedColor;
+        categoryMenu.style.display = "none";
+      }
+    });
+
+    document.addEventListener("click", function (event) {
+      if (!categoryLabel.contains(event.target) && !categoryMenu.contains(event.target)) {
+        categoryMenu.style.display = "none";
+      }
+    });
+
+    // Description save functionality
+    const descriptionBox = document.getElementById("descriptionBox");
+    const saveButton = document.getElementById("saveDescriptionBtn");
+    let originalDescription = descriptionBox.value.trim();
+
+    descriptionBox.addEventListener("input", function () {
+      const currentText = descriptionBox.value.trim();
+      if (currentText !== originalDescription) {
+        saveButton.classList.add("active");
+        saveButton.disabled = false;
+      } else {
+        saveButton.classList.remove("active");
+        saveButton.disabled = true;
+      }
+    });
+
+    saveButton.addEventListener("click", async function () {
+      const newDescription = descriptionBox.value.trim();
+      const response = await fetch(`/api/tasks/${taskId}/description`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: newDescription })
+      });
+
+      if (response.ok) {
+        originalDescription = newDescription;
+        saveButton.classList.remove("active");
+        saveButton.disabled = true;
+      } else {
+        alert("Failed to update description.");
+      }
+    });
+
+    const expandBtn = document.getElementById("expandInputBtn");
+const inputField = document.getElementById("subtaskInput");
+const addBtn = document.getElementById("addSubtaskBtn");
+
+expandBtn.addEventListener("click", () => {
+  inputField.classList.toggle("expanded");
+  inputField.classList.toggle("collapsed");
+  inputField.focus();
+});
+
+addBtn.addEventListener("click", () => {
+  const value = inputField.value.trim();
+  if (value === "") {
+    alert("Subtask cannot be empty!");
+    return;
+  }
+
+  // Add your subtask-adding logic here
+  console.log("Subtask added:", value);
+
+  inputField.value = "";
+  inputField.classList.remove("expanded");
+  inputField.classList.add("collapsed");
+});
+
+
+});
+</script>
 {% endblock %}
