@@ -160,11 +160,12 @@ def history():
 @routes.route('/history_action', methods=['POST'])
 def history_action():
     action = request.form.get('action')
-    task_ids = request.form.getlist('task_ids')
+    raw_ids  = request.form.get('all_task_ids', '') 
+    task_ids = [int(tid) for tid in raw_ids.split(',') if tid.strip().isdigit()]
 
     if not task_ids:
         flash("No tasks selected.", "error")
-        return redirect(url_for('routes.index'))
+        return redirect(url_for('routes.history'))
 
     for task_id in task_ids:
         task = Task.query.get(int(task_id))
@@ -230,7 +231,10 @@ def trash():
 
 @routes.route('/restore_bulk', methods=['POST'])
 def restore_bulk():
-    task_ids = request.form.getlist('task_ids')
+    raw = request.form.get('all_task_ids', '')
+    task_ids = [int(x) for x in raw.split(',') if x.strip().isdigit()]
+    if not task_ids:
+        task_ids = [int(x) for x in request.form.getlist('task_ids')]
     for task_id in task_ids:
         task = Task.query.get(int(task_id))
         if task and task.deleted:
@@ -242,7 +246,10 @@ def restore_bulk():
 
 @routes.route('/delete_tasks_permanently', methods=['POST'])
 def delete_tasks_permanently():
-    task_ids = request.form.getlist('task_ids')
+    raw = request.form.get('all_task_ids', '')
+    task_ids = [int(x) for x in raw.split(',') if x.strip().isdigit()]
+    if not task_ids:
+        task_ids = [int(x) for x in request.form.getlist('task_ids')]
     for task_id in task_ids:
         task = Task.query.get(int(task_id))
         if task and task.deleted:

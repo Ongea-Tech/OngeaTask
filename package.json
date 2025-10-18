@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "ongeatask",
+  "version": "1.0.0",
+  "description": "**Ongea Task** is a simple To-Do List web application created by young developers from **Ongea Tech**  as a learning project to practice full-stack development.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "postcss ./app/static/styles.css -o ./app/static/dist/output.css",
+    "dev:css": "postcss ./app/static/styles.css -o ./app/static/dist/output.css -w",
+    "flask": "flask --app run.py run --debug --port=5001",
+    "format": "prettier --write \"**/*.{html,css,js,json,md}\"",
+    "serve": "browser-sync start --proxy http://localhost:5001/ --files 'app/templates//*.html, app/static/dist/output.css, app//.py' --ignore 'app/static/src/**/' --no-open --port 3000 --reload-delay 150 --no-ui"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ongea-Tech/OngeaTask.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Ongea-Tech/OngeaTask/issues"
+  },
+  "homepage": "https://github.com/Ongea-Tech/OngeaTask#readme",
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.14",
+    "postcss-cli": "^11.0.1"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "browser-sync": "^3.0.4",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.14"
+  }
+}
