@@ -1,0 +1,4 @@
+/* A generic card and the auth card variant */
+
+.card      { @apply bg-white rounded-2xl shadow; }
+.auth-card { @apply card w-full max-w-md p-8; }  /* used on login & logout */

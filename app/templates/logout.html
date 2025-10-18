@@ -1,16 +1,18 @@
 {% extends "index.html" %}
 {% block content %}
 
-<div class="logout-page">
-    <div class="logout-box">
-        <h2><span class="highlight">Ongea</span>Task</h2>
-        <h3>Logout</h3>
-        <p>Are you sure you want to log out from Ongea Task?</p>
-        <div class="logout-buttons">
-            <a href="{{ url_for('routes.index') }}" class="btn cancel">No</a>
-            <a href="{{ url_for('routes.login') }}" class="btn confirm">Yes</a>
-        </div>
+<div class="page-logout">
+  <div class="logout-box">
+    <h2><span class="highlight">Ongea</span>Task</h2>
+    <h3>Logout</h3>
+    <p>Are you sure you want to log out from Ongea Task?</p>
+
+    <div class="logout-buttons">
+      <a href="{{ url_for('routes.index') }}" class="btn btn-secondary btn-md w-28">No</a>
+      <a href="{{ url_for('routes.login') }}" class="btn btn-danger btn-md w-28">Yes</a>
     </div>
+  </div>
 </div>
 
 {% endblock %}
+

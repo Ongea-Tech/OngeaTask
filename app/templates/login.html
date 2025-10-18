@@ -2,33 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
     <title>Log In</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}?v=14">
 </head>
-<body>
-    <div class="login-form"> 
-        <div class="container">
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+
+    <div class="login-form">
+
+        <div class="container auth-card">
             <h2><span class="highlight">Ongea</span>Task</h2>
+
             <div class="main">
                 <div class="content">
                     <h1>Welcome Back!</h1>
+
                     <form class="form1" method="post">
-                        <input type="text" name="" placeholder="User Name" required autofocus="">
-                        <input type="password" name="" placeholder="User Password" required autofocus="">
+                        <input type="text" name="email" placeholder="Email" required autofocus>
+                        <input type="password" name="password" placeholder="Enter Password" required>
+                        
                         <div class="forget">
                             <a href="#">Forgot Password?</a>
                         </div>
-                        <button class="btn" type="submit"> Login </button>    
+
+                        <button class="btn" type="submit">Login</button>
                     </form>
-                    
+
                     <div class="signup">
-                        <p>Don't have an account? <a href="{{ url_for('routes.signup') }}">Sign Up</a></p>
+                        <p>
+                            Don't have an account?
+                            <a href="{{ url_for('routes.signup') }}">Sign Up</a>
+                        </p>
                     </div>
                 </div>
-                
             </div>
         </div>
     </div>
+
 </body>
 </html>
