@@ -1,0 +1,4 @@
+/* static/src/components/_base.css */
+@layer components {
+  .highlight { @apply text-blue-600; }
+}

@@ -1,0 +1,7 @@
+@layer components {
+  .page-logout   { @apply min-h-[60vh] flex items-center justify-center p-6  }
+  .logout-box    { @apply w-full max-w-md bg-white rounded-2xl shadow-lg p-8 text-center; }
+  .logout-box h2 { @apply text-xl font-semibold mb-2; }
+  .logout-box h3 { @apply text-lg font-medium mb-4; }
+  .logout-buttons{ @apply mt-6 flex items-center justify-center gap-4; }
+}
