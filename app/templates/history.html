@@ -2,14 +2,14 @@
 
 {% block content %}
 <div class="mb-5">
-  <h1 class="text-3xl font-bold h-15">History</h1>
+  <h1 class="text-3xl font-bold h-14">History</h1>
   <hr class="border-t border-gray-300">
 </div>
 <div class="h-6"></div>
 
 {% if today_tasks or yesterday_tasks %}
   <!-- top controls -->
-  <div class="flex items-center gap-15">
+  <div class="flex items-center gap-14">
     <input type="checkbox" class="custom-checkbox master-checkbox w-15"/>
 
     <form method="POST" action="{{ url_for('routes.history_action') }}" class="inline">
@@ -56,7 +56,7 @@
         <small class="text-gray-500 font-normal">{{ task.subtask_summary }}</small>
       </p>
     </div>
-    <div class="w-2.5 h-full rounded-r-lg ml-auto -mr-4
+    <div class="w-2.5 h-full rounded-r-lg ml-auto -mr-2
           {% if task.color == 'red' %}bg-red-500
           {% elif task.color == 'yellow' %}bg-yellow-400
           {% elif task.color == 'gray' %}bg-neutral-400
@@ -73,7 +73,7 @@
 <div class="h-1"></div>
 <section class="mb-8">
   <div class="flex justify-between items-center flex-wrap">
-    <h2 class="text-2xl font-semibold h-15">
+    <h2 class="text-2xl font-semibold h-14">
       Yesterday ({{ yesterday_date }})
     </h2>
   </div>
@@ -93,7 +93,7 @@
         <small class="text-gray-500 font-normal">{{ task.subtask_summary }}</small>
       </p>
     </div>
-    <div class="w-2.5 h-full rounded-r-lg ml-auto -mr-4
+    <div class="w-2.5 h-full rounded-r-lg ml-auto -mr-2
           {% if task.color == 'red' %}bg-red-500
           {% elif task.color == 'yellow' %}bg-yellow-400
           {% elif task.color == 'gray' %}bg-neutral-400

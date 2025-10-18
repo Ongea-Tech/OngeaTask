@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="mb-5">
-  <h1 class="text-3xl font-bold h-15">Trash</h1>
+  <h1 class="text-3xl font-bold h-14">Trash</h1>
   <hr class="border-t border-gray-300">
 </div>
 <div class="h-6"></div>
@@ -10,7 +10,7 @@
 {% if today_deleted or yesterday_deleted %}
 <!-- top controls -->
 <div class="row px-4 mb-6">
-<div class="flex items-center gap-15 ps-4 mb-6">
+<div class="flex items-center gap-14 ps-4 mb-6">
   <input type="checkbox" class="custom-checkbox master-checkbox w-14"/>
 
   <form method="POST" action="{{ url_for('routes.restore_bulk') }}" class="inline">
@@ -54,7 +54,7 @@
         {% endif %}
       </p>
     </div>
-    <div class="w-2.5 h-full rounded-r-xl ml-auto -mr-4
+    <div class="w-2.5 h-full rounded-r-xl ml-auto -mr-2
           {% if task.color == 'red' %}bg-red-500
           {% elif task.color == 'yellow' %}bg-yellow-400
           {% elif task.color == 'gray' %}bg-gray-400
@@ -69,7 +69,7 @@
 {% if yesterday_deleted %}
 <div class="h-1"></div>
 <section class="mb-8">
-  <h2 class="text-2xl font-semibold h-15">Yesterday ({{ yesterday_date }})</h2>
+  <h2 class="text-2xl font-semibold h-14">Yesterday ({{ yesterday_date }})</h2>
   <div class="h-1"></div>
 
   {% for task in yesterday_deleted %}
@@ -89,7 +89,7 @@
         {% endif %}
       </p>
     </div>
-    <div class="w-2.5 h-full rounded-r-xl ml-auto -mr-4
+    <div class="w-2.5 h-full rounded-r-xl ml-auto -mr-2
           {% if task.color == 'red' %}bg-red-500
           {% elif task.color == 'yellow' %}bg-yellow-400
           {% elif task.color == 'gray' %}bg-gray-400
