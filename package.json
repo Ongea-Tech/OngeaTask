@@ -3,14 +3,18 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": ".\\node_modules\\.bin\\tailwindcss.cmd -i ./static/src/input.css -o ./app/static/dist/output.css --watch",
-    "build": ".\\node_modules\\.bin\\tailwindcss.cmd -i ./static/src/input.css -o ./app/static/dist/output.css --minify",
+    "build:css": "postcss ./app/static/styles.css -o ./app/static/dist/output.css",
+    "dev:css": "postcss ./app/static/styles.css -o ./app/static/dist/output.css -w",
     "flask": "flask --app run.py run --debug --port=5001",
     "serve": "browser-sync start --proxy http://localhost:5001 --files 'app/templates/**/*.html, app/static/dist/output.css, app/**/*.py' --ignore 'app/static/src/**/*' --no-open --port 3000 --reload-delay 150 --no-ui"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.14",
+    "@tailwindcss/postcss": "^4.1.16",
+    "autoprefixer": "^10.4.21",
     "browser-sync": "^3.0.4",
-    "tailwindcss": "^4.1.14"
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "tailwindcss": "^4.1.16"
   }
 }
