@@ -1,0 +1,23 @@
+/* Namespace for login */
+.page-login .main           { @apply mt-2; }
+.page-login .content        { @apply space-y-4; }
+.page-login .content h1     { @apply text-2xl font-semibold text-center mb-2; }
+
+/* Map .form1 to utilities directly (don’t @apply custom .form-stack here) */
+.page-login .form1          { @apply space-y-4; }
+
+/* Inputs */
+.page-login .form1 input[type="text"],
+.page-login .form1 input[type="password"] { @apply form-field; }
+
+/* Links and text */
+.page-login .forget         { @apply text-right; }
+/* this anchor already has class="link" in HTML, so only add text-sm here */
+.page-login .forget a       { @apply text-sm; }
+
+.page-login .signup         { @apply text-center mt-6; }
+.page-login .signup p       { @apply muted; }
+.page-login .signup a       { /* has class="link" in HTML; no @apply needed */ }
+
+/* Buttons: don’t @apply custom classes */
+.page-login .btn            { @apply w-full; } /* or omit if you add btn-full in HTML */

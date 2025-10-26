@@ -1,0 +1,9 @@
+.form-field { @apply w-full rounded-md border border-gray-300 px-4 py-2
+                     focus:outline-none focus:ring-2 focus:ring-blue-500; }
+
+.form-stack { @apply space-y-4; }   /* define once */
+
+/* keep these as custom helpers */
+
+.link  { @apply text-blue-600 hover:underline; }
+.muted { @apply text-gray-600; }
