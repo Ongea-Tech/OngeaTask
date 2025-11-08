@@ -10,16 +10,17 @@
   {% block head %}{% endblock %}
 </head>
 
-<body class="min-h-screen bg-white">
+<body class="h-screen w-screen overflow-hidden">
 
-  <!-- Top Navigation Bar -->
-  <nav class="navbar">
-    <a href="{{ url_for('routes.index') }}" class="logo">
-      <img src="{{ url_for('static', filename='/images/logo.png') }}" alt="OngeaTask Logo" class="logo" />
+  <nav class="flex items-center justify-between bg-white px-4 py-2 shadow-md top-0 left-0 right-0 h-20 fixed">
+    <a href="{{ url_for('routes.index') }}" class="flex items-center space-x-2">
+      <img src="{{ url_for('static', filename='/images/logo.png') }}" alt="OngeaTask Logo" class="h-12 w-auto" />
     </a>
+
     <form class="search-bar">
       <input type="text" placeholder="Search tasks..." />
     </form>
+    
     <div class="profile-section">
       <div class="dropdown">
         <img src="{{ url_for('static', filename='/images/profile.png') }}" alt="Profile" class="profile-pic" />
