@@ -1,71 +1,64 @@
+
 {% extends "index.html" %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-  <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8">
-    <h2 class="text-3xl font-semibold text-gray-800 mb-6">Profile</h2>
+  <main class="flex-1 p-10">
+    <div class="max-w-3xl mx-auto bg-white shadow-md rounded-2xl p-10">
+      <h2 class="text-3xl font-semibold text-gray-800 mb-8">Profile</h2>
 
-    <div class="flex items-center space-x-6 mb-6">
-      <div class="relative">
-        <img
-          src=""
-          alt="Profile"
-          class="profile-image w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-md cursor-pointer"
-          title="Click to change profile picture" />
-        <input type="file" id="profile-image-input" accept="image/*" class="hidden" />
+      <div class="flex items-center justify-center mb-10">
+        <div class="relative">
+          <img src="/static/images/profile.png" alt="Profile" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow cursor-pointer">
+          <label for="profile-image-input" class="absolute bottom-2 right-2 bg-white rounded-full p-2 shadow cursor-pointer">
+            <i class="fas fa-camera text-gray-600"></i>
+          </label>
+          <input id="profile-image-input" type="file" accept="image/*" class="hidden">
+        </div>
       </div>
-      <div>
-        <p class="text-gray-600">Change your profile picture</p>
-      </div>
+
+      <form class="space-y-6">
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+          <div class="relative">
+            <input id="username" type="text" value="username1" readonly class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            <i class="fas fa-pen absolute right-3 top-3.5 text-gray-400 cursor-pointer"></i>
+          </div>
+        </div>
+
+        <div>
+          <label for="firstname" class="block text-sm font-medium text-gray-700">First Name</label>
+          <div class="relative">
+            <input id="firstname" type="text" value="Jane" readonly class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            <i class="fas fa-pen absolute right-3 top-3.5 text-gray-400 cursor-pointer"></i>
+          </div>
+        </div>
+
+        <div>
+          <label for="lastname" class="block text-sm font-medium text-gray-700">Last Name</label>
+          <div class="relative">
+            <input id="lastname" type="text" value="Doe" readonly class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            <i class="fas fa-pen absolute right-3 top-3.5 text-gray-400 cursor-pointer"></i>
+          </div>
+        </div>
+
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <div class="relative">
+            <input id="email" type="email" value="Jdoe@email.com" readonly class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            <i class="fas fa-pen absolute right-3 top-3.5 text-gray-400 cursor-pointer"></i>
+          </div>
+        </div>
+
+        <div class="pt-6">
+          <button type="button" class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700">Save Profile</button>
+        </div>
+      </form>
     </div>
-
-    <form class="profile-form space-y-4">
-      <div class="space-y-1">
-        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-        <div class="relative">
-          <input type="text" id="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <span class="edit-icon absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer" tabindex="0" role="button">&#9998;</span>
-        </div>
-      </div>
-
-      <div class="space-y-1">
-        <label for="firstname" class="block text-sm font-medium text-gray-700">First Name</label>
-        <div class="relative">
-          <input type="text" id="firstname" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <span class="edit-icon absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer" tabindex="0" role="button">&#9998;</span>
-        </div>
-      </div>
-
-      <div class="space-y-1">
-        <label for="lastname" class="block text-sm font-medium text-gray-700">Last Name</label>
-        <div class="relative">
-          <input type="text" id="lastname" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <span class="edit-icon absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer" tabindex="0" role="button">&#9998;</span>
-        </div>
-      </div>
-
-      <div class="space-y-1">
-        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-        <div class="relative">
-          <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <span class="edit-icon absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer" tabindex="0" role="button">&#9998;</span>
-        </div>
-      </div>
-
-      <div>
-        <button id="save-profile" type="button" class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700">Save Profile</button>
-      </div>
-    </form>
-  </div>
+  </main>
 </div>
 
-<div id="profile-popup" class="fixed inset-0 hidden items-center justify-center">
-  <div class="popup-box bg-white p-6 rounded-xl shadow-lg w-80 text-center">
-    <p id="popup-message" class="text-gray-800 mb-4"></p>
-    <button id="popup-ok" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">OK</button>
-  </div>
-</div>
-
+<!-- Font Awesome for icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const profileId = 1; 
