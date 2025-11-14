@@ -1,314 +1,344 @@
-{% extends "index.html" %} 
+{% extends "index.html" %}
 {% block content %}
+<body class="bg-gray-100 min-h-screen">
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Categories</h1>
 
-<div class="categories-page">
-  <h2 class="categories-title">Categories</h2>
-  <div class="delete-header">
-    <input type="checkbox" class="category-checkbox" id="select-all-checkbox" />
-    <button class="delete-all-button">Delete All</button>
-  </div>
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800">Categories</h2>
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="select-all-checkbox" class="form-checkbox h-5 w-5 text-blue-500 rounded">
+                        <span class="text-gray-700">Select All</span>
+                    </label>
+                    <button id="delete-all-btn" class="text-red-500 font-medium hover:underline flex items-center space-x-1">
+                        <span>Delete All</span> 
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
 
-  <form class="category-form">
-    {% for category in categories %}
-    <div class="category-group" data-id="{{ category.id }}">
-      <input type="checkbox" class="category-checkbox" />
-      <span class="color-indicator" style="background-color: '{{ category.color }}';"></span>
-      <input type="text" class="category-input" value="{{ category.name }}" readonly />
-      <div class="category-actions">
-        <span class="delete-icon">&#128465;</span>
-        <span class="edit-icon">&#9998;</span>
-      </div>
+            <div class="space-y-4 category-form">
+                <div class="flex items-center justify-between bg-gray-50 shadow-sm rounded-lg p-4 category-group" data-id="1">
+                    <div class="flex items-center space-x-4">
+                        <input type="checkbox" class="category-checkbox form-checkbox h-5 w-5 text-blue-500 rounded">
+                        <span class="w-4 h-4 rounded-full bg-red-500"></span>
+                        <input type="text" class="border-none bg-transparent font-medium text-gray-800 focus:outline-none" value="Work" readonly>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button type="button" class="delete-icon text-gray-400 hover:text-red-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button type="button" class="edit-icon text-gray-400 hover:text-blue-500">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-gray-50 shadow-sm rounded-lg p-4 category-group" data-id="2">
+                    <div class="flex items-center space-x-4">
+                        <input type="checkbox" class="category-checkbox form-checkbox h-5 w-5 text-blue-500 rounded">
+                        <span class="w-4 h-4 rounded-full bg-green-500"></span>
+                        <input type="text" class="border-none bg-transparent font-medium text-gray-800 focus:outline-none" value="Personal" readonly>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button type="button" class="delete-icon text-gray-400 hover:text-red-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button type="button" class="edit-icon text-gray-400 hover:text-blue-500">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-gray-50 shadow-sm rounded-lg p-4 category-group" data-id="3">
+                    <div class="flex items-center space-x-4">
+                        <input type="checkbox" class="category-checkbox form-checkbox h-5 w-5 text-blue-500 rounded">
+                        <span class="w-4 h-4 rounded-full bg-blue-500"></span>
+                        <input type="text" class="border-none bg-transparent font-medium text-gray-800 focus:outline-none" value="Shopping" readonly>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button type="button" class="delete-icon text-gray-400 hover:text-red-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button type="button" class="edit-icon text-gray-400 hover:text-blue-500">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button id="add-category-button" class="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Category</span>
+                </button>
+            </div>
+        </div>
     </div>
-    {% endfor %}
+</div>
 
-    <button class="add-category-button">Add Category</button>
-  </form>
+<div id="category-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 space-y-4">
+        <h3 id="modal-title" class="text-xl font-semibold text-gray-800">Add Category</h3>
+
+        <div class="space-y-2">
+            <label for="category-name" class="block text-gray-700 font-medium">Category Name:</label>
+            <input type="text" id="category-name" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Enter category name">
+
+            <label for="category-color" class="block text-gray-700 font-medium mt-2">Pick Category Color:</label>
+            <div class="flex items-center space-x-2">
+                <input type="color" id="category-color" class="w-10 h-10 p-0 border-0 cursor-pointer" value="#3b82f6">
+                <div class="flex space-x-2">
+                    <span class="color-swatch w-6 h-6 rounded-full cursor-pointer border" data-color="#ff4d4f" style="background-color: #ff4d4f;"></span>
+                    <span class="color-swatch w-6 h-6 rounded-full cursor-pointer border" data-color="#faad14" style="background-color: #faad14;"></span>
+                    <span class="color-swatch w-6 h-6 rounded-full cursor-pointer border" data-color="#52c41a" style="background-color: #52c41a;"></span>
+                    <span class="color-swatch w-6 h-6 rounded-full cursor-pointer border" data-color="#1890ff" style="background-color: #1890ff;"></span>
+                    <span class="color-swatch w-6 h-6 rounded-full cursor-pointer border" data-color="#722ed1" style="background-color: #722ed1;"></span>
+                    <span class="color-swatch w-6 h-6 rounded-full cursor-pointer border" data-color="#13c2c2" style="background-color: #13c2c2;"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-3 mt-4">
+            <button id="cancel-btn" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancel</button>
+            <button id="confirm-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">OK</button>
+        </div>
+    </div>
 </div>
 
 
-<div id="category-modal" class="modal hidden">
-  <div class="modal-content">
-    <h3 id="modal-title">Add Category</h3>
-    <label for="category-name">Category Name:</label>
-    <input type="text" id="category-name" class="large-input" />
-
-    <label for="category-color">Pick Priority Color:</label>
-    <div class="color-row">
-      <input type="color" id="category-color" value="#cccccc" />
-      <div class="preset-colors">
-        <span class="color-swatch" data-color="#ff4d4f" style="background-color: #ff4d4f;"></span>
-        <span class="color-swatch" data-color="#faad14" style="background-color: #faad14;"></span>
-        <span class="color-swatch" data-color="#52c41a" style="background-color: #52c41a;"></span>
-        <span class="color-swatch" data-color="#1890ff" style="background-color: #1890ff;"></span>
-        <span class="color-swatch" data-color="#722ed1" style="background-color: #722ed1;"></span>
-        <span class="color-swatch" data-color="#13c2c2" style="background-color: #13c2c2;"></span>
-      </div>
+<div id="confirm-delete-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 space-y-4 text-center">
+        <h3 class="text-lg font-semibold text-gray-800">Confirm Deletion</h3>
+        <p>Are you sure you want to delete all selected categories?</p>
+        <div class="flex justify-center space-x-4 mt-4">
+            <button id="cancel-delete-btn" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancel</button>
+            <button id="confirm-delete-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Yes, Delete</button>
+        </div>
     </div>
-
-    
-
-    <div class="modal-buttons">
-      <button id="confirm-btn">OK</button>
-      <button id="cancel-btn">Cancel</button>
-    </div>
-  </div>
 </div>
 
-<div id="confirm-delete-modal" class="modal hidden">
-  <div class="modal-content">
-    <h3 class="modal-title">Confirm Deletion</h3>
-    <p>Are you sure you want to delete all selected categories?</p>
-    <div class="modal-buttons">
-      <button id="confirm-delete-btn">Yes, Delete</button>
-      <button id="cancel-delete-btn">Cancel</button>
+<div id="custom-alert" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 space-y-4 text-center">
+        <p id="alert-message" class="text-gray-700">Category created successfully!</p>
+        <button id="alert-ok-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">OK</button>
     </div>
-  </div>
 </div>
-
-<div id="custom-alert" class="modal hidden">
-  <div class="modal-content">
-    <p id="alert-message"></p>
-    <div class="modal-buttons">
-      <button id="alert-ok-btn">OK</button>
-    </div>
-  </div>
-</div>
-
-
-<div id="custom-confirm" class="modal hidden">
-  <div class="modal-content">
-    <p id="confirm-message">Are you sure?</p>
-    <div class="modal-buttons">
-      <button id="confirm-yes-btn" class="confirm-yes">Yes</button>
-      <button id="confirm-no-btn">Cancel</button>
-    </div>
-  </div>
-</div>
-
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const form = document.querySelector(".category-form");
-    const addButton = document.querySelector(".add-category-button");
-    const topDeleteBtn = document.querySelector(".delete-all-button");
-    const topCheckbox = document.getElementById("select-all-checkbox");
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".category-form");
+        const addButton = document.getElementById("add-category-button");
+        const topDeleteBtn = document.getElementById("delete-all-btn");
+        const topCheckbox = document.getElementById("select-all-checkbox");
 
-    const modal = document.getElementById("category-modal");
-    const modalTitle = document.getElementById("modal-title");
-    const nameInput = document.getElementById("category-name");
-    const colorInput = document.getElementById("category-color");
-    const confirmBtn = document.getElementById("confirm-btn");
-    const cancelBtn = document.getElementById("cancel-btn");
+        const modal = document.getElementById("category-modal");
+        const modalTitle = document.getElementById("modal-title");
+        const nameInput = document.getElementById("category-name");
+        const colorInput = document.getElementById("category-color");
+        const confirmBtn = document.getElementById("confirm-btn");
+        const cancelBtn = document.getElementById("cancel-btn");
 
-    const confirmDeleteModal = document.getElementById("confirm-delete-modal");
-    const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
-    const cancelDeleteBtn = document.getElementById("cancel-delete-btn");
+        const confirmDeleteModal = document.getElementById("confirm-delete-modal");
+        const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
+        const cancelDeleteBtn = document.getElementById("cancel-delete-btn");
 
-    const customAlert = document.getElementById("custom-alert");
-    const alertMessage = document.getElementById("alert-message");
-    const alertOkBtn = document.getElementById("alert-ok-btn");
+        const customAlert = document.getElementById("custom-alert");
+        const alertMessage = document.getElementById("alert-message");
+        const alertOkBtn = document.getElementById("alert-ok-btn");
 
-    const customConfirm = document.getElementById("custom-confirm");
-    const confirmMessage = document.getElementById("confirm-message");
-    const confirmYesBtn = document.getElementById("confirm-yes-btn");
-    const confirmNoBtn = document.getElementById("confirm-no-btn");
+        let editingCategoryId = null;
+        let idsToDelete = [];
+        let nextCategoryId = 4; // Starting ID for new categories
 
-    let editingCategoryId = null;
-    let idsToDelete = [];
-
-    function showAlert(message) {
-      alertMessage.textContent = message;
-      customAlert.classList.remove("hidden");
-      alertOkBtn.onclick = () => {
-        customAlert.classList.add("hidden");
-      };
-    }
-
-    function showConfirm(message, onConfirm) {
-      confirmMessage.textContent = message;
-      customConfirm.classList.remove("hidden");
-      confirmYesBtn.onclick = () => {
-        customConfirm.classList.add("hidden");
-        onConfirm();
-      };
-      confirmNoBtn.onclick = () => {
-        customConfirm.classList.add("hidden");
-      };
-    }
-
-    function openCategoryModal(title, defaultName = "", defaultColor = "#cccccc") {
-      modalTitle.textContent = title;
-      modalTitle.classList.toggle("bold-title", title.toLowerCase().includes("edit"));
-      nameInput.value = defaultName;
-      colorInput.value = defaultColor;
-      highlightActiveSwatch(defaultColor);
-      modal.classList.remove("hidden");
-    }
-
-    function closeCategoryModal() {
-      modal.classList.add("hidden");
-      editingCategoryId = null;
-    }
-
-    confirmBtn.addEventListener("click", function () {
-      const name = nameInput.value.trim();
-      const color = colorInput.value;
-
-      if (!name) return showAlert("Category name required");
-
-      if (editingCategoryId) {
-        fetch(`/api/categories/${editingCategoryId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, color })
-        }).then(res => {
-          if (res.ok) location.reload();
-          else showAlert("Failed to update.");
-        });
-      } else {
-        fetch("/api/categories", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, color })
-        })
-          .then(res => res.json())
-          .then(data => {
-            if (data.category_id) location.reload();
-            else showAlert("Error creating category.");
-          });
-      }
-
-      closeCategoryModal();
-    });
-
-    cancelBtn.addEventListener("click", closeCategoryModal);
-
-    fetch('/api/categories')
-      .then(res => res.json())
-      .then(categories => {
-        categories.forEach(renderCategoryGroup);
-      });
-
-    function renderCategoryGroup(category) {
-      const div = document.createElement("div");
-      div.className = "category-group";
-      div.setAttribute("data-id", category.id);
-      div.innerHTML = `
-        <input type="checkbox" class="category-checkbox" />
-        <span class="color-indicator" style="background-color: ${category.color};"></span>
-        <input type="text" class="category-input" value="${category.name}" readonly />
-        <div class="category-actions">
-          <span class="delete-icon">&#128465;</span>
-          <span class="edit-icon">&#9998;</span>
-        </div>
-      `;
-      form.insertBefore(div, addButton);
-
-      const editBtn = div.querySelector(".edit-icon");
-      const deleteBtn = div.querySelector(".delete-icon");
-
-      editBtn.addEventListener("click", function () {
-        editingCategoryId = category.id;
-        openCategoryModal("Edit Category", category.name, category.color);
-      });
-
-      deleteBtn.addEventListener("click", function () {
-        const id = div.dataset.id;
-        showConfirm("Are you sure you want to delete this category?", () => {
-          fetch(`/api/categories/${id}`, {
-            method: "DELETE"
-          }).then(res => {
-            if (res.ok) div.remove();
-            else showAlert("Failed to delete.");
-          });
-        });
-      });
-    }
-
-    function highlightActiveSwatch(color) {
-      document.querySelectorAll('.color-swatch').forEach(swatch => {
-        swatch.classList.remove('active');
-        if (swatch.dataset.color.toLowerCase() === color.toLowerCase()) {
-          swatch.classList.add('active');
-        }
-      });
-    }
-
-    colorInput.addEventListener("input", () => {
-      highlightActiveSwatch(colorInput.value);
-    });
-
-    document.querySelectorAll('.color-swatch').forEach(swatch => {
-      swatch.addEventListener('click', function () {
-        const selectedColor = this.dataset.color;
-        colorInput.value = selectedColor;
-        highlightActiveSwatch(selectedColor);
-      });
-    });
-
-    addButton.addEventListener("click", function (e) {
-      e.preventDefault();
-      editingCategoryId = null;
-      openCategoryModal("Add Category");
-    });
-
-    if (topCheckbox) {
-      topCheckbox.addEventListener("change", function () {
-        const allCheckboxes = document.querySelectorAll(".category-group .category-checkbox");
-        allCheckboxes.forEach(cb => cb.checked = topCheckbox.checked);
-      });
-    }
-
-    if (topDeleteBtn) {
-      topDeleteBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-        const selectedGroups = Array.from(document.querySelectorAll(".category-group")).filter(group => {
-          const checkbox = group.querySelector(".category-checkbox");
-          return checkbox && checkbox.checked;
-        });
-
-        if (selectedGroups.length === 0) {
-          showAlert("Please select at least one category to delete.");
-          return;
+        function showAlert(message) {
+            alertMessage.textContent = message;
+            customAlert.classList.remove("hidden");
+            alertOkBtn.onclick = () => {
+                customAlert.classList.add("hidden");
+            };
         }
 
-        idsToDelete = selectedGroups.map(group => group.dataset.id);
-        confirmDeleteModal.classList.remove("hidden");
-      });
-    }
+        function openCategoryModal(title, defaultName = "", defaultColor = "#3b82f6") {
+            modalTitle.textContent = title;
+            nameInput.value = defaultName;
+            colorInput.value = defaultColor;
+            highlightActiveSwatch(defaultColor);
+            modal.classList.remove("hidden");
+        }
 
-    confirmDeleteBtn.addEventListener("click", function () {
-      fetch("/api/categories/delete-multiple", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: idsToDelete })
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.deleted_ids) {
-            idsToDelete.forEach(id => {
-              const group = document.querySelector(`.category-group[data-id="${id}"]`);
-              if (group) group.remove();
+        function closeCategoryModal() {
+            modal.classList.add("hidden");
+            editingCategoryId = null;
+            nameInput.value = "";
+            colorInput.value = "#3b82f6";
+        }
+
+        function createCategoryElement(id, name, color) {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'flex items-center justify-between bg-gray-50 shadow-sm rounded-lg p-4 category-group';
+            categoryDiv.setAttribute('data-id', id);
+            
+            categoryDiv.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="category-checkbox form-checkbox h-5 w-5 text-blue-500 rounded">
+                    <span class="w-4 h-4 rounded-full" style="background-color: ${color};"></span>
+                    <input type="text" class="border-none bg-transparent font-medium text-gray-800 focus:outline-none" value="${name}" readonly>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button type="button" class="delete-icon text-gray-400 hover:text-red-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button type="button" class="edit-icon text-gray-400 hover:text-blue-500">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Add event listeners to the new buttons
+            const editBtn = categoryDiv.querySelector('.edit-icon');
+            const deleteBtn = categoryDiv.querySelector('.delete-icon');
+            
+            editBtn.addEventListener('click', function() {
+                editingCategoryId = id;
+                const currentName = categoryDiv.querySelector('input[type="text"]').value;
+                const currentColor = categoryDiv.querySelector('.rounded-full').style.backgroundColor;
+                openCategoryModal("Edit Category", currentName, currentColor);
             });
-          } else {
-            showAlert("Failed to delete categories.");
-          }
-          confirmDeleteModal.classList.add("hidden");
-        })
-        .catch(error => {
-          console.error("Error:", error);
-          showAlert("An error occurred while deleting.");
-          confirmDeleteModal.classList.add("hidden");
+            
+            deleteBtn.addEventListener('click', function() {
+                if (confirm("Are you sure you want to delete this category?")) {
+                    categoryDiv.remove();
+                    showAlert("Category deleted successfully!");
+                }
+            });
+            
+            return categoryDiv;
+        }
+
+        function addCategory(name, color) {
+            const newCategory = createCategoryElement(nextCategoryId, name, color);
+            form.insertBefore(newCategory, addButton);
+            nextCategoryId++;
+            showAlert("Category created successfully!");
+        }
+
+        function updateCategory(id, name, color) {
+            const categoryDiv = document.querySelector(`.category-group[data-id="${id}"]`);
+            if (categoryDiv) {
+                categoryDiv.querySelector('input[type="text"]').value = name;
+                categoryDiv.querySelector('.rounded-full').style.backgroundColor = color;
+                showAlert("Category updated successfully!");
+            }
+        }
+
+        confirmBtn.addEventListener("click", function () {
+            const name = nameInput.value.trim();
+            const color = colorInput.value;
+
+            if (!name) {
+                showAlert("Category name is required");
+                return;
+            }
+
+            if (editingCategoryId) {
+                updateCategory(editingCategoryId, name, color);
+            } else {
+                addCategory(name, color);
+            }
+
+            closeCategoryModal();
+        });
+
+        cancelBtn.addEventListener("click", closeCategoryModal);
+
+        document.querySelectorAll('.category-group').forEach(group => {
+            const editBtn = group.querySelector(".edit-icon");
+            const deleteBtn = group.querySelector(".delete-icon");
+            const categoryId = group.dataset.id;
+
+            editBtn.addEventListener("click", function () {
+                editingCategoryId = categoryId;
+                const categoryName = group.querySelector('input[type="text"]').value;
+                const categoryColor = group.querySelector('.rounded-full').style.backgroundColor;
+                openCategoryModal("Edit Category", categoryName, categoryColor);
+            });
+
+            deleteBtn.addEventListener("click", function () {
+                if (confirm("Are you sure you want to delete this category?")) {
+                    group.remove();
+                    showAlert("Category deleted successfully!");
+                }
+            });
+        });
+
+        function highlightActiveSwatch(color) {
+            document.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.classList.remove('active-swatch');
+                if (swatch.dataset.color.toLowerCase() === color.toLowerCase()) {
+                    swatch.classList.add('active-swatch');
+                }
+            });
+        }
+
+        colorInput.addEventListener("input", () => {
+            highlightActiveSwatch(colorInput.value);
+        });
+
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', function () {
+                const selectedColor = this.dataset.color;
+                colorInput.value = selectedColor;
+                highlightActiveSwatch(selectedColor);
+            });
+        });
+
+        addButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            editingCategoryId = null;
+            openCategoryModal("Add Category");
+        });
+
+        if (topCheckbox) {
+            topCheckbox.addEventListener("change", function () {
+                const allCheckboxes = document.querySelectorAll(".category-group .category-checkbox");
+                allCheckboxes.forEach(cb => cb.checked = topCheckbox.checked);
+            });
+        }
+
+        if (topDeleteBtn) {
+            topDeleteBtn.addEventListener("click", function (e) {
+                e.preventDefault();
+                const selectedGroups = Array.from(document.querySelectorAll(".category-group")).filter(group => {
+                    const checkbox = group.querySelector(".category-checkbox");
+                    return checkbox && checkbox.checked;
+                });
+
+                if (selectedGroups.length === 0) {
+                    showAlert("Please select at least one category to delete.");
+                    return;
+                }
+
+                idsToDelete = selectedGroups.map(group => group.dataset.id);
+                confirmDeleteModal.classList.remove("hidden");
+            });
+        }
+
+        confirmDeleteBtn.addEventListener("click", function () {
+            idsToDelete.forEach(id => {
+                const group = document.querySelector(`.category-group[data-id="${id}"]`);
+                if (group) group.remove();
+            });
+            
+            showAlert("Selected categories deleted successfully!");
+            confirmDeleteModal.classList.add("hidden");
+            topCheckbox.checked = false;
+        });
+
+        cancelDeleteBtn.addEventListener("click", function () {
+            confirmDeleteModal.classList.add("hidden");
         });
     });
-
-    cancelDeleteBtn.addEventListener("click", function () {
-      confirmDeleteModal.classList.add("hidden");
-    });
-  });
 </script>
-
-
-
-
 {% endblock %}
