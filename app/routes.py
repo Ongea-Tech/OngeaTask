@@ -2,19 +2,21 @@ from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for
 from flask import Blueprint
 from app.models import Task
+from app.forms import TaskForm
 from . import db
 
 routes = Blueprint('routes', __name__)
 
 @routes.route('/')
 def index():
+    form = TaskForm()
     active_tasks = Task.query.filter(
         db.and_(
             Task.completed == False,
             Task.deleted == False
         )
     ).all()
-    return render_template('index.html', tasks=active_tasks)
+    return render_template('index.html', form=form, tasks=active_tasks)
 
 
 @routes.route('/login')
@@ -54,22 +56,23 @@ def show_task(task_id):
 
 @routes.route('/create_task', methods=['GET', 'POST'])
 def create_task():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        description = request.form.get('description')
+    form = TaskForm()
 
-        if not name:
-            flash("Task name is required", "error")
-            return redirect(url_for('routes.create_task'))
-
-        new_task = Task(title=name, description=description, completed=False)
+    if form.validate_on_submit():
+        new_task = Task(
+            title=form.title.data,
+            description=form.description.data or None,
+            completed=False
+        )
         db.session.add(new_task)
         db.session.commit()
 
         flash("Task created successfully", "success")
         return redirect(url_for('routes.show_task', task_id=new_task.id))
 
-    return render_template('index.html')
+    # If it's GET, or POST but invalid, render the page with errors
+    return render_template('index.html', form=form)
+
 @routes.route('/individual-task/<int:task_id>')
 def individual(task_id):
     task = Task.query.get_or_404(task_id)
