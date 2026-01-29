@@ -40,9 +40,9 @@ def create_task():
     return render_template('index.html')
 
 
-@routes.route('/login')
-def login():
-    return render_template('login.html')
+# @routes.route('/login')
+# def login():
+#     return render_template('login.html')
 
 @routes.route('/signup')
 def signup():

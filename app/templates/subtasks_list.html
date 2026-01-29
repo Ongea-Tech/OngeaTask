@@ -1,0 +1,15 @@
+<!-- templates/subtasks/list.html -->
+ 
+<h2>Subtasks for Task {{ task_id }}</h2>
+
+<ul>
+  {% for sub in subtasks %}
+    <li>{{ sub.title }} - {% if sub.completed %}{% else %}{% endif %}</li>
+  {% endfor %}
+</ul>
+
+<form method="POST" action="{{ url_for('subtasks.create_subtask', task_id=task_id) }}">
+  <input type="text" name="title" placeholder="New Subtask">
+  <button type="submit">Add</button>
+</form>
+ 
