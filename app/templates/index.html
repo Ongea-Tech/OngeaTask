@@ -174,8 +174,11 @@
                   taskCard.className = 'task-card border-first';
                   taskCard.style.cursor = 'pointer';
                   taskCard.addEventListener('click', () => {
-                    window.location.href = `/${task.id}`;
+                      // Use correct route for individual task
+                      const taskUrl = `/individual-task/${task.id}`;
+                      window.location.href = taskUrl;
                   });
+
 
                   // Create the checkbox
                   const checkbox = document.createElement('input');

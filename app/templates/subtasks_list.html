@@ -1,15 +1,20 @@
 <!-- templates/subtasks/list.html -->
- 
-<h2>Subtasks for Task {{ task_id }}</h2>
+{% extends "index.html" %}
+{% block content %}
+ <div class="subtask_title">
+  <h2>Subtasks for Task {{ task_id }}</h2>
+ </div>
 
-<ul>
-  {% for sub in subtasks %}
-    <li>{{ sub.title }} - {% if sub.completed %}{% else %}{% endif %}</li>
-  {% endfor %}
-</ul>
+ <div class="subtask_list">
+    <ul>
+      {% for sub in subtasks %}
+        <li>{{ sub.title }} - {% if sub.completed %}{% else %}{% endif %}</li>
+      {% endfor %}
+    </ul>
+ </div>
 
-<form method="POST" action="{{ url_for('subtasks.create_subtask', task_id=task_id) }}">
+<form class="subtask_input" method="POST" action="{{ url_for('subtasks.create_subtask', task_id=task_id) }}">
   <input type="text" name="title" placeholder="New Subtask">
-  <button type="submit">Add</button>
+  <button class="subtask_submit" type="submit">Add</button>
 </form>
- 
+{% endblock %}

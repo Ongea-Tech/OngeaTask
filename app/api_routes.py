@@ -113,6 +113,24 @@ def mark_completed():
     db.session.commit()
     return jsonify({"success": True})
 
+@api.route("/subtasks/<int:subtask_id>", methods=["PATCH"])
+def update_subtask(subtask_id):
+    subtask = Subtask.query.get_or_404(subtask_id)
+    data = request.get_json()
+    completed = data.get("completed")
+
+    if completed is None:
+        return jsonify({"success": False, "message": "Missing 'completed' field"}), 400
+
+    subtask.completed = completed
+    db.session.commit()
+
+    # Recalculate progress
+    task = Task.query.get(subtask.task_id)
+    subtasks = Subtask.query.filter_by(task_id=task.id).all()
+    progress = get_task_progress(task, subtasks)
+
+    return jsonify({"success": True, "progress": progress})
 
 
 

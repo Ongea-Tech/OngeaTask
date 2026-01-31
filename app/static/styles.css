@@ -179,6 +179,20 @@ html, body {
   font-weight: bold;
   margin-top: 1rem;
 }
+
+.progress-bar {
+  width: 30%;
+  height: 10px;
+  background: #e0e0e0;
+  border-radius: 5px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #4caf50;
+  transition: width 0.3s ease;
+}
+
 .title .category {
   height: 60px;
   width: 85px;
@@ -403,6 +417,42 @@ html, body {
   height: 28px;
   width: 95px;
   background-color: #FFFFFF;
+}
+.subtask_title{
+  font-weight:bolder;
+  
+  margin-top: 1rem;
+  font-size: 20px;
+}
+
+.subtask_list{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.subtask_input{
+  width: 400px;
+  opacity: 1;
+  padding-left: 10px;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.subtask_submit{
+  height: 100%;
+  width: 60px;
+  background-color: #3F7EE8;
+  color: white;
+  font-size: 20px;
+  border: none;
+  border-radius: 0px 0 10px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 40px;
 }
 
 

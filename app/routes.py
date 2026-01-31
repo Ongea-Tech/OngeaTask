@@ -1,6 +1,7 @@
-from flask import flash, render_template, request, redirect, url_for
+from flask import flash, render_template, request, redirect, url_for, jsonify
 from flask import Blueprint
-from app.models import Task
+from app.models import Task, Subtask
+from app.services.individual_task_service import (get_individual_task, create_subtask, get_task_progress)
 from . import db
 
 routes = Blueprint('routes', __name__)
@@ -14,10 +15,6 @@ def tasks():
     tasks = Task.query.all()
     return render_template('tasks.html', tasks=tasks)
 
-@routes.route('/<int:task_id>')
-def show_task(task_id):
-    task = Task.query.get_or_404(task_id)
-    return render_template('individual-task.html', task=task)
 
 @routes.route('/create_task', methods=['GET', 'POST'])
 def create_task():
@@ -35,7 +32,7 @@ def create_task():
 
         flash("Task created successfully", "success")
         # Redirect to the newly created task page using its ID
-        return redirect(url_for('routes.show_task', task_id=new_task.id))
+        return redirect(url_for('routes.individual', task_id=new_task.id))
 
     return render_template('index.html')
 
@@ -67,7 +64,18 @@ def logout():
 @routes.route('/individual-task/<int:task_id>')
 def individual(task_id):
     task = Task.query.get_or_404(task_id)
-    return render_template('individual-task.html', task=task)
+    subtasks = Subtask.query.filter_by(task_id=task_id).all()
+    progress = get_task_progress(task, subtasks)
+    
+
+    
+
+    return render_template(
+        "individual-task.html",
+        task=task,
+        subtasks=subtasks,
+        progress=progress
+    )
 
 
 @routes.route('/settings')
@@ -78,17 +86,37 @@ def settings():
 def trash():
     return render_template('trash.html')
 
-@routes.route('/mark-completed', methods=['POST'])
+@routes.route("/mark_completed", methods=["POST"])
 def mark_completed():
-    ids = request.form.get('completed_ids', '')
-    if ids:
-        task_ids = [int(tid) for tid in ids.split(',')]
-        for task_id in task_ids:
-            task = Task.query.get(task_id)
-            if task:
-                task.completed = True
-        db.session.commit()
-    return redirect(url_for('routes.index'))
+    data = request.get_json() or request.form
+    completed_ids = data.get("completed_ids")
+
+    if not completed_ids:
+        return jsonify({"success": False, "message": "No subtasks selected"}), 400
+
+    # Convert string IDs to integers if needed
+    if isinstance(completed_ids, str):
+        completed_ids = [int(i) for i in completed_ids.split(",")]
+    else:
+        completed_ids = [int(i) for i in completed_ids]
+
+    # Update all selected subtasks
+    for subtask_id in completed_ids:
+        subtask = Subtask.query.get(subtask_id)
+        if subtask:
+            subtask.completed = True
+            db.session.add(subtask)
+
+    db.session.commit()
+
+    # Recalculate progress for the task
+    task_id = Subtask.query.get(completed_ids[0]).task_id
+    task = Task.query.get(task_id)
+    subtasks = Subtask.query.filter_by(task_id=task.id).all()
+    progress = get_task_progress(task, subtasks)
+
+    return jsonify({"success": True, "progress": progress})
+
 
 @routes.route('/move-to-trash', methods=['POST'])
 def move_to_trash():
