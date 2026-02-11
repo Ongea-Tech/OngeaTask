@@ -11,22 +11,23 @@
   <!-- top controls -->
   <div class="flex items-center gap-14">
     <input type="checkbox" class="custom-checkbox master-checkbox w-15"/>
-
     <form method="POST" action="{{ url_for('routes.history_action') }}" class="inline">
-      <input type="hidden" name="all_task_ids" id="all-task-ids"/>
-      <button type="submit" name="action" value="reopen"
-              class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:ring-blue-300 font-medium rounded-sm text-base px-5 py-2.5 text-center cursor-pointer">
-        Reopen Task
-      </button>
+       {{ form.hidden_tag() }}
+       {{ form.action(value="reopen") }}
+       {{ form.task_ids(id="all-task-ids") }}
+    <button type="submit" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:ring-blue-300 font-medium rounded-sm text-base px-5 py-2.5 text-center cursor-pointer">
+    Reopen Task
+    </button>
     </form>
 
     <form method="POST" action="{{ url_for('routes.history_action') }}" class="inline">
-      <input type="hidden" name="all_task_ids" id="all-delete-ids"/>
-      <button type="submit" name="action" value="trash" aria-label="Move to trash"
-              class="inline-flex items-center justify-center px-2 py-1 text-xl leading-none text-red-600 hover:text-red-700 border-0 bg-transparent focus:outline-none cursor-pointer">
-        🗑
-      </button>
-    </form>
+       {{ form.hidden_tag() }}
+       {{ form.action(value="trash") }}
+       {{ form.task_ids(id="all-delete-ids") }}
+     <button type="submit" aria-label="Move to trash" class="inline-flex items-center justify-center px-2 py-1 text-xl leading-none text-red-600 hover:text-red-700 border-0 bg-transparent focus:outline-none cursor-pointer">
+    🗑
+    </button>
+</form>
   </div>
   <div class="h-6"></div>
 {% endif %}

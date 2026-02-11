@@ -1,8 +1,8 @@
-from flask import Flask
+from flask import Flask, app
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
-from flask_mail import Mail 
+from flask_mail import Mail  # pyright: ignore[reportMissingImports]
 
 
 db = SQLAlchemy()
@@ -39,8 +39,19 @@ def create_app():
     app.register_blueprint(api)
     app.register_blueprint(auth, url_prefix = '/auth')
 
+    from app.blueprints.history import history_bp
+    from app.blueprints.trash import trash_bp
+
+    app.register_blueprint(history_bp)
+    app.register_blueprint(trash_bp)
+
     # Create tables
     with app.app_context():
         db.create_all()
 
     return app
+    
+    app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+    app.config["WTF_CSRF_ENABLED"] = True
+
+
