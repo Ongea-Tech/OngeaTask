@@ -2,8 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
-from flask_mail import Mail 
-
+from flask_mail import Mail
 
 db = SQLAlchemy()
 mail = Mail()
@@ -12,6 +11,9 @@ def create_app():
 
     app = Flask(__name__)
     app.secret_key = 'dev-secret-key'
+
+    app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+    app.config["WTF_CSRF_ENABLED"] = True
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
