@@ -12,6 +12,7 @@ class Task(db.Model):
     deleted = db.Column(db.Boolean, default=False)
     deleted_date = db.Column(db.Date, nullable=True)
     subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
+    priority = db.Column(db.String(20), nullable=False, default="Medium")
 
     def mark_as_completed(self):
         """Mark task as completed and update database"""
