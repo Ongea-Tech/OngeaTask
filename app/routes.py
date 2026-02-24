@@ -3,13 +3,16 @@ from flask import flash, render_template, request, redirect, url_for
 from flask import Blueprint
 from app.models import Task
 from . import db
+from flask_login import current_user, login_required
 
 routes = Blueprint('routes', __name__)
 
 @routes.route('/')
+@login_required
 def index():
     active_tasks = Task.query.filter(
         db.and_(
+            Task.user_id == current_user.id,
             Task.completed == False,
             Task.deleted == False
         )
@@ -42,17 +45,20 @@ def logout():
     return render_template('logout.html')
 
 @routes.route('/tasks', methods=['GET'])
+@login_required
 def tasks():
-    active_tasks = Task.get_active_tasks()
+    active_tasks = Task.get_active_tasks(current_user.id)
     print(f"Active tasks count: {len(active_tasks)}") 
     return render_template('tasks.html', tasks=active_tasks)
 
 @routes.route('/<int:task_id>')
+@login_required
 def show_task(task_id):
-    task = Task.query.get_or_404(task_id)
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     return render_template('individual-task.html', task=task)
 
 @routes.route('/create_task', methods=['GET', 'POST'])
+@login_required
 def create_task():
     if request.method == 'POST':
         name = request.form.get('name')
@@ -62,7 +68,12 @@ def create_task():
             flash("Task name is required", "error")
             return redirect(url_for('routes.create_task'))
 
-        new_task = Task(title=name, description=description, completed=False)
+        new_task = Task(
+            title=name,
+            description=description,
+            completed=False,
+            user_id=current_user.id
+        )
         db.session.add(new_task)
         db.session.commit()
 
@@ -71,14 +82,19 @@ def create_task():
 
     return render_template('index.html')
 @routes.route('/individual-task/<int:task_id>')
+@login_required
 def individual(task_id):
-    task = Task.query.get_or_404(task_id)
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     return render_template('individual-task.html', task=task)
 
 @routes.route('/complete/<int:task_id>', methods=['POST'])
+@login_required
 def mark_completed_single(task_id):
     try:
-        task = db.session.query(Task).with_for_update().get(task_id)
+        task = db.session.query(Task).with_for_update().filter_by(
+            id=task_id,
+            user_id=current_user.id
+        ).first_or_404()
         task.completed = True
         task.completed_date = date.today()
         task.deleted = False
@@ -93,9 +109,10 @@ def mark_completed_single(task_id):
         return redirect(url_for('routes.index'))
 
 @routes.route('/trash_single/<int:task_id>', methods=['POST'])
+@login_required
 def move_to_trash_single(task_id):
     try:
-        task = Task.query.get_or_404(task_id)
+        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
         task.deleted = True
         task.deleted_date = date.today()
         task.completed = False
@@ -110,12 +127,13 @@ def move_to_trash_single(task_id):
         return redirect(url_for('routes.index'))
 
 @routes.route('/mark-completed', methods=['POST'])
+@login_required
 def mark_completed():
     ids = request.form.get('completed_ids', '')
     if ids:
         task_ids = [int(tid) for tid in ids.split(',')]
         for task_id in task_ids:
-            task = Task.query.get(task_id)
+            task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
             if task:
                 task.mark_as_completed()
                
@@ -123,17 +141,20 @@ def mark_completed():
     return redirect(url_for('routes.index'))
 
 @routes.route('/history')
+@login_required
 def history():
     today = date.today()
     yesterday = today - timedelta(days=1)
 
     today_tasks = Task.query.filter(
+        Task.user_id == current_user.id,
         Task.completed == True,
         Task.deleted == False,
         Task.completed_date == today
     ).all()
 
     yesterday_tasks = Task.query.filter(
+        Task.user_id == current_user.id,
         Task.completed == True,
         Task.deleted == False,
         Task.completed_date == yesterday
@@ -158,6 +179,7 @@ def history():
     )
 
 @routes.route('/history_action', methods=['POST'])
+@login_required
 def history_action():
     action = request.form.get('action')
     task_ids = request.form.getlist('task_ids')
@@ -167,7 +189,7 @@ def history_action():
         return redirect(url_for('routes.index'))
 
     for task_id in task_ids:
-        task = Task.query.get(int(task_id))
+        task = Task.query.filter_by(id=int(task_id), user_id=current_user.id).first()
         if not task:
             continue
 
@@ -196,16 +218,19 @@ def history_action():
     return redirect(url_for('routes.history'))
 
 @routes.route('/trash', methods=['GET'])
+@login_required
 def trash():
     today = date.today()
     yesterday = today - timedelta(days=1)
 
     today_deleted = Task.query.filter(
+        Task.user_id == current_user.id,
         Task.deleted == True,
         Task.deleted_date == today
     ).all()
 
     yesterday_deleted = Task.query.filter(
+        Task.user_id == current_user.id,
         Task.deleted == True,
         Task.deleted_date == yesterday
     ).all()
@@ -229,10 +254,11 @@ def trash():
     )
 
 @routes.route('/restore_bulk', methods=['POST'])
+@login_required
 def restore_bulk():
     task_ids = request.form.getlist('task_ids')
     for task_id in task_ids:
-        task = Task.query.get(int(task_id))
+        task = Task.query.filter_by(id=int(task_id), user_id=current_user.id).first()
         if task and task.deleted:
             task.deleted = False
             task.deleted_date = None
@@ -241,10 +267,11 @@ def restore_bulk():
     return redirect(url_for('routes.trash'))
 
 @routes.route('/delete_tasks_permanently', methods=['POST'])
+@login_required
 def delete_tasks_permanently():
     task_ids = request.form.getlist('task_ids')
     for task_id in task_ids:
-        task = Task.query.get(int(task_id))
+        task = Task.query.filter_by(id=int(task_id), user_id=current_user.id).first()
         if task and task.deleted:
             db.session.delete(task)
     db.session.commit()
@@ -252,13 +279,14 @@ def delete_tasks_permanently():
     return redirect(url_for('routes.trash'))
 
 @routes.route('/move-to-trash', methods=['POST'])
+@login_required
 def move_to_trash():
     try:
         ids = request.form.get('trash_ids', '')
         if ids:
             task_ids = [int(tid) for tid in ids.split(',')]
             for task_id in task_ids:
-                task = Task.query.get(task_id)
+                task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
                 if task:
                     task.move_to_trash()
             db.session.commit()
@@ -271,13 +299,17 @@ def move_to_trash():
         return redirect(url_for('routes.index'))
     
 @routes.route('/delete-selected', methods=['POST'])
+@login_required
 def delete_selected():
     ids_str = request.form.get('delete_ids', '')
     ids = [int(id.strip()) for id in ids_str.split(',') if id.strip().isdigit()]
 
     if ids:
         from app.models import Subtask
-        Subtask.query.filter(Subtask.id.in_(ids)).delete(synchronize_session=False)
+        Subtask.query.join(Task).filter(
+            Subtask.id.in_(ids),
+            Task.user_id == current_user.id
+        ).delete(synchronize_session=False)
         db.session.commit()
 
     return redirect(request.referrer or url_for('routes.index'))
