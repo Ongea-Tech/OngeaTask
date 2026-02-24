@@ -17,7 +17,7 @@ def get_active_tasks():
         user_id=current_user.id,
         completed=False,
         deleted=False
-    ).all()  # ✅ Only ongoing tasks
+    ).all()  # Only ongoing tasks
     result = []
     for task in tasks:
         subtasks = [{'id': st.id, 'title': st.title, 'completed': st.completed} for st in task.subtasks]
