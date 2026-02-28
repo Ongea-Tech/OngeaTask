@@ -1,0 +1,1 @@
+    "dev:css": "postcss ./app/static/styles.css -o ./app/static/dist/output.css -w",
