@@ -11,6 +11,7 @@ def ping():
 
 @api.route('/api/tasks', methods=['GET'])
 def get_active_tasks():
+    """Gets all the ongoing incomplete tasks"""
     tasks = Task.query.filter_by(completed=False, deleted=False).all()  # ✅ Only ongoing tasks
     result = []
     for task in tasks:
@@ -27,6 +28,7 @@ def get_active_tasks():
 
 @api.route('/api/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):
+    """Gets a specific task"""
     task = Task.query.get_or_404(task_id)
     subtasks = [{'id': st.id, 'title': st.title, 'completed': st.completed} for st in task.subtasks]
     return jsonify({
@@ -37,8 +39,10 @@ def get_task(task_id):
         'subtasks': subtasks
     })
 
+    
 @api.route('/api/tasks', methods=['POST'])
 def create_task():
+    """Creates a new task"""
     data = request.get_json()
     title = data.get('title')
     description = data.get('description', '')
@@ -51,8 +55,10 @@ def create_task():
     db.session.commit()
     return jsonify({'message': 'Task created', 'task_id': new_task.id}), 201
 
+
 @api.route('/api/tasks/<int:task_id>/subtasks', methods=['POST'])
 def add_subtask(task_id):
+    """Adds a new subtask to a specific task"""
     task = Task.query.get_or_404(task_id)
     data = request.get_json()
     title = data.get('title')
@@ -66,15 +72,19 @@ def add_subtask(task_id):
 
     return jsonify({'message': 'Subtask added', 'subtask_id': subtask.id}), 201
 
+
 @api.route('/api/tasks/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
+    """Deletes a specific task"""
     task = Task.query.get_or_404(task_id)
     db.session.delete(task)
     db.session.commit()
     return jsonify({'message': 'Task deleted'}), 200
 
+
 @api.route('/api/tasks/<int:task_id>', methods=['PUT'])
 def update_task(task_id):
+    """Updates old records of a specific task with data provided by the user"""
     task = Task.query.get_or_404(task_id)
     data = request.get_json()
     task.title = data.get('title', task.title)
@@ -83,15 +93,19 @@ def update_task(task_id):
     db.session.commit()
     return jsonify({'message': 'Task updated'}), 200
 
+
 @api.route('/api/subtasks/<int:subtask_id>', methods=['DELETE'])
 def delete_subtask(subtask_id):
+    """Deletes a subtask from the database"""
     subtask = Subtask.query.get_or_404(subtask_id)
     db.session.delete(subtask)
     db.session.commit()
     return jsonify({'message': 'Subtask deleted'}), 200
 
+
 @api.route('/api/tasks/<int:task_id>/description', methods=['PATCH'])
 def update_description(task_id):
+    """Updates the old description with new description provided by the user"""
     data = request.get_json()
     new_description = data.get('description', '').strip()
 
@@ -101,8 +115,10 @@ def update_description(task_id):
 
     return jsonify({"message": "Description updated"}), 200
 
+
 @api.route('/mark_completed', methods=['POST'])
 def mark_completed():
+    """Marks subtasks as completed"""
     data = request.get_json()
     completed_ids = data.get('completed_ids', [])
 

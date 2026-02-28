@@ -5,19 +5,22 @@ from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 from flask_mail import Message
 from app import mail
+from app.forms import ForgotPasswordForm, LogInForm, SignUpForm, ResetPasswordForm
 
 
 auth = Blueprint('auth', __name__)
 
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
+    """Gets new user data and adds them to the database"""
+    form = SignUpForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        first_name = form.first_name.data
+        last_name = form.last_name.data
+        email = form.email.data
+        password = form.password.data
+        confirm_password = form.confirm_password.data
 
         # Check if user already exists
         if User.query.filter_by(username=username).first():
@@ -37,14 +40,16 @@ def signup():
         flash('Account created. Please log in.')
         return redirect(url_for('auth.login'))
 
-    return render_template('signup.html')
+    return render_template('signup.html', form=form)
 
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+    """Logs in existing user"""
+    form = LogInForm()
+    if form.validate_on_submit:
+        username = form.username.data
+        password = form.password.data
 
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
@@ -55,12 +60,14 @@ def login():
         else:
             flash('Invalid credentials')
 
-    return render_template('login.html')
+    return render_template('login.html', form=form)
 
 @auth.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
-    if request.method == 'POST':
-        email = request.form.get('email')
+    """Sends link to existing user for password reset"""
+    form = ForgotPasswordForm()
+    if form.validate_on_submit:
+        email = form.email.data
         user = User.query.filter_by(email=email).first()
 
         if user:
@@ -77,11 +84,12 @@ def forgot_password():
             return redirect(url_for('auth.login'))
         else:
             flash('No account found with that email.')
-    return render_template('forgot_password.html')
+    return render_template('forgot_password.html', form=form)
 
 
 @auth.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
+    """Enables password reset"""
     email = confirm_token(token)  
 
     if not email:
@@ -89,8 +97,9 @@ def reset_password(token):
         return redirect(url_for('auth.forgot_password'))
 
     user = User.query.filter_by(email=email).first_or_404()
-
-    if request.method == 'POST':
+    
+    form = ResetPasswordForm()
+    if form.validate_on_submit:
         new_password = request.form.get('new_password')
         confirm_password = request.form.get('confirm_password')
 
@@ -106,15 +115,18 @@ def reset_password(token):
 
 @auth.route('/logout')
 def logout():
+    """logs out user"""
     session.clear()
     flash('Logged out.')
     return redirect(url_for('auth.login'))
 
 def generate_token(email):
+    """Generates password token"""
     serializer = URLSafeTimedSerializer(current_app.secret_key)
     return serializer.dumps(email, salt='password-reset-salt')
 
 def confirm_token(token, expiration=3600):
+    """confirms password token"""
     serializer = URLSafeTimedSerializer(current_app.secret_key)
     try:
         email = serializer.loads(token, salt='password-reset-salt', max_age=expiration)
