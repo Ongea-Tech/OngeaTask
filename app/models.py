@@ -2,9 +2,12 @@ from datetime import date
 from app import db   
 from app import db   
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     completed = db.Column(db.Boolean, default=False)
@@ -34,19 +37,19 @@ class Task(db.Model):
         db.session.refresh(self)
 
     @classmethod
-    def get_active_tasks(cls):
+    def get_active_tasks(cls, user_id):
         """active tasks not completed and not deleted"""
-        return cls.query.filter_by(completed=False, deleted=False).all()
+        return cls.query.filter_by(user_id=user_id, completed=False, deleted=False).all()
 
     @classmethod
-    def get_completed_tasks(cls):
+    def get_completed_tasks(cls, user_id):
         """completed tasks for a specific date"""
-        return cls.query.filter_by(completed=True, deleted=False).all()
+        return cls.query.filter_by(user_id=user_id, completed=True, deleted=False).all()
 
     @classmethod
-    def get_deleted_tasks(cls):
+    def get_deleted_tasks(cls, user_id):
         """deleted tasks"""
-        return cls.query.filter_by(deleted=True).all()
+        return cls.query.filter_by(user_id=user_id, deleted=True).all()
     
 class Subtask(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,24 +57,28 @@ class Subtask(db.Model):
     completed = db.Column(db.Boolean, default=False)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     first_name = db.Column(db.String(80), nullable=False)
     last_name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(512), nullable=False)
+    tasks = db.relationship('Task', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
     def to_dict(self):
         return {
             "id": self.id,
-            "title": self.title,
-            "completed": self.completed
+            "username": self.username,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email
         }
 
 class Profile(db.Model):
