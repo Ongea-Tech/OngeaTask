@@ -94,16 +94,16 @@
           <form id="createTaskForm" method="POST" action="{{ url_for('routes.create_task') }}" class="space-y-5">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Create New Task</h2>
             <div>
-            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Task Name (required):</label>
-            <input type="text" id="name" name="name" required
-              class="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 focus:ring-[#4379EE] focus:border-[#4379EE]" />
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Task Name (required):</label>
+              <input type="text" id="name" name="name" required
+                class="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 focus:ring-[#4379EE] focus:border-[#4379EE]" />
             </div>
             <div>
-            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description:</label>
-            <textarea id="description" name="description"
-              class="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 resize-none focus:ring-[#4379EE] focus:border-[#4379EE] pb-3 "></textarea>
+              <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description:</label>
+              <textarea id="description" name="description"
+                class="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 resize-none focus:ring-[#4379EE] focus:border-[#4379EE] pb-3 "></textarea>
             </div>
-              <div>
+            <div>
               <button type="submit"
                 class="w-full bg-[#4379EE] rounded-lg py-3 hover:bg-blue-600 transition font-medium text-white bottom-2">Create
                 Task</button>
@@ -113,19 +113,22 @@
       </div>
 
       <div id="bulk-actions" class="flex items-center space-x-4 mb-4 hidden">
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" id="selectAll"
+            class="ml-4 w-5 h-5 accent-[#4379EE] rounded cursor-pointer self-center">
+          <span class="text-gray-700 text-sm font-medium">Select All</span>
+        </label>
         <form id="markCompletedForm" method="POST" action="{{ url_for('routes.mark_completed') }}">
           <input type="hidden" name="completed_ids" id="completedTaskIds">
-          <button type="submit"
-          class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
-          >Mark as Completed</button>
+          <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">Mark
+            as Completed</button>
 
         </form>
 
         <form id="moveToTrashForm" method="POST" action="{{ url_for('routes.move_to_trash') }}">
           <input type="hidden" name="trash_ids" id="trashTaskIds">
-          <button type="submit"
-          class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
-          >🗑️ Move to Trash</button>
+          <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">🗑️ Move
+            to Trash</button>
         </form>
       </div>
 
@@ -221,6 +224,25 @@
                   }
                   updateBulkActionsVisibility();
                 });
+                const selectAllCheckbox = document.getElementById('selectAll');
+
+                selectAllCheckbox.addEventListener('change', () => {
+                  const allCheckboxes = document.querySelectorAll('#taskList input[type="checkbox"]');
+
+                  allCheckboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllCheckbox.checked;
+                    const taskId = checkbox.dataset.taskId;
+
+                    if (selectAllCheckbox.checked) {
+                      selectedTaskIds.add(taskId);
+                    } else {
+                      selectedTaskIds.delete(taskId);
+                    }
+                  });
+
+                  updateBulkActionsVisibility();
+                });
+
 
                 // Task info section
                 const taskInfo = document.createElement('div');
@@ -234,6 +256,7 @@
                         `;
                 const priorityIndicator = document.createElement('div');
                 priorityIndicator.className = 'w-5 rounded-r-lg bg-green-400 ml-4'
+                
                 taskCard.appendChild(checkbox);
                 taskCard.appendChild(taskInfo);
                 taskList.appendChild(taskCard);
