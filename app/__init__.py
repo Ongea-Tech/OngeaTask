@@ -1,4 +1,4 @@
-from flask import Flask, app
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
@@ -14,9 +14,6 @@ def create_app():
 
     app = Flask(__name__)
     app.secret_key = 'dev-secret-key'
-
-    app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
-    app.config["WTF_CSRF_ENABLED"] = True
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -44,12 +41,6 @@ def create_app():
     app.register_blueprint(routes)
     app.register_blueprint(api)
     app.register_blueprint(auth, url_prefix = '/auth')
-
-    from app.blueprints.history import history_bp
-    from app.blueprints.trash import trash_bp
-
-    app.register_blueprint(history_bp)
-    app.register_blueprint(trash_bp)
 
 
     return app

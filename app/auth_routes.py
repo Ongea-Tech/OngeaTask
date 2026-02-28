@@ -3,9 +3,8 @@ from app import db
 from app.models import User
 from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
-from flask_mail import Message # type: ignore
+from flask_mail import Message
 from app import mail
-from app.forms.auth_forms import ResetPasswordForm
 
 
 auth = Blueprint('auth', __name__)
@@ -83,21 +82,27 @@ def forgot_password():
 
 @auth.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
-    email = confirm_token(token)
+    email = confirm_token(token)  
+
     if not email:
         flash('Invalid or expired reset link.')
         return redirect(url_for('auth.forgot_password'))
 
     user = User.query.filter_by(email=email).first_or_404()
-    form = ResetPasswordForm()
 
-    if form.validate_on_submit():
-        user.set_password(form.new_password.data)
-        db.session.commit()
-        flash('Password reset successful. Please log in.')
-        return redirect(url_for('auth.login'))
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
 
-    return render_template('reset_password.html', form=form)
+        if new_password != confirm_password:
+            flash('Passwords do not match.')
+        else:
+            user.set_password(new_password)
+            db.session.commit()
+            flash('Password reset successful. Please log in.')
+            return redirect(url_for('auth.login'))
+
+    return render_template('reset_password.html', user=user)
 
 @auth.route('/logout')
 def logout():
