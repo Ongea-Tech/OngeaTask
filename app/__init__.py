@@ -3,10 +3,17 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 from flask_mail import Mail 
-
+from flask_migrate import Migrate
+from flask_login import LoginManager
 
 db = SQLAlchemy()
 mail = Mail()
+migrate = Migrate()
+login_manager = LoginManager()
+login_manager.login_view = "auth.login"
+login_manager.login_message = "Please log in to access this page."
+login_manager.login_message_category = "error"
+
 def create_app():
     load_dotenv()  # Loads variables from .env
 
@@ -17,8 +24,9 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.init_app(app, db)
     mail.init_app(app)
-    
 
     # Import routes after app is created to avoid circular import
     from app.routes import routes
@@ -33,7 +41,7 @@ def create_app():
     MAIL_PASSWORD=os.getenv("MAIL_PASSWORD")
     
 )
-    mail.init_app(app)
+
 
     app.register_blueprint(routes)
     app.register_blueprint(api)

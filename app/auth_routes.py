@@ -1,27 +1,34 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app import db
 from app.models import User
 from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 from flask_mail import Message
 from app import mail
+from flask_login import login_user, logout_user, login_required, current_user
 
 
 auth = Blueprint('auth', __name__)
 
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for('routes.index'))
     if request.method == 'POST':
-        username = request.form.get('username')
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
-        email = request.form.get('email')
+        username = request.form.get('username', '').strip()
+        first_name = request.form.get('first_name', '').strip()
+        last_name = request.form.get('last_name', '').strip()
+        email = request.form.get('email', '').strip().lower()
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
+        
+        if not all([username, first_name, last_name, email, password, confirm_password]):
+            flash('All fields are required.')
+            return redirect(url_for('auth.signup'))
 
         # Check if user already exists
-        if User.query.filter_by(username=username).first():
-            flash('Username already exists')
+        if User.query.filter_by(email=email).first():
+            flash('Email already exists')
             return redirect(url_for('auth.signup'))
         if password != confirm_password:
             flash('Passwords do not match')
@@ -42,22 +49,25 @@ def signup():
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('routes.index'))
     if request.method == 'POST':
-        username = request.form.get('username')
+        email = request.form.get('username')
         password = request.form.get('password')
 
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(email=email).first()
+
         if user and user.check_password(password):
-            session['user_id'] = user.id
-            session['username'] = user.username
+            login_user(user, remember=True)
             flash('Logged in successfully.')
             return redirect(url_for('routes.index'))
         else:
-            flash('Invalid credentials')
+            flash('Invalid credentials', 'error')
 
     return render_template('login.html')
 
 @auth.route('/forgot-password', methods=['GET', 'POST'])
+@login_required
 def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -81,6 +91,7 @@ def forgot_password():
 
 
 @auth.route('/reset-password/<token>', methods=['GET', 'POST'])
+@login_required
 def reset_password(token):
     email = confirm_token(token)  
 
@@ -105,9 +116,10 @@ def reset_password(token):
     return render_template('reset_password.html', user=user)
 
 @auth.route('/logout')
+@login_required
 def logout():
-    session.clear()
-    flash('Logged out.')
+    logout_user()
+    flash('Logged out successfully.')
     return redirect(url_for('auth.login'))
 
 def generate_token(email):
