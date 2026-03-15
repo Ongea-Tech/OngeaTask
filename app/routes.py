@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for
 from flask import Blueprint
-from app.models import Task
+from app.models import Task, Subtask
 from . import db
 from flask_login import current_user, login_required
 
@@ -81,6 +81,17 @@ def create_task():
 def individual(task_id):
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     return render_template('individual-task.html', task=task)
+
+@routes.route('/edit_subtask/<int:subtask_id>', methods=['POST'])
+def edit_subtask(subtask_id):
+    subtask = Subtask.query.get_or_404(id)
+    new_title = request.json.get('title')
+    
+    if new_title:
+        subtask.title = new_title
+        db.session.commit() # This saves it permanently
+        return {"message": "Success"}, 200
+    return {"message": "Content cannot be empty"}, 400
 
 @routes.route('/complete/<int:task_id>', methods=['POST'])
 @login_required

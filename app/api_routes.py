@@ -37,6 +37,8 @@ def get_task(task_id):
         'subtasks': subtasks
     })
 
+
+
     
 @api.route('/api/tasks', methods=['POST'])
 @login_required
