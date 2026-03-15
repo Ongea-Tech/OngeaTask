@@ -5,7 +5,7 @@ import os
 from flask_mail import Mail 
 from flask_migrate import Migrate
 from flask_login import LoginManager
-
+from .error_handlers import register_error_handlers
 
 db = SQLAlchemy()
 mail = Mail()
@@ -19,6 +19,8 @@ def create_app():
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    register_error_handlers(app)
 
     db.init_app(app)
     migrate.init_app(app, db)
