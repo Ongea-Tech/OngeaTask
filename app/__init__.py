@@ -5,6 +5,8 @@ import os
 from flask_mail import Mail 
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from .error_handlers import register_error_handlers
+import logging
 
 
 db = SQLAlchemy()
@@ -16,6 +18,7 @@ def create_app():
 
     app = Flask(__name__)
     app.secret_key = 'dev-secret-key'
+    app.logger.setLevel(logging.DEBUG)
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -25,7 +28,7 @@ def create_app():
     mail.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'  # Redirect to login page if not authenticated
-    
+    register_error_handlers(app)
 
     # Import routes after app is created to avoid circular import
     from app.routes import routes
@@ -55,5 +58,7 @@ def create_app():
     # Create tables
     with app.app_context():
         db.create_all()
+
+  
 
     return app

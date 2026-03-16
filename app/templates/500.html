@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>500</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}">
+</head>
+<body class="min-h-screen bg-black text-white flex items-center justify-center px-6">
+  <div class="max-w-xl text-center">
+    <h1 class="text-7xl font-black mb-4">500</h1>
+    <h2 class="text-2xl font-semibold mb-4">Something went wrong</h2>
+    <p class="text-gray-400 mb-6">{{ message }}</p>
+
+    {% if request_id %}
+      <p class="text-sm text-gray-500 mb-6">Reference ID: {{ request_id }}</p>
+    {% endif %}
+
+    <a
+      href="/"
+      class="inline-block bg-lime-400 text-black font-bold px-6 py-3 rounded-full"
+    >
+      Back to Home
+    </a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}">
+</head>
+
+<body class="bg-black">
+
+<div class="min-h-screen bg-black flex items-center justify-center text-white px-6 relative overflow-hidden">
+
+    <div class="absolute top-16 left-10 text-5xl animate-bounce">
+        🛸
+    </div>
+
+    <div class="absolute bottom-20 right-12 text-6xl animate-pulse">
+        🚀
+    </div>
+
+    <div class="text-center max-w-xl">
+        <h1 class="text-8xl font-black mb-4 animate-pulse text-white">
+            404
+        </h1>
+
+        <div class="text-5xl mb-6 animate-bounce">🤷🏽‍♀️</div>
+
+        <h2 class="text-2xl font-semibold mb-4 text-gray-100">
+            Well… this is awkward.
+        </h2>
+
+        <p class="text-gray-400 mb-8 leading-relaxed">
+            The page you're looking for has either moved, disappeared, or is currently hiding from responsibilities.
+            <br><br>
+            We checked the database, the server, and even under the couch. Still nothing.
+        </p>
+
+        <a href="{{ url_for('routes.index') }}"
+           class="inline-block bg-lime-400 text-black font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition">
+            Take Me Back Home
+        </a>
+
+        <p class="text-sm text-gray-500 mt-6 italic">
+            Error code: 404 — Page not found (but we tried really hard)
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>
