@@ -1,10 +1,12 @@
 from datetime import date
 from app import db   
 from app import db   
+from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     completed = db.Column(db.Boolean, default=False)
@@ -32,19 +34,19 @@ class Task(db.Model):
         db.session.refresh(self)
 
     @classmethod
-    def get_active_tasks(cls):
+    def get_active_tasks(cls, user_id):
         """active tasks not completed and not deleted"""
-        return cls.query.filter_by(completed=False, deleted=False).all()
+        return cls.query.filter_by(user_id = user_id, completed=False, deleted=False).all()
 
     @classmethod
-    def get_completed_tasks(cls):
-        """completed tasks for a specific date"""
-        return cls.query.filter_by(completed=True, deleted=False).all()
+    def get_completed_tasks(cls, user_id):
+        """completed tasks for a specific user"""
+        return cls.query.filter_by(user_id=user_id, completed=True, deleted=False).all()
 
     @classmethod
-    def get_deleted_tasks(cls):
-        """deleted tasks"""
-        return cls.query.filter_by(deleted=True).all()
+    def get_deleted_tasks(cls, user_id):
+        """deleted tasks for a specific user"""
+        return cls.query.filter_by(user_id=user_id, deleted=True).all()
     
 class Subtask(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,8 +54,9 @@ class Subtask(db.Model):
     completed = db.Column(db.Boolean, default=False)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
+    tasks = db.relationship('Task', backref='user', lazy=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     first_name = db.Column(db.String(80), nullable=False)
     last_name = db.Column(db.String(80), nullable=False)
