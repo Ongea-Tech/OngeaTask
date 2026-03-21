@@ -47,23 +47,6 @@ body {
   width: auto;
 }
 
-/* 
-.logo { 
-  font-size: 1.5rem;
-  font-weight:bold;
-  font-family: sans-serif;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.logo .ongea {
-  color: #3f7ee8;
-}
-
-.logo .task {
-  color: #000000;
-} */
-
 .search-container {
   flex: 1;
   display: flex;
