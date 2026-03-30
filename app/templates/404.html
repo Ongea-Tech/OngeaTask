@@ -1,0 +1,10 @@
+{% extends "index.html" %} {% block content %}
+<div class="min-h-screen flex items-center justify-center flex-col">
+    <h1 class="font-medium text-5xl">Whoops!</h1>
+    <h1 class="font-medium text-5xl">You just 404'd!</h1>
+    <img src="{{ url_for('static', filename='/images/404.png') }}" alt="404 Image">
+
+    <p>This content doesn't exist. <br /> Maybe you should head back to our <a
+            href="{{ url_for('routes.index') }}" class="text-blue-600 underline">homepage</a>.</p>
+</div>
+{% endblock %}

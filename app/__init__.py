@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 from flask_mail import Mail 
+from .error_handlers import register_error_handlers
 from flask_migrate import Migrate
 from flask_login import LoginManager
 
@@ -51,6 +52,8 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+    
+    register_error_handlers(app)
 
     # Create tables
     with app.app_context():

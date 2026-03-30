@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Something Went Wrong</title>
+</head>
+<body>
+    <h1>500</h1>
+    <h2>Something Went Wrong</h2>
+    <p>{{ message or "An unexpected error occurred." }}</p>
+
+    {% if request_id %}
+        <p>Reference ID: {{ request_id }}</p>
+    {% endif %}
+
+    <a href="{{ url_for('routes.index') }}">Return Home</a>
+</body>
+</html>
