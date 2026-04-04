@@ -36,7 +36,6 @@ class Task(db.Model):
 
     @classmethod
     def get_active_tasks(cls, user_id):
-    def get_active_tasks(cls, user_id):
         """active tasks not completed and not deleted"""
         return cls.query.filter_by(user_id = user_id, completed=False, deleted=False).all()
 
@@ -76,10 +75,6 @@ class User(db.Model, UserMixin):
     def to_dict(self):
         return {
             "id": self.id,
-            "username": self.username,
-            "first_name": self.first_name,
-            "last_name": self.last_name,
-            "email": self.email
             "username": self.username,
             "first_name": self.first_name,
             "last_name": self.last_name,
