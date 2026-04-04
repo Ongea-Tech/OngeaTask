@@ -3,13 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 from flask_mail import Mail
-from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_migrate import Migrate
+from .error_handlers import register_error_handlers
 
+login_manager = LoginManager()
 db = SQLAlchemy()
 mail = Mail()
 migrate = Migrate()
-login_manager = LoginManager()
+
 
 def create_app():
     load_dotenv()
@@ -19,7 +21,9 @@ def create_app():
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///test.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+    app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+    app.config["WTF_CSRF_ENABLED"] = True
+    
     app.config.update(
         MAIL_SERVER=os.getenv('MAIL_SERVER', 'smtp.example.com'),
         MAIL_PORT=int(os.getenv('MAIL_PORT', 587)),
@@ -32,22 +36,21 @@ def create_app():
     migrate.init_app(app, db)
     mail.init_app(app)
     login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'
+    login_manager.login_view = "auth.login" 
+    register_error_handlers(app)
+    
 
+    # Import routes after app is created to avoid circular import
     from app.routes import routes
     from app.api_routes import api
     from app.auth_routes import auth
-    from app.models import User
+    
+    
+    mail.init_app(app)
 
     app.register_blueprint(routes)
     app.register_blueprint(api)
-    app.register_blueprint(auth, url_prefix='/auth')
+    app.register_blueprint(auth, url_prefix = '/auth')
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
-
-    with app.app_context():
-        db.create_all()
 
     return app
