@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: 'http://127.0.0.1:5001',
+    baseURL: 'http://127.0.0.1:5000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -32,7 +32,7 @@ export default defineConfig({
 
   webServer: {
     command: 'flask run',
-    url: 'http://127.0.0.1:5001',
+    url: 'http://127.0.0.1:5000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
