@@ -1,22 +1,21 @@
 from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for
 from flask import Blueprint
-from app.models import Task
-from . import db
 from flask_login import current_user, login_required
+from app.models import Task, User
+from . import db, login_manager
 
 routes = Blueprint('routes', __name__)
 
 @routes.route('/')
 @login_required
 def index():
-    active_tasks = Task.query.filter(
-        db.and_(
-            Task.user_id == current_user.id,
-            Task.completed == False,
-            Task.deleted == False
-        )
+    active_tasks = Task.query.filter_by(
+        user_id=current_user.id,
+        completed=False,
+        deleted=False
     ).all()
+
     return render_template('index.html', tasks=active_tasks)
 
 
@@ -29,18 +28,22 @@ def signup():
     return render_template('signup.html')
 
 @routes.route('/profile')
+@login_required
 def profile():
     return render_template('profile.html')
 
 @routes.route('/settings')
+@login_required
 def settings():
     return render_template('settings.html')
 
 @routes.route('/categories')
+@login_required
 def categories():
     return render_template('categories.html')
 
 @routes.route('/logout')
+@login_required
 def logout():
     return render_template('logout.html')
 
@@ -68,12 +71,7 @@ def create_task():
             flash("Task name is required", "error")
             return redirect(url_for('routes.create_task'))
 
-        new_task = Task(
-            title=name,
-            description=description,
-            completed=False,
-            user_id=current_user.id
-        )
+        new_task = Task(title=name, description=description, completed=False, user_id=current_user.id)
         db.session.add(new_task)
         db.session.commit()
 
@@ -91,10 +89,7 @@ def individual(task_id):
 @login_required
 def mark_completed_single(task_id):
     try:
-        task = db.session.query(Task).with_for_update().filter_by(
-            id=task_id,
-            user_id=current_user.id
-        ).first_or_404()
+        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
         task.completed = True
         task.completed_date = date.today()
         task.deleted = False
@@ -313,3 +308,7 @@ def delete_selected():
         db.session.commit()
 
     return redirect(request.referrer or url_for('routes.index'))
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))

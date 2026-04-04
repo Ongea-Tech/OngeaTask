@@ -1,9 +1,7 @@
 from datetime import date
-from app import db   
-from app import db   
+from app import db    
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -15,8 +13,9 @@ class Task(db.Model):
     deleted = db.Column(db.Boolean, default=False)
     deleted_date = db.Column(db.Date, nullable=True)
     subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
-    priority = db.Column(db.String(20), nullable=False, default="Medium")
-    updated_date = db.Column(db.Date, nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+
 
     def mark_as_completed(self):
         """Mark task as completed and update database"""
@@ -43,12 +42,12 @@ class Task(db.Model):
 
     @classmethod
     def get_completed_tasks(cls, user_id):
-        """completed tasks for a specific date"""
+        """completed tasks for a specific user"""
         return cls.query.filter_by(user_id=user_id, completed=True, deleted=False).all()
 
     @classmethod
     def get_deleted_tasks(cls, user_id):
-        """deleted tasks"""
+        """deleted tasks for a specific user"""
         return cls.query.filter_by(user_id=user_id, deleted=True).all()
     
 class Subtask(db.Model):

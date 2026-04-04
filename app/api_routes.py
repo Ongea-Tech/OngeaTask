@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.models import Task, Subtask
 from . import db
-from flask_login import current_user, login_required
+from flask_login import login_required, current_user
 
 api = Blueprint('api', __name__)
 
@@ -12,12 +12,9 @@ def ping():
 
 @api.route('/api/tasks', methods=['GET'])
 @login_required
+@login_required
 def get_active_tasks():
-    tasks = Task.query.filter_by(
-        user_id=current_user.id,
-        completed=False,
-        deleted=False
-    ).all()  # Only ongoing tasks
+    tasks = Task.query.filter_by(user_id=current_user.id, completed=False, deleted=False).all()  # ✅ Only ongoing tasks
     result = []
     for task in tasks:
         subtasks = [{'id': st.id, 'title': st.title, 'completed': st.completed} for st in task.subtasks]
@@ -34,7 +31,7 @@ def get_active_tasks():
 @api.route('/api/tasks/<int:task_id>', methods=['GET'])
 @login_required
 def get_task(task_id):
-    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()  # ✅ Ensure task belongs to current user
     subtasks = [{'id': st.id, 'title': st.title, 'completed': st.completed} for st in task.subtasks]
     return jsonify({
         'id': task.id,
@@ -54,12 +51,7 @@ def create_task():
     if not title:
         return jsonify({'error': 'Title is required'}), 400
 
-    new_task = Task(
-        title=title,
-        description=description,
-        completed=False,
-        user_id=current_user.id
-    )
+    new_task = Task(title=title, description=description, completed=False, user_id=current_user.id)  # ✅ Associate task with current user
     db.session.add(new_task)
     db.session.commit()
     return jsonify({'message': 'Task created', 'task_id': new_task.id}), 201
@@ -102,10 +94,7 @@ def update_task(task_id):
 @api.route('/api/subtasks/<int:subtask_id>', methods=['DELETE'])
 @login_required
 def delete_subtask(subtask_id):
-    subtask = Subtask.query.join(Task).filter(
-        Subtask.id == subtask_id,
-        Task.user_id == current_user.id
-    ).first_or_404()
+    subtask = Subtask.query.filter_by(id=subtask_id, task=Task.query.filter_by(user_id=current_user.id).first_or_404()).first_or_404()
     db.session.delete(subtask)
     db.session.commit()
     return jsonify({'message': 'Subtask deleted'}), 200
