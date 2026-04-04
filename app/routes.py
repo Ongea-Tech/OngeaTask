@@ -2,24 +2,27 @@ from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for
 from flask import Blueprint
 from flask_login import current_user, login_required
-from app.models import Task, User
+from app.models import Task, User, Subtask
 from . import db, login_manager
 
 routes = Blueprint('routes', __name__)
 
 @routes.route('/')
 @login_required
+@login_required
 def index():
-    active_tasks = Task.query.filter_by(
-        user_id=current_user.id,
-        completed=False,
-        deleted=False
+    active_tasks = Task.query.filter(
+        db.and_(
+            Task.user_id == current_user.id,
+            Task.completed == False,
+            Task.deleted == False
+        )
     ).all()
 
     return render_template('index.html', tasks=active_tasks)
 
 
-@routes.route('/login')
+@routes.route('/login', methods=['GET', 'POST'])
 def login():
     return render_template('login.html')
 
@@ -49,18 +52,22 @@ def logout():
 
 @routes.route('/tasks', methods=['GET'])
 @login_required
+@login_required
 def tasks():
+    active_tasks = Task.get_active_tasks(current_user.id)
     active_tasks = Task.get_active_tasks(current_user.id)
     print(f"Active tasks count: {len(active_tasks)}") 
     return render_template('tasks.html', tasks=active_tasks)
 
 @routes.route('/<int:task_id>')
 @login_required
+@login_required
 def show_task(task_id):
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     return render_template('individual-task.html', task=task)
 
 @routes.route('/create_task', methods=['GET', 'POST'])
+@login_required
 @login_required
 def create_task():
     if request.method == 'POST':
@@ -72,6 +79,7 @@ def create_task():
             return redirect(url_for('routes.create_task'))
 
         new_task = Task(title=name, description=description, completed=False, user_id=current_user.id)
+        new_task = Task(title=name, description=description, completed=False, user_id=current_user.id)
         db.session.add(new_task)
         db.session.commit()
 
@@ -81,15 +89,32 @@ def create_task():
     return render_template('index.html')
 @routes.route('/individual-task/<int:task_id>')
 @login_required
+@login_required
 def individual(task_id):
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     return render_template('individual-task.html', task=task)
 
+@routes.route('/edit_subtask/<int:subtask_id>', methods=['POST'])
+def edit_subtask(subtask_id):
+    subtask = Subtask.query.get_or_404(id)
+    new_title = request.json.get('title')
+    
+    if new_title:
+        subtask.title = new_title
+        db.session.commit() # This saves it permanently
+        return {"message": "Success"}, 200
+    return {"message": "Content cannot be empty"}, 400
+
 @routes.route('/complete/<int:task_id>', methods=['POST'])
+@login_required
 @login_required
 def mark_completed_single(task_id):
     try:
-        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
+        task = db.session.query(Task).with_for_update().filter_by(
+            id=task_id,
+            user_id=current_user.id
+        ).first_or_404()
         task.completed = True
         task.completed_date = date.today()
         task.deleted = False

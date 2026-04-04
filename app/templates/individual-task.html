@@ -26,14 +26,33 @@
   </div>
 
   <div class="description">
-    <textarea id="descriptionBox" placeholder="Add a description here...">
+    <textarea
+      id="descriptionBox"
+      placeholder="Add a description here..."
+      class="w-full flex h-[120px] p-[15px] border-none focus:outline-none bg-white"
+    >
 {{ task.description }}</textarea
     >
-    <button id="saveDescriptionBtn" class="save-button" disabled>Save</button>
+    <button
+      id="saveDescriptionBtn"
+      class="save-button mt-[5px] px-[12px] py-[6px] bg-gray-500 text-white border-none rounded-[4px] text-[0.9rem] cursor-not-allowed opacity-60 relative left-0"
+      disabled
+    >
+      Save
+    </button>
   </div>
 
-  <div id="bulkActions" style="display: none" class="bulk-actions">
-    <button type="button" id="checkAllBtn" class="checkAll"></button>
+  <!-- Bulk Actions -->
+  <div
+    id="bulkActions"
+    style="display: none"
+    class="bulk-actions flex items-center gap-[10px] mt-[10px]"
+  >
+    <button
+      type="button"
+      id="checkAllBtn"
+      class="checkAll w-[20px] h-[20px] border border-gray-400 rounded-[3px] cursor-pointer"
+    ></button>
 
     <form
       id="markCompletedForm"
@@ -62,19 +81,62 @@
 
   <div class="subtasks" id="subtaskList">
     {% for subtask in task.subtasks %}
-    <label class="checkbox" data-subtask-id="{{ subtask.id }}">
-      <input type="checkbox" {% if subtask.completed %}checked{% endif %} />
-      <p>{{ subtask.title }}</p>
-      <a href="#" class="icon"><i class="fa-solid fa-trash-can"></i></a>
+    <label
+      class="checkbox flex items-center justify-between border border-gray-200 rounded-[4px] p-[8px] mb-[5px]"
+      data-subtask-id="{{ subtask.id }}"
+    >
+      <div class="flex items-center gap-[8px]">
+        <input
+          type="checkbox"
+          class="w-[16px] h-[16px] accent-green-600 cursor-pointer"
+          {%
+          if
+          subtask.completed
+          %}checked{%
+          endif
+          %}
+        />
+        <p>{{ subtask.title }}</p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <a href="#" class="icon1 text-gray-500 hover:text-blue-600 edit-btn" data-id="{{ subtask.id }}">
+          <i class="fa-solid fa-pen"></i>
+        </a>
+        <a href="#" class="icon text-gray-500 hover:text-red-600">
+          <i class="fa-solid fa-trash-can"></i>
+        </a>
+      </div>
     </label>
     <br />
     {% endfor %}
   </div>
 
-  <div class="addSubtask" id="addSubtaskContainer">
-    <button id="expandInputBtn" class="expand-btn">➕</button>
-    <input type="text" placeholder="Add a new list item" id="subtaskInput" class="collapsed" />
-    <button class="inputButton" id="addSubtaskBtn">Add</button>
+  <!-- Add Subtask -->
+  
+
+  <div class="addSubtask flex items-center gap-[8px] mt-[10px] h-[40px]" id="addSubtaskContainer">
+    <input
+      type="text"
+      placeholder="Add a new list item"
+      id="subtaskInput"
+      class="collapsed border border-gray-300 rounded-[4px] px-[10px] py-[6px] flex-1 focus:outline-none"
+    />
+
+    <button
+      id="expandInputBtn"
+      type="button"
+      class="expand-btn text-xl text-gray-600 hover:text-black"
+    >
+      ➕
+    </button>
+    
+    <button
+      class="inputButton bg-blue-600 text-white px-[12px] py-[6px] rounded-[4px] text-[0.9rem] hover:bg-blue-700"
+      id="addSubtaskBtn"
+    >
+      Add
+    </button>
   </div>
 
 
@@ -86,204 +148,246 @@
     const subtaskList = document.getElementById("subtaskList");
     let allChecked = false;
 
-    // Add subtask
-    document.getElementById("addSubtaskBtn").addEventListener("click", async function () {
-      const input = document.getElementById("subtaskInput");
-      const subtaskText = input.value.trim();
+        // Add subtask
+        document.getElementById("addSubtaskBtn").addEventListener("click", async function () {
+          const input = document.getElementById("subtaskInput");
+          const subtaskText = input.value.trim();
 
-      if (subtaskText === "") {
-        alert("Please enter a new item.");
-        return;
-      }
-
-      const response = await fetch(`/api/tasks/${taskId}/subtasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: subtaskText })
-      });
-
-      if (response.ok) {
-        location.reload();
-      } else {
-        alert("Failed to add subtask.");
-      }
-    });
-
-    // Delete individual subtask
-    subtaskList.addEventListener("click", async function (event) {
-      if (event.target.classList.contains("fa-trash-can")) {
-        event.preventDefault();
-        const label = event.target.closest(".checkbox");
-        const subtaskId = label.getAttribute("data-subtask-id");
-
-        if (confirm("Are you sure you want to delete this subtask?")) {
-          const res = await fetch(`/api/subtasks/${subtaskId}`, { method: "DELETE" });
-          if (res.ok) {
-            label.remove();
-          } else {
-            alert("Failed to delete subtask.");
+          if (subtaskText === "") {
+            alert("Please enter a new item.");
+            return;
           }
+
+          const response = await fetch(`/api/tasks/${taskId}/subtasks`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: subtaskText })
+          });
+
+          if (response.ok) {
+            location.reload();
+          } else {
+            alert("Failed to add subtask.");
+          }
+        });
+
+        // Delete individual subtask
+        subtaskList.addEventListener("click", async function (event) {
+          if (event.target.classList.contains("fa-trash-can")) {
+            event.preventDefault();
+            const label = event.target.closest(".checkbox");
+            const subtaskId = label.getAttribute("data-subtask-id");
+
+            if (confirm("Are you sure you want to delete this subtask?")) {
+              const res = await fetch(`/api/subtasks/${subtaskId}`, { method: "DELETE" });
+              if (res.ok) {
+                label.remove();
+              } else {
+                alert("Failed to delete subtask.");
+              }
+            }
+          }
+        });
+
+        // Show/hide bulk action bar when individual checkboxes change
+        subtaskList.addEventListener("change", function () {
+          const checkboxes = subtaskList.querySelectorAll("input[type='checkbox']");
+          const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+          document.getElementById("bulkActions").style.display = anyChecked ? "flex" : "none";
+        });
+
+        // Check All button toggle
+        const checkAllBtn = document.getElementById("checkAllBtn");
+        checkAllBtn.addEventListener("click", function () {
+          const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']");
+          allChecked = !allChecked;
+          checkboxes.forEach(cb => cb.checked = allChecked);
+          checkAllBtn.textContent = allChecked ? "" : "";
+
+          const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+          document.getElementById("bulkActions").style.display = anyChecked ? "flex" : "none";
+        });
+
+       // Mark as completed
+       document.getElementById("markCompletedForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']:checked");
+        const ids = Array.from(checkboxes).map(cb =>
+          cb.closest(".checkbox").getAttribute("data-subtask-id")
+        );
+
+        if (ids.length === 0) {
+          alert("Please select at least one subtask to mark as complete.");
+          return;
         }
-      }
-    });
 
-    // Show/hide bulk action bar when individual checkboxes change
-    subtaskList.addEventListener("change", function () {
-      const checkboxes = subtaskList.querySelectorAll("input[type='checkbox']");
-      const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-      document.getElementById("bulkActions").style.display = anyChecked ? "flex" : "none";
-    });
+        // Send to backend
+        const response = await fetch("{{ url_for('routes.mark_completed') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completed_ids: ids })
+        });
 
-    // Check All button toggle
-    const checkAllBtn = document.getElementById("checkAllBtn");
-    checkAllBtn.addEventListener("click", function () {
-      const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']");
-      allChecked = !allChecked;
-      checkboxes.forEach(cb => cb.checked = allChecked);
-      checkAllBtn.textContent = allChecked ? "" : "";
+        if (response.ok) {
+          // Apply visual feedback: strikethrough
+          checkboxes.forEach(cb => {
+            const label = cb.closest(".checkbox");
+            label.classList.add("completed");
+            cb.checked = false;
+          });
 
-      const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-      document.getElementById("bulkActions").style.display = anyChecked ? "flex" : "none";
-    });
-
-   // Mark as completed
-   document.getElementById("markCompletedForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']:checked");
-    const ids = Array.from(checkboxes).map(cb =>
-      cb.closest(".checkbox").getAttribute("data-subtask-id")
-    );
-
-    if (ids.length === 0) {
-      alert("Please select at least one subtask to mark as complete.");
-      return;
-    }
-
-    // Send to backend
-    const response = await fetch("{{ url_for('routes.mark_completed') }}", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ completed_ids: ids })
-    });
-
-    if (response.ok) {
-      // Apply visual feedback: strikethrough
-      checkboxes.forEach(cb => {
-        const label = cb.closest(".checkbox");
-        label.classList.add("completed");
-        cb.checked = false;
+          // Hide bulk actions bar
+          document.getElementById("bulkActions").style.display = "none";
+        } else {
+          alert("Failed to mark tasks as complete.");
+        }
       });
 
-      // Hide bulk actions bar
-      document.getElementById("bulkActions").style.display = "none";
-    } else {
-      alert("Failed to mark tasks as complete.");
-    }
+
+        // Delete selected form handler
+        document.getElementById("deleteSelectedForm").addEventListener("submit", function (e) {
+          const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']:checked");
+          const ids = Array.from(checkboxes).map(cb => cb.closest(".checkbox").getAttribute("data-subtask-id"));
+
+          if (ids.length === 0) {
+            e.preventDefault();
+            alert("Please select at least one subtask to delete.");
+            return;
+          }
+
+          if (!confirm("Are you sure you want to delete selected subtasks?")) {
+            e.preventDefault();
+            return;
+          }
+
+          document.getElementById("deleteTaskIds").value = ids.join(",");
+        });
+
+        // Category dropdown functionality
+        const categoryLabel = document.getElementById("categoryLabel");
+        const categoryMenu = document.getElementById("categoryMenu");
+
+        categoryLabel.addEventListener("click", function () {
+          categoryMenu.style.display = categoryMenu.style.display === "block" ? "none" : "block";
+        });
+
+        categoryMenu.addEventListener("click", function (event) {
+          const selectedColor = event.target.getAttribute("data-color");
+          if (selectedColor) {
+            categoryLabel.textContent = "";
+            categoryLabel.style.backgroundColor = selectedColor;
+            categoryMenu.style.display = "none";
+          }
+        });
+
+        document.addEventListener("click", function (event) {
+          if (!categoryLabel.contains(event.target) && !categoryMenu.contains(event.target)) {
+            categoryMenu.style.display = "none";
+          }
+        });
+
+        // Description save functionality
+        const descriptionBox = document.getElementById("descriptionBox");
+        const saveButton = document.getElementById("saveDescriptionBtn");
+        let originalDescription = descriptionBox.value.trim();
+
+        descriptionBox.addEventListener("input", function () {
+          const currentText = descriptionBox.value.trim();
+          if (currentText !== originalDescription) {
+            saveButton.classList.add("active");
+            saveButton.disabled = false;
+          } else {
+            saveButton.classList.remove("active");
+            saveButton.disabled = true;
+          }
+        });
+
+        saveButton.addEventListener("click", async function () {
+          const newDescription = descriptionBox.value.trim();
+          const response = await fetch(`/api/tasks/${taskId}/description`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ description: newDescription })
+          });
+
+          if (response.ok) {
+            originalDescription = newDescription;
+            saveButton.classList.remove("active");
+            saveButton.disabled = true;
+          } else {
+            alert("Failed to update description.");
+          }
+        });
+
+        // 1. Select all pen icons
+        const editButtons = document.querySelectorAll('.edit-btn');
+
+        editButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // 2. Get the ID from the data attribute we added to the HTML
+                const subtaskId = btn.getAttribute('data-id');
+                
+                // 3. Ask the user for the new title
+                const currentTitle = btn.closest('.searchable-item').querySelector('span').innerText;
+                const newTitle = prompt("Edit Subtask Title:", currentTitle);
+
+                // 4. If they didn't hit cancel and the text isn't empty...
+                if (newTitle && newTitle.trim() !== "") {
+                    
+                    // 5. Call our API route
+                    fetch(`/edit_subtask/${subtaskId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ title: newTitle })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Refresh page to show the update, or update the DOM manually
+                            window.location.reload();
+                        } else {
+                            alert("Something went wrong while saving.");
+                        }
+                    })
+                    .catch(err => console.error("Error:", err));
+                }
+            });
+        });
+
+        //Epanding Input field for adding subtasks
+      const expandBtn = document.getElementById("expandInputBtn");
+      const inputField = document.getElementById("subtaskInput");
+      const addBtn = document.getElementById("addSubtaskBtn");
+
+      expandBtn.addEventListener("click", () => {
+      inputField.classList.toggle("expanded");
+      inputField.classList.toggle("collapsed");
+      
+      if (inputField.classList.contains("expanded")) {
+        inputField.focus();
+      }
+      });
+
+      addBtn.addEventListener("click", () => {
+        const value = inputField.value.trim();
+        if (value === "") {
+          alert("Subtask cannot be empty!");
+          return;
+        }
+
+        // Add your subtask-adding logic here
+        console.log("Subtask added:", value);
+
+        inputField.value = "";
+        inputField.classList.remove("expanded");
+        inputField.classList.add("collapsed");
+      });
+
+
   });
-
-
-    // Delete selected form handler
-    document.getElementById("deleteSelectedForm").addEventListener("submit", function (e) {
-      const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']:checked");
-      const ids = Array.from(checkboxes).map(cb => cb.closest(".checkbox").getAttribute("data-subtask-id"));
-
-      if (ids.length === 0) {
-        e.preventDefault();
-        alert("Please select at least one subtask to delete.");
-        return;
-      }
-
-      if (!confirm("Are you sure you want to delete selected subtasks?")) {
-        e.preventDefault();
-        return;
-      }
-
-      document.getElementById("deleteTaskIds").value = ids.join(",");
-    });
-
-    // Category dropdown functionality
-    const categoryLabel = document.getElementById("categoryLabel");
-    const categoryMenu = document.getElementById("categoryMenu");
-
-    categoryLabel.addEventListener("click", function () {
-      categoryMenu.style.display = categoryMenu.style.display === "block" ? "none" : "block";
-    });
-
-    categoryMenu.addEventListener("click", function (event) {
-      const selectedColor = event.target.getAttribute("data-color");
-      if (selectedColor) {
-        categoryLabel.textContent = "";
-        categoryLabel.style.backgroundColor = selectedColor;
-        categoryMenu.style.display = "none";
-      }
-    });
-
-    document.addEventListener("click", function (event) {
-      if (!categoryLabel.contains(event.target) && !categoryMenu.contains(event.target)) {
-        categoryMenu.style.display = "none";
-      }
-    });
-
-    // Description save functionality
-    const descriptionBox = document.getElementById("descriptionBox");
-    const saveButton = document.getElementById("saveDescriptionBtn");
-    let originalDescription = descriptionBox.value.trim();
-
-    descriptionBox.addEventListener("input", function () {
-      const currentText = descriptionBox.value.trim();
-      if (currentText !== originalDescription) {
-        saveButton.classList.add("active");
-        saveButton.disabled = false;
-      } else {
-        saveButton.classList.remove("active");
-        saveButton.disabled = true;
-      }
-    });
-
-    saveButton.addEventListener("click", async function () {
-      const newDescription = descriptionBox.value.trim();
-      const response = await fetch(`/api/tasks/${taskId}/description`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description: newDescription })
-      });
-
-      if (response.ok) {
-        originalDescription = newDescription;
-        saveButton.classList.remove("active");
-        saveButton.disabled = true;
-      } else {
-        alert("Failed to update description.");
-      }
-    });
-
-    const expandBtn = document.getElementById("expandInputBtn");
-const inputField = document.getElementById("subtaskInput");
-const addBtn = document.getElementById("addSubtaskBtn");
-
-expandBtn.addEventListener("click", () => {
-  inputField.classList.toggle("expanded");
-  inputField.classList.toggle("collapsed");
-  inputField.focus();
-});
-
-addBtn.addEventListener("click", () => {
-  const value = inputField.value.trim();
-  if (value === "") {
-    alert("Subtask cannot be empty!");
-    return;
-  }
-
-  // Add your subtask-adding logic here
-  console.log("Subtask added:", value);
-
-  inputField.value = "";
-  inputField.classList.remove("expanded");
-  inputField.classList.add("collapsed");
-});
-
-
-});
 </script>
 {% endblock %}
