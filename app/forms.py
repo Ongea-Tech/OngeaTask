@@ -21,7 +21,7 @@ class TaskForm(FlaskForm):
     description = TextAreaField('Description', validators=[Optional(), Length(min=2, max=2000, message="Description cannot exceed 2000 characters.")], filters=[lambda x: x.strip() if x else x])
     submit = SubmitField('Create Task')
 
-class SignupForm(FlaskForm):
+class SignUpForm(FlaskForm):
     username = StringField('Username*', validators=[DataRequired(message="Username is required."), Length(min=2, max=50, message="Username must be between 2 and 50 characters.")], filters=[lambda x: x.strip() if x else x])
     first_name = StringField('First Name*', validators=[DataRequired(message="First name is required."), Length(min=2, max=50, message="First name must be between 2 and 50 characters.")], filters=[lambda x: x.strip() if x else x])
     last_name = StringField('Last Name*', validators=[DataRequired(message="Last name is required."), Length(min=2, max=50, message="Last name must be between 2 and 50 characters.")], filters=[lambda x: x.strip() if x else x])

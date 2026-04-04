@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app import db
 from app.models import User
 from itsdangerous import URLSafeTimedSerializer
