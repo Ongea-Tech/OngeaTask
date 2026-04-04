@@ -32,7 +32,7 @@ export default defineConfig({
 
   webServer: {
     command: 'flask run',
-    url: 'http://127.0.0.1:5000',
+    url: 'http://127.0.0.1:5001',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
