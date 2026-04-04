@@ -44,7 +44,8 @@ def create_app():
     MAIL_PASSWORD=os.getenv("MAIL_PASSWORD")
     
 )
-
+    
+    mail.init_app(app)
 
     app.register_blueprint(routes)
     app.register_blueprint(api)

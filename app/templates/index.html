@@ -92,21 +92,43 @@
             class="absolute top-3 right-4 text-gray-500 text-2xl cursor-pointer hover:text-red-500">&times;</span>
 
           <form id="createTaskForm" method="POST" action="{{ url_for('routes.create_task') }}" class="space-y-5">
+            {{ form.hidden_tag() }}
+
             <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Create New Task</h2>
+
             <div>
-            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Task Name (required):</label>
-            <input type="text" id="name" name="name" required
-              class="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 focus:ring-[#4379EE] focus:border-[#4379EE]" />
+              {{ form.title.label(class_="block text-sm font-medium text-gray-700 mb-1") }}
+              {{ form.title(
+              class_="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 focus:ring-[#4379EE]
+              focus:border-[#4379EE]"
+              ) }}
+
+              {% if form.title.errors %}
+              {% for err in form.title.errors %}
+              <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+              {% endfor %}
+              {% endif %}
             </div>
+
             <div>
-            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description:</label>
-            <textarea id="description" name="description"
-              class="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 resize-none focus:ring-[#4379EE] focus:border-[#4379EE] pb-3 "></textarea>
+              {{ form.description.label(class_="block text-sm font-medium text-gray-700 mb-1") }}
+              {{ form.description(
+              class_="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 resize-none
+              focus:ring-[#4379EE] focus:border-[#4379EE] pb-3",
+              rows="4"
+              ) }}
+
+              {% if form.description.errors %}
+              {% for err in form.description.errors %}
+              <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+              {% endfor %}
+              {% endif %}
             </div>
-              <div>
-              <button type="submit"
-                class="w-full bg-[#4379EE] rounded-lg py-3 hover:bg-blue-600 transition font-medium text-white bottom-2">Create
-                Task</button>
+
+            <div>
+              {{ form.submit(
+              class_="w-full bg-[#4379EE] rounded-lg py-3 hover:bg-blue-600 transition font-medium text-white bottom-2"
+              ) }}
             </div>
           </form>
         </div>
@@ -115,18 +137,21 @@
       <div id="bulk-actions" class="flex items-center space-x-4 mb-4 hidden">
         <form id="markCompletedForm" method="POST" action="{{ url_for('routes.mark_completed') }}">
           <input type="hidden" name="completed_ids" id="completedTaskIds">
-          <button type="submit"
-          class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
-          >Mark as Completed</button>
+          <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">Mark
+            as Completed</button>
 
         </form>
 
         <form id="moveToTrashForm" method="POST" action="{{ url_for('routes.move_to_trash') }}">
-          <input type="hidden" name="trash_ids" id="trashTaskIds">
-          <button type="submit"
-          class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
-          >🗑️ Move to Trash</button>
+          {{ trash_form.hidden_tag() }}
+
+          {{ trash_form.trash_ids(id="trashTaskIds") }}
+
+          {{ trash_form.submit(
+          class_="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+          ) }}
         </form>
+
       </div>
 
       <div class="space-y-4" id="taskList">

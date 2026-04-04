@@ -1,14 +1,13 @@
 from datetime import date, timedelta
-from flask import flash, render_template, request, redirect, url_for
-from flask import Blueprint
+from flask import flash, render_template, request, redirect, url_for, Blueprint
 from flask_login import current_user, login_required
 from app.models import Task, User, Subtask
 from . import db, login_manager
+from app.forms import TaskForm, MoveToTrashForm
 
 routes = Blueprint('routes', __name__)
 
 @routes.route('/')
-@login_required
 @login_required
 def index():
     active_tasks = Task.query.filter(
@@ -18,8 +17,8 @@ def index():
             Task.deleted == False
         )
     ).all()
-
-    return render_template('index.html', tasks=active_tasks)
+    taskform = TaskForm()
+    return render_template('index.html', tasks=active_tasks, form=taskform, trash_form=MoveToTrashForm())
 
 
 @routes.route('/login', methods=['GET', 'POST'])
@@ -52,7 +51,6 @@ def logout():
 
 @routes.route('/tasks', methods=['GET'])
 @login_required
-@login_required
 def tasks():
     active_tasks = Task.get_active_tasks(current_user.id)
     active_tasks = Task.get_active_tasks(current_user.id)
@@ -61,37 +59,29 @@ def tasks():
 
 @routes.route('/<int:task_id>')
 @login_required
-@login_required
 def show_task(task_id):
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     return render_template('individual-task.html', task=task)
 
 @routes.route('/create_task', methods=['GET', 'POST'])
 @login_required
-@login_required
 def create_task():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        description = request.form.get('description')
+    form = TaskForm()
+    if form.validate_on_submit():
+    
+        title = form.title.data
+        description = form.description.data or None
 
-        if not name:
-            flash("Task name is required", "error")
-            return redirect(url_for('routes.create_task'))
-
-        new_task = Task(title=name, description=description, completed=False, user_id=current_user.id)
-        new_task = Task(title=name, description=description, completed=False, user_id=current_user.id)
+        new_task = Task(title=title, description=description, completed=False, user_id=current_user.id)
         db.session.add(new_task)
         db.session.commit()
+        flash('Task created successfully!', 'success')
+        return redirect(url_for('routes.individual', task_id=new_task.id))
+    return render_template('index.html', form=form)
 
-        flash("Task created successfully", "success")
-        return redirect(url_for('routes.show_task', task_id=new_task.id))
-
-    return render_template('index.html')
 @routes.route('/individual-task/<int:task_id>')
 @login_required
-@login_required
 def individual(task_id):
-    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     return render_template('individual-task.html', task=task)
 
@@ -107,7 +97,6 @@ def edit_subtask(subtask_id):
     return {"message": "Content cannot be empty"}, 400
 
 @routes.route('/complete/<int:task_id>', methods=['POST'])
-@login_required
 @login_required
 def mark_completed_single(task_id):
     try:
@@ -131,6 +120,7 @@ def mark_completed_single(task_id):
 @routes.route('/trash_single/<int:task_id>', methods=['POST'])
 @login_required
 def move_to_trash_single(task_id):
+    trashform = MoveToTrashForm()    
     try:
         task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
         task.deleted = True
@@ -144,7 +134,7 @@ def move_to_trash_single(task_id):
     except Exception as e:
         db.session.rollback()
         flash("Error moving task to trash", "error")
-        return redirect(url_for('routes.index'))
+        return redirect(url_for('routes.index'), trash_form=trashform)
 
 @routes.route('/mark-completed', methods=['POST'])
 @login_required
@@ -301,6 +291,7 @@ def delete_tasks_permanently():
 @routes.route('/move-to-trash', methods=['POST'])
 @login_required
 def move_to_trash():
+    trashform = MoveToTrashForm()
     try:
         ids = request.form.get('trash_ids', '')
         if ids:
@@ -311,7 +302,7 @@ def move_to_trash():
                     task.move_to_trash()
             db.session.commit()
             flash(f"Tasks moved to trash successfully", "success")
-        return redirect(url_for('routes.index'))
+        return redirect(url_for('routes.index'), trash_form=trashform)
     except Exception as e:
         db.session.rollback()
         print(f"Error moving tasks to trash: {str(e)}")
