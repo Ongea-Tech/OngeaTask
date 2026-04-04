@@ -12,6 +12,7 @@ def ping():
 
 @api.route('/api/tasks', methods=['GET'])
 @login_required
+@login_required
 def get_active_tasks():
     tasks = Task.query.filter_by(user_id=current_user.id, completed=False, deleted=False).all()  # ✅ Only ongoing tasks
     result = []
@@ -117,7 +118,10 @@ def mark_completed():
     completed_ids = data.get('completed_ids', [])
 
     for subtask_id in completed_ids:
-        subtask = Subtask.query.get(int(subtask_id))
+        subtask = Subtask.query.join(Task).filter(
+            Subtask.id == int(subtask_id),
+            Task.user_id == current_user.id
+        ).first()
         if subtask:
             subtask.completed = True
 

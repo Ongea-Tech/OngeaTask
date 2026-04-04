@@ -5,6 +5,7 @@ from flask_login import UserMixin
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     completed = db.Column(db.Boolean, default=False)
@@ -69,11 +70,14 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
     def to_dict(self):
         return {
             "id": self.id,
-            "title": self.title,
-            "completed": self.completed
+            "username": self.username,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email
         }
 
 class Profile(db.Model):

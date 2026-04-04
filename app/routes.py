@@ -107,7 +107,7 @@ def mark_completed_single(task_id):
 @login_required
 def move_to_trash_single(task_id):
     try:
-        task = Task.query.get_or_404(task_id)
+        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
         task.deleted = True
         task.deleted_date = date.today()
         task.completed = False
@@ -128,7 +128,7 @@ def mark_completed():
     if ids:
         task_ids = [int(tid) for tid in ids.split(',')]
         for task_id in task_ids:
-            task = Task.query.get(task_id)
+            task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
             if task:
                 task.mark_as_completed()
                
@@ -142,12 +142,14 @@ def history():
     yesterday = today - timedelta(days=1)
 
     today_tasks = Task.query.filter(
+        Task.user_id == current_user.id,
         Task.completed == True,
         Task.deleted == False,
         Task.completed_date == today
     ).all()
 
     yesterday_tasks = Task.query.filter(
+        Task.user_id == current_user.id,
         Task.completed == True,
         Task.deleted == False,
         Task.completed_date == yesterday
@@ -217,11 +219,13 @@ def trash():
     yesterday = today - timedelta(days=1)
 
     today_deleted = Task.query.filter(
+        Task.user_id == current_user.id,
         Task.deleted == True,
         Task.deleted_date == today
     ).all()
 
     yesterday_deleted = Task.query.filter(
+        Task.user_id == current_user.id,
         Task.deleted == True,
         Task.deleted_date == yesterday
     ).all()
@@ -277,7 +281,7 @@ def move_to_trash():
         if ids:
             task_ids = [int(tid) for tid in ids.split(',')]
             for task_id in task_ids:
-                task = Task.query.get(task_id)
+                task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
                 if task:
                     task.move_to_trash()
             db.session.commit()
@@ -297,7 +301,10 @@ def delete_selected():
 
     if ids:
         from app.models import Subtask
-        Subtask.query.filter(Subtask.id.in_(ids)).delete(synchronize_session=False)
+        Subtask.query.join(Task).filter(
+            Subtask.id.in_(ids),
+            Task.user_id == current_user.id
+        ).delete(synchronize_session=False)
         db.session.commit()
 
     return redirect(request.referrer or url_for('routes.index'))
