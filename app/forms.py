@@ -8,7 +8,7 @@ class ForgotPasswordForm(FlaskForm):
     submit = SubmitField("Submit")
 
 class LogInForm(FlaskForm):
-    username = StringField("Username", validators=[DataRequired(message="User name is required")], filters=[lambda x: x.strip() if x else x])
+    username = StringField("username", validators=[DataRequired(message="User name is required")], filters=[lambda x: x.strip() if x else x])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Log In')
 

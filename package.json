@@ -5,8 +5,8 @@
   "scripts": {
     "build:css": "postcss ./app/static/styles.css -o ./app/static/dist/output.css",
     "dev:css": "postcss ./app/static/styles.css -o ./app/static/dist/output.css -w",
-    "flask": "flask --app run.py run --debug --port=5001",
-    "serve": "browser-sync start --proxy http://localhost:5001 --files 'app/templates/**/*.html, app/static/dist/output.css, app/**/*.py' --ignore 'app/static/src/**/*' --no-open --port 3000 --reload-delay 150 --no-ui"
+    "flask": "flask --app run.py run --debug --port=5000",
+    "serve": "browser-sync start --proxy http://localhost:5000 --files 'app/templates/**/*.html, app/static/dist/output.css, app/**/*.py' --ignore 'app/static/src/**/*' --no-open --port 3000 --reload-delay 150 --no-ui"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.14",
