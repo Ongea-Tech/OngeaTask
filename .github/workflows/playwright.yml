@@ -13,6 +13,7 @@ jobs:
     env:
       CI: true
       FLASK_APP: run.py
+      SQLALCHEMY_DATABASE_URI: sqlite:///test.db
 
     steps:
       - name: Checkout repository
