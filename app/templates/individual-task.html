@@ -1,53 +1,30 @@
 {% extends "index.html" %} {% block content %}
 
-<div class="taskContainer max-w-full" data-task-id="{{ task.id }}">
-  <a href="{{ url_for('routes.index') }}">
-    <i class="fa-solid fa-arrow-left"></i>
-  </a>
+<div class="taskContainer" data-task-id="{{ task.id }}">
+  <a href="{{ url_for('routes.index') }}"
+    ><i class="fa-solid fa-arrow-left"></i
+  ></a>
 
-  <!-- Title -->
-  <div class="title flex justify-between mb-[13px] w-full">
-    <h2 class="font-bold mt-4 text-2xl">{{ task.title }}</h2>
-
-    <!-- Category Dropdown -->
-    <div class="category-dropdown relative inline-block">
+  <div class="title">
+    <h2>{{ task.title }}</h2>
+    <div class="category-dropdown">
       <label class="category" id="categoryLabel">Select Category</label>
-      <div
-        class="dropdown-menu hidden absolute bg-white border border-[#ccc] mt-[5px] py-[5px] z-10 rounded-[4px] shadow-[0_2px_5px_rgba(0,0,0,0.1)]"
-        id="categoryMenu"
-      >
-        <div
-          class="dropdown-option flex items-center gap-[8px] px-[12px] py-[6px] cursor-pointer"
-          data-color="red"
-        >
-          <span
-            class="color-circle inline-block w-[12px] h-[12px] rounded-full bg-red-500"
-          ></span>
-          High
+      <div class="dropdown-menu" id="categoryMenu">
+        <div class="dropdown-option" data-color="red">
+          <span class="color-circle" style="background-color: red"></span> High
         </div>
-        <div
-          class="dropdown-option flex items-center gap-[8px] px-[12px] py-[6px] cursor-pointer"
-          data-color="grey"
-        >
-          <span
-            class="color-circle inline-block w-[12px] h-[12px] rounded-full bg-gray-500"
-          ></span>
+        <div class="dropdown-option" data-color="grey">
+          <span class="color-circle" style="background-color: grey"></span>
           Medium
         </div>
-        <div
-          class="dropdown-option flex items-center gap-[8px] px-[12px] py-[6px] cursor-pointer"
-          data-color="green"
-        >
-          <span
-            class="color-circle inline-block w-[12px] h-[12px] rounded-full bg-[#4caf50]"
-          ></span>
+        <div class="dropdown-option" data-color="green">
+          <span class="color-circle" style="background-color: #4caf50"></span>
           Low
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Description -->
   <div class="description">
     <textarea
       id="descriptionBox"
@@ -81,15 +58,10 @@
       id="markCompletedForm"
       method="POST"
       action="{{ url_for('routes.mark_completed') }}"
-      class="inline"
     >
       <input type="hidden" name="completed_ids" id="completedTaskIds" />
       <div>
-        <button
-          id="markCompleteBtn"
-          class="markComplete px-[10px] py-[5px] bg-green-600 text-white rounded-[4px] text-[0.9rem] cursor-pointer"
-          type="submit"
-        >
+        <button id="markCompleteBtn" class="markComplete" type="submit">
           Mark as Completed
         </button>
       </div>
@@ -99,21 +71,15 @@
       id="deleteSelectedForm"
       method="POST"
       action="{{ url_for('routes.delete_selected') }}"
-      class="inline"
     >
       <input type="hidden" name="delete_ids" id="deleteTaskIds" />
-      <button
-        type="submit"
-        id="deleteSelectedBtn"
-        class="deleteSelected px-[10px] py-[6px] bg-red-600 text-white rounded-[4px] text-[0.9rem] cursor-pointer flex items-center gap-[5px]"
-      >
+      <button type="submit" id="deleteSelectedBtn" class="deleteSelected">
         🗑️ Delete Selected
       </button>
     </form>
   </div>
 
-  <!-- Subtasks -->
-  <div class="subtasks mt-[15px]" id="subtaskList">
+  <div class="subtasks" id="subtaskList">
     {% for subtask in task.subtasks %}
     <label
       class="checkbox flex items-center justify-between border border-gray-200 rounded-[4px] p-[8px] mb-[5px]"
@@ -142,6 +108,7 @@
         </a>
       </div>
     </label>
+    <br />
     {% endfor %}
   </div>
 
@@ -171,13 +138,15 @@
       Add
     </button>
   </div>
+
+
 </div>
 
 <script>
-      document.addEventListener("DOMContentLoaded", function () {
-      const taskId = {{ task.id }};
-      const subtaskList = document.getElementById("subtaskList");
-      let allChecked = false;
+           document.addEventListener("DOMContentLoaded", function () {
+    const taskId = {{ task.id }};
+    const subtaskList = document.getElementById("subtaskList");
+    let allChecked = false;
 
         // Add subtask
         document.getElementById("addSubtaskBtn").addEventListener("click", async function () {

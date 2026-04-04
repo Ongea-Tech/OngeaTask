@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.models import Task, Subtask
 from . import db
-from flask_login import current_user, login_required
+from flask_login import login_required, current_user
 
 api = Blueprint('api', __name__)
 
@@ -42,6 +42,7 @@ def get_task(task_id):
     
 @api.route('/api/tasks', methods=['POST'])
 @login_required
+@login_required
 def create_task():
     """Creates a new task"""
     data = request.get_json()
@@ -58,6 +59,7 @@ def create_task():
 
 
 @api.route('/api/tasks/<int:task_id>/subtasks', methods=['POST'])
+@login_required
 @login_required
 def add_subtask(task_id):
     """Adds a new subtask to a specific task"""
@@ -77,6 +79,7 @@ def add_subtask(task_id):
 
 @api.route('/api/tasks/<int:task_id>', methods=['DELETE'])
 @login_required
+@login_required
 def delete_task(task_id):
     """Deletes a specific task"""
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
@@ -86,6 +89,7 @@ def delete_task(task_id):
 
 
 @api.route('/api/tasks/<int:task_id>', methods=['PUT'])
+@login_required
 @login_required
 def update_task(task_id):
     """Updates old records of a specific task with data provided by the user"""
@@ -100,6 +104,7 @@ def update_task(task_id):
 
 @api.route('/api/subtasks/<int:subtask_id>', methods=['DELETE'])
 @login_required
+@login_required
 def delete_subtask(subtask_id):
     """Deletes a subtask from the database"""
     subtask = Subtask.query.join(Task).filter(Subtask.id == subtask_id, Task.user_id == current_user.id).first_or_404()
@@ -110,11 +115,13 @@ def delete_subtask(subtask_id):
 
 @api.route('/api/tasks/<int:task_id>/description', methods=['PATCH'])
 @login_required
+@login_required
 def update_description(task_id):
     """Updates the old description with new description provided by the user"""
     data = request.get_json()
     new_description = data.get('description', '').strip()
 
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     task.description = new_description
     db.session.commit()
@@ -124,13 +131,17 @@ def update_description(task_id):
 
 @api.route('/mark_completed', methods=['POST'])
 @login_required
+@login_required
 def mark_completed():
     """Marks subtasks as completed"""
     data = request.get_json()
     completed_ids = data.get('completed_ids', [])
 
     for subtask_id in completed_ids:
-        subtask = Subtask.query.join(Task).filter(Subtask.id == int(subtask_id),Task.user_id == current_user.id).first()
+        subtask = Subtask.query.join(Task).filter(
+            Subtask.id == int(subtask_id),
+            Task.user_id == current_user.id
+        ).first()
         if subtask:
             subtask.completed = True
 

@@ -1,13 +1,13 @@
 from datetime import date
-from app import db   
-from app import db 
-from flask_login import UserMixin  
+from app import db    
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 class Task(db.Model):
     __tablename__ = "task"
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
@@ -38,6 +38,7 @@ class Task(db.Model):
 
     @classmethod
     def get_active_tasks(cls, user_id):
+    def get_active_tasks(cls, user_id):
         """active tasks not completed and not deleted"""
         return cls.query.filter_by(user_id = user_id, completed=False, deleted=False).all()
 
@@ -58,8 +59,6 @@ class Subtask(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
 
 class User(db.Model, UserMixin):
-    __tablename__ = "user"
-
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     first_name = db.Column(db.String(80), nullable=False)
@@ -74,9 +73,14 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
     def to_dict(self):
         return {
             "id": self.id,
+            "username": self.username,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email
             "username": self.username,
             "first_name": self.first_name,
             "last_name": self.last_name,
