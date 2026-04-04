@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>500-Something Went Wrong</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
+
+        body {
+            text-align: center;           
+            font-family: "Nunito Sans", sans-serif;
+            font-size: 20px;
+            padding: 50px;
+            background-color: #e2e4e8;
+        }
+
+        .video-container {
+            display: flex;         
+            text-align: right;
+            justify-content: flex-start; 
+            padding-left: 40px;   
+        }
+
+        video {
+            height: 600px;
+            max-width: 800px;       /* Keeps the pencil from becoming too giant */
+            width: 100%;
+            border-radius: 15px;
+        }
+
+        .content-container{
+            flex: 1;
+            text-align: left;
+            margin-left: 100px;
+        }
+        
+        .main-container{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn {
+            width: 90px;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3F7EE8;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .btn:hover{
+            background-color: #3F7EE8;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+</style>
+</head>
+<body>
+    <h1>500</h1>
+    <h2>Something Went Wrong</h2>
+
+    <div class="main-container">
+        <div class="video-container">
+            <video autoplay loop muted playsinline>
+                <source src="{{ url_for('static', filename='videos/500_animation.mp4') }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="content-container">
+            <p>{{ message or "An unexpected error occurred." }}</p>
+
+            {% if request_id %}
+                <p>Reference ID: {{ request_id }}</p>
+            {% endif %}
+
+            <a href="{{ url_for('routes.index') }}" class="btn">Return Home</a>
+        </div>
+    </div>
+</body>
+</html>

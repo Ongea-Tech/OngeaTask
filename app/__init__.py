@@ -5,7 +5,7 @@ import os
 from flask_mail import Mail 
 from flask_login import LoginManager
 from flask_migrate import Migrate
-from flask_migrate import Migrate
+from .error_handlers import register_error_handlers
 
 login_manager = LoginManager()
 db = SQLAlchemy()
@@ -27,7 +27,8 @@ def create_app():
     migrate.init_app(app, db)
     mail.init_app(app)
     login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'  # Redirect to login page if not authenticated
+    login_manager.login_view = "auth.login" 
+    register_error_handlers(app)
     
 
     # Import routes after app is created to avoid circular import
