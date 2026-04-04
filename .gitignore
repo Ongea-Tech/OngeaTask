@@ -91,3 +91,9 @@ docker-data/
 # ---- DO NOT ignore database migrations ----
 # Keep Alembic/Flask-Migrate scripts in version control:
 # migrations/  <-- should be committed (so do NOT ignore)
+
+# Playwright
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
