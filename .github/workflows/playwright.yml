@@ -13,7 +13,13 @@ jobs:
     env:
       CI: true
       FLASK_APP: run.py
-      SQLALCHEMY_DATABASE_URI: sqlite:///test.db
+      DATABASE_URL: sqlite:///test.db
+      SECRET_KEY: test-secret-key
+      MAIL_SERVER: smtp.example.com
+      MAIL_PORT: 587
+      MAIL_USE_TLS: True
+      MAIL_USERNAME: test@example.com
+      MAIL_PASSWORD: testpassword
 
     steps:
       - name: Checkout repository
