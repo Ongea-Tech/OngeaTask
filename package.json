@@ -9,8 +9,10 @@
     "serve": "browser-sync start --proxy http://localhost:5001 --files 'app/templates/**/*.html, app/static/dist/output.css, app/**/*.py' --ignore 'app/static/src/**/*' --no-open --port 3000 --reload-delay 150 --no-ui"
   },
   "devDependencies": {
+    "@playwright/test": "^1.40.1",
     "@tailwindcss/cli": "^4.1.14",
     "@tailwindcss/postcss": "^4.1.16",
+    "@types/node": "^25.5.2",
     "autoprefixer": "^10.4.21",
     "browser-sync": "^3.0.4",
     "postcss": "^8.5.6",
