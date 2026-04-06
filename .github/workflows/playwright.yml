@@ -54,9 +54,31 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
-        
+
       - name: Run database migrations
         run: flask db upgrade
+
+      - name: Seed test user
+        run: |
+          python - <<'PY'
+          from app import create_app, db
+          from app.models import User
+          from werkzeug.security import generate_password_hash
+
+          app = create_app()
+          with app.app_context():
+              existing = User.query.filter_by(username='testuser').first()
+              if not existing:
+                  user = User(
+                      username='testuser',
+                      first_name='Test',
+                      last_name='User',
+                      email='test@example.com',
+                      password_hash=generate_password_hash('password123')
+                  )
+                  db.session.add(user)
+                  db.session.commit()
+          PY
 
       - name: Run Playwright tests
         run: npx playwright test
