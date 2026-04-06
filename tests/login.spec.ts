@@ -19,7 +19,7 @@ test('user can create task successfully', async ({ page }) => {
   await page.getByRole('button', {name:'log in'}).click();
 
   await page.click('button:has-text("Add New Task")');
-  await page.fill('input[name="name"]', 'Task 1');
+  await page.getByLabel('name').fill('Task 1');
   await page.getByLabel('description').fill('Task 1 description');
   await page.click('button[type="submit"]');
   
