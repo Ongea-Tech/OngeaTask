@@ -21,7 +21,7 @@ test('user can create task successfully', async ({ page }) => {
   await page.click('button:has-text("Add New Task")');
   await page.getByLabel('Title').fill('Task 1');
   await page.getByLabel('Description').fill('Task 1 description');
-  await page.click('button[type="submit"]');
+  await page.getByRole('button', {name:'submit'}).click();
   
   await expect(page.getByRole('heading', {name:'Task 1'})).toBeVisible();
 });
