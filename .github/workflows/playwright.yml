@@ -54,6 +54,9 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
+        
+      - name: Run database migrations
+        run: flask db upgrade
 
       - name: Run Playwright tests
         run: npx playwright test
