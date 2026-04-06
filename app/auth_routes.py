@@ -75,11 +75,12 @@ def login():
             flash('Logged in successfully.')
             return redirect(url_for('routes.index'))
         else:
-            flash('Invalid credentials')
+            flash('Invalid credentials', 'error')
 
     return render_template('login.html', form=form)
 
 @auth.route('/forgot-password', methods=['GET', 'POST'])
+@login_required
 def forgot_password():
     """Sends link to existing user for password reset"""
     form = ForgotPasswordForm()
@@ -105,6 +106,7 @@ def forgot_password():
 
 
 @auth.route('/reset-password/<token>', methods=['GET', 'POST'])
+@login_required
 def reset_password(token):
     """Enables password reset"""
     email = confirm_token(token)  

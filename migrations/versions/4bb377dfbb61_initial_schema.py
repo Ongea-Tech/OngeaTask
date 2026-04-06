@@ -1,8 +1,8 @@
-"""Link tasks to users
+"""initial schema
 
-Revision ID: 706b7a1ca5fa
+Revision ID: 4bb377dfbb61
 Revises: 
-Create Date: 2026-02-28 08:39:04.769864
+Create Date: 2026-04-04 07:46:38.390946
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '706b7a1ca5fa'
+revision = '4bb377dfbb61'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -25,17 +25,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
-    op.create_table('profile',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('username', sa.String(length=100), nullable=False),
-    sa.Column('first_name', sa.String(length=100), nullable=False),
-    sa.Column('last_name', sa.String(length=100), nullable=False),
-    sa.Column('email', sa.String(length=120), nullable=False),
-    sa.Column('image_filename', sa.String(length=200), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email'),
-    sa.UniqueConstraint('username')
-    )
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=80), nullable=False),
@@ -43,6 +32,7 @@ def upgrade():
     sa.Column('last_name', sa.String(length=80), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('password_hash', sa.String(length=512), nullable=False),
+    sa.Column('image_filename', sa.String(length=200), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
@@ -64,6 +54,7 @@ def upgrade():
     sa.Column('completed_date', sa.Date(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.Column('deleted_date', sa.Date(), nullable=True),
+    sa.Column('priority', sa.String(length=20), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -84,6 +75,5 @@ def downgrade():
     op.drop_table('task')
     op.drop_table('category_item')
     op.drop_table('user')
-    op.drop_table('profile')
     op.drop_table('category')
     # ### end Alembic commands ###

@@ -1003,7 +1003,31 @@ body {
   width: 450px;
 }
 .search-bar input[type="text"] {
+.search-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #EAEAEA;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 0.3rem 0.8rem;
+  width: 450px;
+}
+.search-bar input[type="text"] {
   border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  flex: 1;
+  padding-left: 1rem;
+}
+.search-icon {
+  font-size: 16px;
+  color: #555;
   background: transparent;
   outline: none;
   font-size: 14px;
@@ -1052,6 +1076,80 @@ body {
 }
 .dropdown:hover .dropdown-content {
   display: block;
+}
+#save-profile {
+  background-color: #3F7EE8;
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.2s ease;
+  margin-top: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 92%;
+  display: block;
+}
+#save-profile:hover {
+  background-color: #3F7EE8;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+#save-profile:active {
+  transform: scale(0.98);
+}
+#profile-popup {
+  display: none;
+}
+.popup-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.popup-box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  min-width: 250px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+}
+.popup-box p {
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #333;
+}
+.popup-box button {
+  background: #ccc;
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.popup-box button:hover {
+  background: #bbb;
+}
+.popup-box.success p {
+  color: #2e7d32;
+  font-weight: 500;
+  border-left: 4px solid #4caf50;
+  padding-left: 8px;
+}
+.popup-box.error p {
+  color: #c62828;
+  font-weight: 500;
+  border-left: 4px solid #e53935;
+  padding-left: 8px;
 }
 #save-profile {
   background-color: #3F7EE8;
@@ -1223,6 +1321,9 @@ body {
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .dropdown-menu {
   display: none;
@@ -1321,6 +1422,9 @@ body {
 .deleteIcon {
   color: red;
 }
+.deleteIcon {
+  color: red;
+}
 .subtasks {
   align-items: center;
   position: relative;
@@ -1406,6 +1510,18 @@ body {
   height: 28px;
   width: 95px;
   background-color: #FFFFFF;
+}
+.addSubtask button {
+  background-color: #3F7EE8;
+  color: white;
+  height: 100%;
+  width: 100px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 0 12px;
+  border: none;
+  cursor: pointer;
 }
 .addSubtask button {
   background-color: #3F7EE8;
@@ -1572,6 +1688,7 @@ input[type="checkbox"] {
   border-radius: 12px;
   text-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   height: 300px;
   width: 600px;
 }
@@ -1628,6 +1745,7 @@ input[type="checkbox"] {
   margin-bottom: 1.5rem;
   margin-left: 195px;
   position: relative;
+  position: relative;
 }
 .profile-image {
   width: 100px;
@@ -1636,8 +1754,16 @@ input[type="checkbox"] {
   border: 2px solid #ddd;
   -o-object-fit: cover;
      object-fit: cover;
+  -o-object-fit: cover;
+     object-fit: cover;
   margin-top: -40px;
   margin-bottom: 5px;
+  cursor: pointer;
+  transition: opacity 0.3s ease, border-color 0.3s ease;
+}
+.profile-image:hover {
+  opacity: 0.85;
+  border-color: #aaa;
   cursor: pointer;
   transition: opacity 0.3s ease, border-color 0.3s ease;
 }
@@ -1653,17 +1779,22 @@ input[type="checkbox"] {
   gap: 1.2rem;
   padding: 0 1rem;
   align-items: center;
+  align-items: center;
 }
 .form-group {
   width: 92%;
+  width: 92%;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   justify-content: flex-start;
   gap: 1rem;
 }
 .form-group label {
   flex: 0 0 120px;
+  flex: 0 0 120px;
   font-weight: 500;
+  text-align: left;
   text-align: left;
 }
 .input-wrapper {
@@ -1675,18 +1806,28 @@ input[type="checkbox"] {
   background: white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   padding-right: 8px;
+  width: 100%;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding-right: 8px;
 }
 .input-wrapper input {
+  flex: 1;
+  padding: 10px;
   flex: 1;
   padding: 10px;
   border: none;
   outline: none;
   background: white;
   font-size: 16px;
+  background: white;
+  font-size: 16px;
 }
 .edit-icon {
   padding: 8px;
+  padding: 8px;
   cursor: pointer;
+  font-size: 18px;
   font-size: 18px;
 }
 .edit-icon:hover {
@@ -1748,6 +1889,11 @@ input[type="checkbox"] {
   font-size: 28px;
   font-weight: bold;
 }
+.close {
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
 .category-input {
   flex: 1;
   padding: 0.6rem 1rem;
@@ -1766,6 +1912,8 @@ input[type="checkbox"] {
   cursor: pointer;
   flex-shrink: 0;
   transition: color 0.2s ease;
+  font-size: 18px;
+  padding: 8px;
   font-size: 18px;
   padding: 8px;
 }
@@ -2185,6 +2333,10 @@ input[type="checkbox"] {
   syntax: "*";
   inherits: false;
 }
+@property --tw-leading {
+  syntax: "*";
+  inherits: false;
+}
 @property --tw-font-weight {
   syntax: "*";
   inherits: false;
@@ -2255,6 +2407,7 @@ input[type="checkbox"] {
   initial-value: 0 0 #0000;
 }
 @property --tw-backdrop-blur {
+@property --tw-backdrop-blur {
   syntax: "*";
   inherits: false;
 }
@@ -2300,6 +2453,7 @@ input[type="checkbox"] {
       --tw-space-y-reverse: 0;
       --tw-space-x-reverse: 0;
       --tw-border-style: solid;
+      --tw-leading: initial;
       --tw-leading: initial;
       --tw-font-weight: initial;
       --tw-shadow: 0 0 #0000;

@@ -1,13 +1,13 @@
 from datetime import date
-from app import db   
-from app import db 
-from flask_login import UserMixin  
+from app import db    
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 class Task(db.Model):
     __tablename__ = "task"
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
@@ -16,7 +16,7 @@ class Task(db.Model):
     deleted = db.Column(db.Boolean, default=False)
     deleted_date = db.Column(db.Date, nullable=True)
     subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
-   
+    priority = db.Column(db.String(20), nullable=False, default="Medium")
 
     def mark_as_completed(self):
         """Mark task as completed and update database"""
@@ -24,7 +24,6 @@ class Task(db.Model):
         self.completed_date = date.today()
         self.deleted = False
         self.deleted_date = None
-        db.session.commit()
         db.session.refresh(self)
 
     def move_to_trash(self):
@@ -33,7 +32,6 @@ class Task(db.Model):
         self.deleted_date = date.today()
         self.completed = False
         self.completed_date = None
-        db.session.commit()
         db.session.refresh(self)
 
     @classmethod
@@ -58,14 +56,13 @@ class Subtask(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
 
 class User(db.Model, UserMixin):
-    __tablename__ = "user"
-
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     first_name = db.Column(db.String(80), nullable=False)
     last_name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(512), nullable=False)
+    image_filename = db.Column(db.String(200), default='images/profile.png')
 
     tasks = db.relationship('Task', backref='user', lazy=True)
 
@@ -74,6 +71,7 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
     def to_dict(self):
         return {
             "id": self.id,
@@ -82,17 +80,8 @@ class User(db.Model, UserMixin):
             "last_name": self.last_name,
             "email": self.email
         }
-
-class Profile(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
-    first_name = db.Column(db.String(100), nullable=False)
-    last_name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    image_filename = db.Column(db.String(200), default='images/profile.png')
-
     def __repr__(self):
-        return f"<Profile {self.username}>"
+        return f"<User {self.username}>"
     
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
