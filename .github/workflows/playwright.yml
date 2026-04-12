@@ -46,9 +46,13 @@ jobs:
         env:
           FLASK_APP: app
           FLASK_ENV: development
-          APP_EMAIL: ${{ secrets.APP_EMAIL }}
-          APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
-
+          APP_EMAIL: ${{ secrets.Kawira }}
+          APP_PASSWORD: ${{ secrets.@Ongeatask09 }}
+          SECRET_KEY: ${{ secrets.secret-for-wtf-csrf-protection }}
+          MAIL_PORT: ${{ secrets.587 }}
+          MAIL_SERVER: ${{ secrets.smtp.gmail.com }}
+          MAIL_USERNAME: ${{ secrets.tarus2659@gmail.com }}
+          MAIL_PASSWORD: ${{ secrets.mddrwbxsyqvfokux }}
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()
