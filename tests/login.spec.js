@@ -12,10 +12,10 @@ test('Full app flow - login to logout', async ({ page }) => {
 
 //login
   await page.goto('http://127.0.0.1:5000/auth/login');
-  await page.getByRole('textbox', { name: 'username' }).fill('Kawira');
-  await page.getByRole('textbox', { name: 'Password' }).fill('@Ongeatask09');
+  await page.getByRole('textbox', { name: 'username' }).fill(process.env.APP_USERNAME ?? 'Kawira');
+  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.APP_PASSWORD ?? '@Ongeatask09');
   await page.getByRole('button', { name: 'Log In' }).click();
-  await page.waitForURL('http://127.0.0.1:5000/');
+  await page.waitForURL('http://127.0.0.1:5000/', { timeout: 30000 });
   await expect(page.getByRole('link', { name: ' Tasks' })).toBeVisible();
 
 //creating a task
