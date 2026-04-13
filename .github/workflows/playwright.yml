@@ -37,22 +37,26 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start Flask and run tests
+      - name: Start Flask
         run: |
           source venv/bin/activate
           flask run &
           sleep 5
-          npx playwright test
         env:
           FLASK_APP: app
           FLASK_ENV: development
-          APP_EMAIL: ${{ secrets.Kawira }}
-          APP_PASSWORD: ${{ secrets.@Ongeatask09 }}
-          SECRET_KEY: ${{ secrets.secret-for-wtf-csrf-protection }}
-          MAIL_PORT: ${{ secrets.587 }}
-          MAIL_SERVER: ${{ secrets.smtp.gmail.com }}
-          MAIL_USERNAME: ${{ secrets.tarus2659@gmail.com }}
-          MAIL_PASSWORD: ${{ secrets.mddrwbxsyqvfokux }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          APP_EMAIL: ${{ secrets.APP_EMAIL }}
+          APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()
