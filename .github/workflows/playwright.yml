@@ -41,7 +41,8 @@ jobs:
         run: |
           source venv/bin/activate
           flask run &
-          sleep 5
+          sleep 8
+          curl -f http://127.0.0.1:5000/auth/login || echo "Flask not ready"
         env:
           FLASK_APP: app
           FLASK_ENV: development
@@ -54,7 +55,7 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test
         env:
-          APP_EMAIL: ${{ secrets.APP_EMAIL }}
+          APP_USERNAME: ${{ secrets.APP_USERNAME }}
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
 
       - name: Upload Playwright report
@@ -64,3 +65,11 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
+      - name: Upload test results on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 7
