@@ -196,6 +196,7 @@
                 const taskCard = document.createElement('div');
                 taskCard.className = 'flex items-stretch justify-between bg-white rounded-lg shadow-md hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-400 cursor-pointer h-24 mb-4';
                 taskCard.style.cursor = 'pointer';
+                taskCard.setAttribute("data-testid", "task-card");
                 taskCard.addEventListener('click', () => {
                   window.location.href = `/${task.id}`;
                 });
@@ -204,6 +205,7 @@
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'ml-4 w-5 h-5 accent-[#4379EE] rounded cursor-pointer self-center';
+                checkbox.setAttribute("data-testid", "task-checkbox");
                 checkbox.dataset.taskId = task.id;
 
                 // Prevent checkbox click from triggering card navigation
