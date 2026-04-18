@@ -47,23 +47,6 @@ body {
   width: auto;
 }
 
-/* 
-.logo { 
-  font-size: 1.5rem;
-  font-weight:bold;
-  font-family: sans-serif;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.logo .ongea {
-  color: #3f7ee8;
-}
-
-.logo .task {
-  color: #000000;
-} */
-
 .search-container {
   flex: 1;
   display: flex;
@@ -449,17 +432,11 @@ body {
     opacity: 0.6;
 }
 
-.subtasks{
-
-}
-
-.deleteIcon {
-  color: red;
-}
 
 .subtasks {
   align-items: center;
   position: relative;
+  padding-bottom: 200px;
 }
 
 .subtasks .checkbox {
@@ -477,58 +454,83 @@ body {
 
 }
 
+.checkbox .icon1 {
+  position: absolute;
+  right: 4rem;
+  pointer-events: auto;
+  cursor: pointer;
+  color: red;
+
+}
+
 .checkbox .icon {
   position: absolute;
   right: 1rem;
   pointer-events: auto;
   cursor: pointer;
   color: red;
+
 }
 .addSubtask {
-  position: fixed;
+  position: absolute;
   bottom: 30px;
   right: 30px;
+  justify-content: flex-end;
   display: flex;
   align-items: center;
-  gap: 8px;
-  z-index: 999;
+  gap: 0;
+  z-index: 100;
   background-color: #f2f2f2;
   height: 50px;
   border-radius: 20px 20px 20px 20px;
+}
+
+#subtaskInput{
+  transition: all 0.3s ease-in-out;
+  border-radius: 5px;
+  outline: none;
 }
 
 #subtaskInput.collapsed {
   width: 0;
   opacity: 0;
   padding: 0;
+  margin: 0;
   border: none;
   transition: width 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
 }
 
 #subtaskInput.expanded {
-  width: 600px;
+  width: 500px;
   opacity: 1;
-  padding-left: 10px;
+  margin-left: 10px;
   height: 40px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 15px;
   transition: width 0.3s ease, opacity 0.3s ease;
+  
 }
 
-.expand-btn {
+#expandInputBtn {
   height: 100%;
   width: 40px;
   font-size: 20px;
-  background-color: #f2f2f2;
+  background-color: #f0f0f0;
   border: none;
+  align-items: center;
+  justify-content: center;
   border-radius: 0 0 0 10px;
   cursor: pointer;
+  flex-shrink: 0;
+  margin-right: 70px;
 }
 
 
 .inputButton {
   height: 100%;
-  width: 60px;
+  width: 70px;
+  min-width: 70px;
   background-color: #3F7EE8;
   color: white;
   font-size: 20px;
@@ -538,6 +540,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .check-all{
@@ -558,7 +561,7 @@ body {
   background-color: #3F7EE8;
   color: white;
   height: 100%;
-  width: 100px;
+  width: 2px;
   position: absolute;
   right: 0;
   top: 0;
