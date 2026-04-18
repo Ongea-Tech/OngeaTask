@@ -40,9 +40,10 @@ jobs:
       - name: Start Flask
         run: |
           source venv/bin/activate
-          flask run &
-          sleep 8
-          curl -f http://127.0.0.1:5000/auth/login || echo "Flask not ready"
+          flask run & 
+          FLASK_PID=$!
+          sleep 10
+          curl -f http://127.0.0.1:5000/auth/login || exit 1
         env:
           FLASK_APP: app
           FLASK_ENV: development
