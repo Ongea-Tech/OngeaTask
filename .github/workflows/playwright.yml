@@ -5,6 +5,7 @@ on:
     branches: [main, Kawira/playwright]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -37,13 +38,14 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start Flask
+      - name: Start Flask and run Playwright tests
         run: |
           source venv/bin/activate
-          flask run & 
-          FLASK_PID=$!
+          flask run &
+          echo "Waiting for Flask to start..."
           sleep 10
-          curl -f http://127.0.0.1:5000/auth/login || exit 1
+          curl -f http://127.0.0.1:5000/auth/login && echo "Flask is ready"
+          npx playwright test
         env:
           FLASK_APP: app
           FLASK_ENV: development
@@ -52,10 +54,6 @@ jobs:
           MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-
-      - name: Run Playwright tests
-        run: npx playwright test
-        env:
           APP_USERNAME: ${{ secrets.APP_USERNAME }}
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
 
