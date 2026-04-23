@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.models import Task, Subtask
+from app.models import Task, Subtask, Category
 from . import db
 from flask_login import login_required, current_user
 
@@ -147,6 +147,100 @@ def mark_completed():
 
     db.session.commit()
     return jsonify({"success": True})
+#Category Endpoints
+@api.route('/api/categories', methods=['GET'])
+@login_required
+def get_categories():
+    """Gets all categories for the current user"""
+    categories = Category.query.all()
+    result = []
+    for cat in categories:
+        result.append({
+            'id': cat.id,
+            'name': cat.name,
+            'color': cat.color
+        })
+    return jsonify(result)
 
 
+@api.route('/api/categories', methods=['POST'])
+@login_required
+def create_category():
+    """Creates a new category"""
+    data = request.get_json()
+    name = data.get('name')
 
+    if not name:
+        return jsonify({'error': 'Category name is required'}), 400
+
+    # Frontend may send a color, fallback to blue if missing
+    color = data.get('color', '#3b82f6')
+
+    new_category = Category(name=name, color=color)
+    db.session.add(new_category)
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Category created',
+        'category_id': new_category.id,
+        'name': new_category.name,
+        'color': new_category.color
+    }), 201
+@api.route('/api/categories/<int:category_id>', methods=['PUT'])
+@login_required
+def update_category(category_id):
+    """Updates a specific category (name & color)"""
+    category = Category.query.filter_by(id=category_id).first_or_404()
+    data = request.get_json()
+    
+    # Only update fields if they were sent
+    if 'name' in data:
+        category.name = data['name']
+    if 'color' in data:
+        category.color = data['color']
+        
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Category updated',
+        'id': category.id,
+        'name': category.name,
+        'color': category.color
+    }), 200
+@api.route('/api/categories/<int:category_id>', methods=['DELETE'])
+@login_required
+def delete_category(category_id):
+    """Deletes a specific category"""
+    category = Category.query.filter_by(id=category_id).first_or_404()
+    
+    db.session.delete(category)
+    db.session.commit()
+    
+    return jsonify({'message': 'Category deleted'}), 200
+@api.route('/api/categories/delete-multiple', methods=['POST'])
+@login_required
+def delete_multiple_categories():
+    """Deletes multiple categories at once"""
+    data = request.get_json()
+    category_ids = data.get('ids', [])
+
+    if not category_ids or not isinstance(category_ids, list):
+        return jsonify({'error': 'List of category IDs is required'}), 400
+
+    # Convert string IDs (from dataset.id) to integers for SQLAlchemy
+    category_ids = [int(i) for i in category_ids]
+
+    # Fetch categories that actually exist in the DB
+    categories = Category.query.filter(Category.id.in_(category_ids)).all()
+    deleted_ids = [cat.id for cat in categories]
+
+    # Delete them in one transaction
+    for cat in categories:
+        db.session.delete(cat)
+    db.session.commit()
+
+    # ✅ Return exactly what the frontend checks: `deleted_ids`
+    return jsonify({
+        'deleted_ids': deleted_ids,
+        'message': f'{len(deleted_ids)} categories deleted successfully'
+    }), 200
