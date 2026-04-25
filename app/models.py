@@ -63,6 +63,8 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(512), nullable=False)
     image_filename = db.Column(db.String(200), default='images/profile.png')
+    motivation_message = db.Column(db.Text, nullable=True)
+    motivation_date = db.Column(db.Date, nullable=True)
 
     tasks = db.relationship('Task', backref='user', lazy=True)
 

@@ -1,11 +1,16 @@
 from datetime import date, timedelta
-from flask import flash, render_template, request, redirect, url_for, Blueprint
+from flask import flash, render_template, request, redirect, url_for, Blueprint, jsonify
 from flask_login import current_user, login_required
 from app.models import Task, User, Subtask
 from . import db, login_manager
 from app.forms import TaskForm, MoveToTrashForm
 from werkzeug.exceptions import Forbidden
 from flask import abort
+from openai import OpenAI
+import os
+
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 routes = Blueprint('routes', __name__)
 
@@ -31,9 +36,69 @@ def index():
             Task.deleted == False
         )
     ).all()
-    taskform = TaskForm()
-    return render_template('index.html', tasks=active_tasks, form=taskform, trash_form=MoveToTrashForm())
+    
+    
+    task_titles = [task.title for task in active_tasks]
 
+    if task_titles:
+        formatted_tasks = "\n".join([f"- {title}" for title in task_titles])
+
+        prompt = f"""
+        You are a motivational coach.
+
+        A user has the following tasks:
+        {formatted_tasks}
+
+        Generate a short, encouraging motivational message (max 2 sentences).
+        Make it personal, warm, and energizing.
+        Avoid clichés.
+        """
+
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            message = response.choices[0].message.content.strip()
+
+        except Exception:
+            message = "Start where you are. Do what you can. Keep going."
+
+    else:
+        message = "You have no tasks today. Take time to reset and plan ahead."
+
+    # Always store latest message
+    current_user.motivation_message = message
+    current_user.motivation_date = date.today()
+    db.session.commit()
+
+    taskform = TaskForm()
+    return render_template(
+        'index.html',
+        tasks=active_tasks,
+        form=TaskForm(),
+        trash_form=MoveToTrashForm(),
+        motivation_message=message
+    )
+
+def get_motivation_message():
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "user",
+                "content": "Give me one short, powerful motivational message for someone managing their daily tasks. Max 20 words. No quotes, no labels, just the message."
+            }
+        ],
+        max_tokens=50
+    )
+    return response.choices[0].message.content.strip()
+
+@routes.route('/regenerate-motivation')
+def regenerate_motivation():
+    message = get_motivation_message()  
+    return jsonify({"message": message})
 
 @routes.route('/login', methods=['GET', 'POST'])
 def login():
