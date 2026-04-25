@@ -63,6 +63,8 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(512), nullable=False)
     image_filename = db.Column(db.String(200), default='images/profile.png')
+    motivation_message = db.Column(db.Text, nullable=True)
+    motivation_date = db.Column(db.Date, nullable=True)
 
     tasks = db.relationship('Task', backref='user', lazy=True)
 
@@ -78,7 +80,10 @@ class User(db.Model, UserMixin):
             "username": self.username,
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "email": self.email
+            "email": self.email,
+            "image_filename": self.image_filename,
+            "motivation_message": self.motivation_message,
+            "motivation_date": self.motivation_date.isoformat() if self.motivation_date else None
         }
     def __repr__(self):
         return f"<User {self.username}>"
