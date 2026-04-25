@@ -26,6 +26,49 @@ test('user can create task successfully', async ({ page }) => {
   await expect(page.getByRole('heading', {name:'Task 1'})).toBeVisible();
 });
 
+test('user can mark a task as completed', async ({ page }) => {
+  await page.goto('/');
+
+  await page.fill('input[name="username"]', 'testuser');
+  await page.fill('input[name="password"]', 'password123');
+  await page.getByRole('button', {name:'log in'}).click();
+  
+  await page.locator('input[type="checkbox"]').first().check();
+
+  await page.getByRole('button', { name: 'Mark as Completed' }).click();
+
+  await expect(page).toHaveURL('/');
+  await expect(page.getByText('Task marked as completed')).toBeVisible(); 
+});
+
+test('user can move a task to trash', async ({ page }) => {
+  await page.goto('/');
+
+  await page.fill('input[name="username"]', 'testuser');
+  await page.fill('input[name="password"]', 'password123');
+  await page.getByRole('button', {name:'log in'}).click();
+
+  await page.locator('input[type="checkbox"]').first().check();
+
+  await page.getByRole('button', { name: 'Move To Trash' }).click(); 
+
+  await expect(page).toHaveURL('/');
+  await expect(page.getByText('Task moved to trash')).toBeVisible(); 
+});
+
+test('user can delete a task to permanently', async ({ page }) => {
+  await page.goto('/');
+  
+  await page.fill('input[name="username"]', 'testuser');
+  await page.fill('input[name="password"]', 'password123');
+  await page.getByRole('button', {name:'log in'}).click();
+
+  await page.getByRole('link', {name:'Trash'}).click();
+  await expect(page).toHaveURL('/trash');
+  await expect(page.getByRole('heading', {name:'Trash'})).toBeVisible();
+  
+});
+
 test('user can create a description successfully', async ({ page }) => {
   await page.goto('/'); 
 

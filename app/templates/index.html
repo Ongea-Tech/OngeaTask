@@ -84,6 +84,9 @@
           Add New Task
         </button>
       </div>
+      <div class="bg-blue-100 p-4 rounded-lg mb-4">
+        <p>{{ motivation_message }}</p>
+      </div>
 
       <div id="taskModal"
         class="fixed inset-0 backdrop-blur-sm bg-opacity-60 flex justify-center items-center hidden z-50">
@@ -217,6 +220,13 @@
               tasks.forEach(task => {
                 const completedSubtasks = task.subtasks.filter(st => st.completed).length;
                 const totalSubtasks = task.subtasks.length;
+                const colorClasses = {
+                    red: { text: 'text-red-700', bg: 'bg-red-100', bar: 'bg-red-500' },
+                    green: { text: 'text-green-700', bg: 'bg-green-100', bar: 'bg-green-500' },
+                    grey: { text: 'text-gray-700', bg: 'bg-gray-100', bar: 'bg-gray-400' }
+                };
+                // 2. Get the style (fallback to grey if null)
+                const style = colorClasses[task.category_color] || colorClasses.grey;
 
                 // Create the card
                 const taskCard = document.createElement('div');
@@ -285,9 +295,6 @@
       {% endblock %}
     </main>
   </div>
-  {% block scripts %}
-  <script src="{{ url_for('static', filename='individual-task.js') }}"></script>
-  {% endblock %}
 
 </body>
 {% with messages = get_flashed_messages() %}
