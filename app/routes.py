@@ -6,6 +6,10 @@ from . import db, login_manager
 from app.forms import TaskForm, MoveToTrashForm
 from werkzeug.exceptions import Forbidden
 from flask import abort
+from openai import OpenAI
+import os
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 routes = Blueprint('routes', __name__)
 
@@ -31,9 +35,121 @@ def index():
             Task.deleted == False
         )
     ).all()
-    taskform = TaskForm()
-    return render_template('index.html', tasks=active_tasks, form=taskform, trash_form=MoveToTrashForm())
 
+    task_titles = [task.title for task in active_tasks]
+
+    # daily cache
+    if current_user.motivation_message and current_user.motivation_date == date.today():
+        message = current_user.motivation_message
+
+    else:
+        if len(task_titles) >= 8:
+            tone = "The user has many tasks and may feel overwhelmed. Use a calm, reassuring tone."
+        elif len(task_titles) == 1:
+            tone = "The user has one task. Use a focused, confident tone."
+        else:
+            tone = "Use a warm, balanced encouraging tone."
+
+        if task_titles:
+            formatted_tasks = "\n".join([f"- {title}" for title in task_titles])
+
+            prompt = f"""
+You are a motivational coach.
+
+The user's name is {current_user.first_name}.
+
+The user has the following tasks:
+{formatted_tasks}
+
+{tone}
+
+Generate a short, personal motivational message (max 2 sentences).
+Include the user's name naturally.
+Avoid clichés.
+"""
+
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4.1-mini",
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                message = response.choices[0].message.content.strip()
+
+            except Exception:
+                message = f"Start where you are, {current_user.first_name}. Keep going."
+
+        else:
+            message = f"{current_user.first_name}, you have no tasks today. Take time to reset and plan ahead."
+
+        current_user.motivation_message = message
+        current_user.motivation_date = date.today()
+        db.session.commit()
+
+    return render_template(
+        'index.html',
+        tasks=active_tasks,
+        form=TaskForm(),
+        trash_form=MoveToTrashForm(),
+        motivation_message=message
+    )
+
+@routes.route('/regenerate-motivation', methods=['POST'])
+@login_required
+def regenerate_motivation():
+    active_tasks = Task.query.filter(
+        db.and_(
+            Task.user_id == current_user.id,
+            Task.completed == False,
+            Task.deleted == False
+        )
+    ).all()
+
+    task_titles = [task.title for task in active_tasks]
+
+    if len(task_titles) >= 8:
+        tone = "The user has many tasks and may feel overwhelmed. Use a calm, reassuring tone."
+    elif len(task_titles) == 1:
+        tone = "The user has one task. Use a focused, confident tone."
+    else:
+        tone = "Use a warm, balanced encouraging tone."
+
+    if task_titles:
+        formatted_tasks = "\n".join([f"- {title}" for title in task_titles])
+
+        prompt = f"""
+You are a motivational coach.
+
+The user's name is {current_user.first_name}.
+
+The user has the following tasks:
+{formatted_tasks}
+
+{tone}
+
+Generate a short, personal motivational message (max 2 sentences).
+Include the user's name naturally.
+Avoid clichés.
+"""
+
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            message = response.choices[0].message.content.strip()
+
+        except Exception:
+            message = f"Keep going, {current_user.first_name}."
+
+    else:
+        message = f"{current_user.first_name}, you have no tasks today. Reset and plan ahead."
+
+    current_user.motivation_message = message
+    current_user.motivation_date = date.today()
+    db.session.commit()
+
+    flash("Motivation regenerated.", "success")
+    return redirect(url_for('routes.index'))
 
 @routes.route('/login', methods=['GET', 'POST'])
 def login():
@@ -168,6 +284,8 @@ def mark_completed():
                 task.mark_as_completed()
                
         db.session.commit()
+        flash("Task(s) marked as completed.", "success")
+
     return redirect(url_for('routes.index'))
 
 @routes.route('/history')
@@ -311,25 +429,24 @@ def delete_tasks_permanently():
 @routes.route('/move-to-trash', methods=['POST'])
 @login_required
 def move_to_trash():
-    trashform = MoveToTrashForm()
-    try:
-        ids = request.form.get('trash_ids', '')
+    ids = request.form.get('trash_ids', '')
 
-        if ids:
-            task_ids = [int(tid) for tid in ids.split(',')]
-            for task_id in task_ids:
-                task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
-                if task:
-                    task.move_to_trash()
+    if ids:
+        task_ids = [int(tid) for tid in ids.split(',')]
 
-            db.session.commit()
-            flash(f"Tasks moved to trash successfully", "success")
-        return redirect(url_for('routes.index'), trash_form=trashform)
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error moving tasks to trash: {str(e)}")
-        flash("Error moving tasks to trash", "error")
-        return redirect(url_for('routes.index'))
+        for task_id in task_ids:
+            task = Task.query.filter_by(
+                id=task_id,
+                user_id=current_user.id
+            ).first()
+
+            if task:
+                task.move_to_trash()
+
+        db.session.commit()
+        flash("Task(s) moved to trash.", "success")
+
+    return redirect(url_for('routes.index'))
     
 @routes.route('/delete-selected', methods=['POST'])
 @login_required

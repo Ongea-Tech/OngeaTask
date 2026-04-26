@@ -85,6 +85,15 @@
         </button>
       </div>
 
+      <div class="bg-blue-100 p-4 rounded-lg mb-4">
+       <p>{{ motivation_message }}</p>
+      </div>
+      <form method="POST" action="{{ url_for('routes.regenerate_motivation') }}" class="mt-4 mb-4">
+        <button type="submit" class="bg-[#4379EE] text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+          Re-generate Motivation
+        </button>
+      </form>
+
       <div id="taskModal"
         class="fixed inset-0 backdrop-blur-sm bg-opacity-60 flex justify-center items-center hidden z-50">
         <div class="bg-white rounded-2xl shadow-2xl px-10 py-8 w-full max-w-md relative border-2 border-gray-200">
@@ -143,13 +152,11 @@
         </form>
 
         <form id="moveToTrashForm" method="POST" action="{{ url_for('routes.move_to_trash') }}">
-          {{ trash_form.hidden_tag() }}
-
-          {{ trash_form.trash_ids(id="trashTaskIds") }}
-
-          {{ trash_form.submit(
-          class_="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
-          ) }}
+          <input type="hidden" name="trash_ids" id="trashTaskIds">
+        
+          <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+            Move to Trash
+          </button>
         </form>
 
       </div>
@@ -166,7 +173,7 @@
         });
 
         // Optional: Hide dropdown when clicking outside
-        window.addEventListener("click", () => {
+        window.addEventListener("click", (e) => {
           if (!profileBtn.contains(e.target)) {
             dropdownMenu.classList.add("hidden");
           }
@@ -270,36 +277,35 @@
               console.error('Error fetching tasks:', error);
             });
 
-          // Attach form submit handlers to pass selected task IDs
-          document.getElementById('markCompletedForm').addEventListener('submit', function () {
-            completedInput.value = Array.from(selectedTaskIds).join(',');
+           // Attach form submit handlers to pass selected task IDs
+            document
+              .getElementById("markCompletedForm")
+              .addEventListener("submit", function () {
+                completedInput.value = Array.from(selectedTaskIds).join(",");
+              });
+
+            document
+              .getElementById("moveToTrashForm")
+              .addEventListener("submit", function () {
+                trashInput.value = Array.from(selectedTaskIds).join(",");
+              });
           });
+        </script>
 
-          document.getElementById('moveToTrashForm').addEventListener('submit', function () {
-            trashInput.value = Array.from(selectedTaskIds).join(',');
-          });
-        });
-      </script>
-
-
-      {% endblock %}
-    </main>
-  </div>
-  {% block scripts %}
-  <script src="{{ url_for('static', filename='individual-task.js') }}"></script>
-  {% endblock %}
-
-</body>
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <div class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
-      {% for message in messages %}
-        <div class="bg-red-500 text-white px-4 py-2 rounded-md shadow mb-2 text-sm">
-          {{ message }}
-        </div>
-      {% endfor %}
+        {% endblock %}
+      </main>
     </div>
-  {% endif %}
-{% endwith %}
-
+    {% block scripts %}
+    <script src="{{ url_for('static', filename='individual-task.js') }}"></script>
+    {% endblock %}
+  </body>
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
+    {% for message in messages %}
+    <div class="bg-red-500 text-white px-4 py-2 rounded-md shadow mb-2 text-sm">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %} {% endwith %}
 </html>
