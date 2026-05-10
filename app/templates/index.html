@@ -258,6 +258,21 @@
                                 <p class="text-sm text-gray-500">${completedSubtasks}/${totalSubtasks} completed</p>
                             </div>
                         `;
+                       // Render category chips if task has categories
+if (task.categories && task.categories.length > 0) {
+  const chipsContainer = document.createElement('div');
+  chipsContainer.className = 'flex flex-wrap gap-1 mt-1';
+  
+  task.categories.forEach(cat => {
+    const chip = document.createElement('span');
+    chip.className = 'text-[10px] font-medium px-2 py-0.5 rounded-full text-white shadow-sm';
+    chip.style.backgroundColor = cat.color; // Uses the color from your Category model
+    chip.textContent = cat.name;
+    chipsContainer.appendChild(chip);
+  });
+  
+  taskInfo.appendChild(chipsContainer);
+} 
                 const priorityIndicator = document.createElement('div');
                 priorityIndicator.className = 'w-5 rounded-r-lg bg-green-400 ml-4'
                 taskCard.appendChild(checkbox);

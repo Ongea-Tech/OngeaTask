@@ -3,11 +3,17 @@ from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
+# NEW: Association table for Task <-> Category (Many-to-Many)
+task_categories = db.Table('task_categories',
+    db.Column('task_id', db.Integer, db.ForeignKey('task.id'), primary_key=True),
+    db.Column('category_id', db.Integer, db.ForeignKey('category.id'), primary_key=True)
+)
+
 class Task(db.Model):
     __tablename__ = "task"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    # FIXED: Removed duplicate user_id line
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
@@ -15,11 +21,14 @@ class Task(db.Model):
     completed_date = db.Column(db.Date, nullable=True)
     deleted = db.Column(db.Boolean, default=False)
     deleted_date = db.Column(db.Date, nullable=True)
-    subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
     priority = db.Column(db.String(20), nullable=False, default="Medium")
+    
+    #NEW: Link to categories
+    categories = db.relationship('Category', secondary=task_categories,
+                                 backref=db.backref('tasks', lazy=True))
+    subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
 
     def mark_as_completed(self):
-        """Mark task as completed and update database"""
         self.completed = True
         self.completed_date = date.today()
         self.deleted = False
@@ -27,7 +36,6 @@ class Task(db.Model):
         db.session.refresh(self)
 
     def move_to_trash(self):
-        """Move task to trash and update database"""
         self.deleted = True
         self.deleted_date = date.today()
         self.completed = False
@@ -36,19 +44,16 @@ class Task(db.Model):
 
     @classmethod
     def get_active_tasks(cls, user_id):
-        """active tasks not completed and not deleted"""
-        return cls.query.filter_by(user_id = user_id, completed=False, deleted=False).all()
+        return cls.query.filter_by(user_id=user_id, completed=False, deleted=False).all()
 
     @classmethod
     def get_completed_tasks(cls, user_id):
-        """completed tasks for a specific date"""
-        return cls.query.filter_by(user_id = user_id, completed=True, deleted=False).all()
+        return cls.query.filter_by(user_id=user_id, completed=True, deleted=False).all()
 
     @classmethod
     def get_deleted_tasks(cls, user_id):
-        """deleted tasks"""
-        return cls.query.filter_by(user_id = user_id, deleted=True).all()
-    
+        return cls.query.filter_by(user_id=user_id, deleted=True).all()
+
 class Subtask(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -82,11 +87,11 @@ class User(db.Model, UserMixin):
         }
     def __repr__(self):
         return f"<User {self.username}>"
-    
+
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
-    color = db.Column(db.String(20), default='#cccccc')  # New field for urgency color
+    color = db.Column(db.String(20), default='#cccccc')
 
     def __repr__(self):
         return f"<Category {self.name}>"

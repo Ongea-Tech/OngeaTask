@@ -13,12 +13,15 @@ def get_active_tasks():
     result = []
     for task in tasks:
         subtasks = [{'id': st.id, 'title': st.title, 'completed': st.completed} for st in task.subtasks]
+        #Extract category data for the frontend
+        categories = [{'id': c.id, 'name': c.name, 'color': c.color} for c in task.categories]
         result.append({
             'id': task.id,
             'title': task.title,
             'description': task.description,
             'completed': task.completed,
-            'subtasks': subtasks
+            'subtasks': subtasks,
+            'categories': categories
         })
     return jsonify(result)
 
@@ -29,12 +32,15 @@ def get_task(task_id):
     """Gets a specific task"""
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     subtasks = [{'id': st.id, 'title': st.title, 'completed': st.completed} for st in task.subtasks]
+    #Extract category data for the frontend
+    categories = [{'id': c.id, 'name': c.name, 'color': c.color} for c in task.categories]
     return jsonify({
         'id': task.id,
         'title': task.title,
         'description': task.description,
         'completed': task.completed,
-        'subtasks': subtasks
+        'subtasks': subtasks,
+        'categories': categories
     })
 
 
