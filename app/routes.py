@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for, Blueprint
 from flask_login import current_user, login_required
-from app.models import Task, User, Subtask
+from app.models import Task, User, Subtask, Category 
 from . import db, login_manager
 from app.forms import TaskForm, MoveToTrashForm
 from werkzeug.exceptions import Forbidden
@@ -13,72 +13,82 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 routes = Blueprint('routes', __name__)
 
-@routes.route('/test-500')
-def test_500():
-    raise Exception("Testing my awesome new 500 animation!")
-
-@routes.route('/test-403')
-def test_403():
-    raise Forbidden("You don't have the secret pencil to enter here.")
-
-@routes.route('/test-401')
-def test_401():
-    abort(401)
-
 @routes.route('/')
 @login_required
 def index():
-    active_tasks = Task.query.filter(
-        db.and_(
-            Task.user_id == current_user.id,
-            Task.completed == False,
-            Task.deleted == False
-        )
-    ).all()
+    priority = request.args.get('priority')
+    status = request.args.get('status')
+    category_id = request.args.get('category')
+    date_filter = request.args.get('date')
+    today = date.today()
 
+    query = Task.query.filter(
+        Task.user_id == current_user.id,
+        Task.deleted == False
+    )
+
+    if priority:
+        query = query.filter(Task.priority == priority)
+
+    if category_id:
+        query = query.filter(Task.category_id == category_id)
+
+    if status == 'completed':
+        query = query.filter(Task.completed == True)
+    elif status == 'not_completed':
+        query = query.filter(Task.completed == False)
+    elif status == 'approaching':
+        query = query.filter(
+            Task.completed == False,
+            Task.due_date != None,
+            Task.due_date >= today,
+            Task.due_date <= today + timedelta(days=3)
+        )
+
+    if date_filter == 'today':
+        query = query.filter(Task.due_date == today)
+    elif date_filter == 'this_week':
+        query = query.filter(Task.due_date <= today + timedelta(days=7))
+    elif date_filter == 'overdue':
+        query = query.filter(Task.due_date < today, Task.completed == False)
+
+    active_tasks = query.all()
     task_titles = [task.title for task in active_tasks]
+    message = "You have no tasks today. Take time to reset and plan ahead."
 
     if task_titles:
         formatted_tasks = "\n".join([f"- {title}" for title in task_titles])
-
         prompt = f"""
         You are a motivational coach.
-
         A user has the following tasks:
         {formatted_tasks}
-
         Generate a short, encouraging motivational message (max 2 sentences).
         Make it personal, warm, and energizing.
         Avoid clichés.
         """
-
         try:
             response = client.chat.completions.create(
                 model="gpt-4.1-mini",
                 messages=[{"role": "user", "content": prompt}]
             )
-
             message = response.choices[0].message.content.strip()
-
         except Exception:
             message = "Start where you are. Do what you can. Keep going."
 
-    else:
-        message = "You have no tasks today. Take time to reset and plan ahead."
-
-    # Always store latest message
     current_user.motivation_message = message
     current_user.motivation_date = date.today()
     db.session.commit()
+
+    categories = Category.query.all()
 
     return render_template(
         'index.html',
         tasks=active_tasks,
         form=TaskForm(),
         trash_form=MoveToTrashForm(),
-        motivation_message=message
+        motivation_message=message,
+        categories=categories
     )
-
 
 @routes.route('/login', methods=['GET', 'POST'])
 def login():
@@ -127,7 +137,8 @@ def tasks():
 @login_required
 def show_task(task_id):
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
-    return render_template('individual-task.html', task=task)
+    form = TaskForm()
+    return render_template('individual-task.html', task=task, form=form)
 
 @routes.route('/create_task', methods=['GET', 'POST'])
 @login_required
@@ -141,19 +152,79 @@ def create_task():
         new_task = Task(title=title, description=description, completed=False, user_id=current_user.id)
         db.session.add(new_task)
         db.session.commit()
+
+        # Auto-generate subtasks
+        if form.auto_generate.data:
+            subtasks = generate_subtasks_with_ai(title, description)
+
+            for sub in subtasks:
+                db.session.add(Subtask(title=sub, task_id=new_task.id))
+
+            db.session.commit()
+
         flash('Task created successfully!', 'success')
+
         return redirect(url_for('routes.individual', task_id=new_task.id))
+    
     return render_template('index.html', form=form)
 
 @routes.route('/individual-task/<int:task_id>')
 @login_required
 def individual(task_id):
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
-    return render_template('individual-task.html', task=task)
+    form = TaskForm()
+    return render_template('individual-task.html', task=task, form=form)
+
+def generate_subtasks_with_ai(title, description=None):
+    prompt = f"""
+    You are a productivity assistant.
+
+    Break down the following task, with its description, into 5-7 clear, actionable subtasks.
+
+    Task Title: {title}
+    Task Description: {description or "No description provided"}
+
+    Rules:
+    - Each subtask should be short and specific
+    - Each should be something an individual can actually do
+    - Return as a simple list (no numbering, no extra text)
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        content = response.choices[0].message.content.strip()
+
+        # Convert response into list
+        subtasks = [line.strip("- ").strip() for line in content.split("\n") if line.strip()]
+
+        return subtasks
+
+    except Exception as e:
+        print("Subtask generation error:", str(e))
+        return []
+    
+@routes.route('/generate_subtasks/<int:task_id>', methods=['POST'])
+@login_required
+def generate_subtasks(task_id):
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
+
+    subtasks = generate_subtasks_with_ai(task.title, task.description)
+
+    for sub in subtasks:
+        db.session.add(Subtask(title=sub, task_id=task.id))
+
+    db.session.commit()
+
+    return {"message": "Subtasks generated successfully"}, 200
+
 
 @routes.route('/edit_subtask/<int:subtask_id>', methods=['POST'])
 def edit_subtask(subtask_id):
-    subtask = Subtask.query.get_or_404(id)
+    subtask = Subtask.query.get_or_404(subtask_id)
     new_title = request.json.get('title')
     
     if new_title:
@@ -214,6 +285,7 @@ def mark_completed():
                
         db.session.commit()
     return redirect(url_for('routes.index'))
+
 
 @routes.route('/history')
 @login_required

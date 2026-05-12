@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-
+from wtforms import BooleanField
 from wtforms import StringField, SubmitField, TextAreaField, PasswordField, BooleanField,  SelectField, DateField, HiddenField 
 from wtforms.validators import DataRequired, Email, Length,  Optional
 
@@ -20,6 +20,7 @@ class TaskForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(message= "Task title is required."), Length(min=2, max=100, message="Title must be between 2 and 100 characters.")], filters=[lambda x: x.strip() if x else x])
     description = TextAreaField('Description', validators=[Optional(), Length(min=2, max=2000, message="Description cannot exceed 2000 characters.")], filters=[lambda x: x.strip() if x else x])
     submit = SubmitField('Create Task')
+    auto_generate = BooleanField('Auto-generate subtasks')
 
 class SignUpForm(FlaskForm):
     username = StringField('Username*', validators=[DataRequired(message="Username is required."), Length(min=2, max=50, message="Username must be between 2 and 50 characters.")], filters=[lambda x: x.strip() if x else x])
