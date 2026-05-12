@@ -1,13 +1,14 @@
 from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for, Blueprint
 from flask_login import current_user, login_required
-from app.models import Task, User, Subtask
+from app.models import Category, Task, User, Subtask
 from . import db, login_manager
 from app.forms import TaskForm, MoveToTrashForm
 from werkzeug.exceptions import Forbidden
 from flask import abort
 from openai import OpenAI
 import os
+from app.models import Category
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -71,12 +72,15 @@ def index():
     current_user.motivation_date = date.today()
     db.session.commit()
 
+    categories = Category.query.all()
+
     return render_template(
         'index.html',
         tasks=active_tasks,
         form=TaskForm(),
         trash_form=MoveToTrashForm(),
-        motivation_message=message
+        motivation_message=message,
+        categories=categories
     )
 
 
