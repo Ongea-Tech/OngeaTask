@@ -53,6 +53,7 @@ def calculate_urgency_score(task):
     now = datetime.now(timezone.utc)
 
     if task.due_date:
+        task.due_date = task.due_date.replace(tzinfo=timezone.utc) if task.due_date.tzinfo is None else task.due_date
         time_until_due = task.due_date - now
         days_until_due = time_until_due.days
 
@@ -79,6 +80,7 @@ def get_task_nudge_message(task, user_id):
     now = datetime.now(timezone.utc)
 
     if task.due_date and task.due_date < now:
+        task.due_date = task.due_date.replace(tzinfo=timezone.utc) if task.due_date.tzinfo is None else task.due_date
         return f"'{task.title}' is overdue. This would be a good task to focus on next."
     if task.due_date and task.due_date.date() == now.date():
         return f"'{task.title}' is due today. Try making progress on it soon."
@@ -94,6 +96,7 @@ def should_nudge_task(task):
     now = datetime.now(timezone.utc)
 
     if task.last_nudged_at:
+        task.last_nudged_at = task.last_nudged_at.replace(tzinfo=timezone.utc) if task.last_nudged_at.tzinfo is None else task.last_nudged_at
         hours_since_last_nudge = (now - task.last_nudged_at).total_seconds()/3600
         if hours_since_last_nudge < 6:
             return False

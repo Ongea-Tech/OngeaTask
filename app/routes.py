@@ -151,7 +151,7 @@ def create_task():
         title = form.title.data
         description = form.description.data or None
 
-        new_task = Task(title=title, description=description, completed=False, user_id=current_user.id)
+        new_task = Task(title=title, description=description, completed=False, user_id=current_user.id, due_date=form.due_date.data, estimated_minutes=form.estimated_minutes.data, category_id=form.category_id.data if form.category_id.data else None)
         db.session.add(new_task)
         db.session.commit()
 

@@ -26,7 +26,7 @@ class Task(db.Model):
     def mark_as_completed(self):
         """Mark task as completed and update database"""
         self.completed = True
-        self.completed_at = date.today()
+        self.completed_at = datetime.now(timezone.utc)
         self.deleted = False
         self.deleted_date = None
         db.session.refresh(self)
@@ -109,7 +109,7 @@ class User(db.Model, UserMixin):
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
-    color = db.Column(db.String(20), default='#cccccc')  # New field for urgency color
+    color = db.Column(db.String(20), default='#cccccc')  
 
     def __repr__(self):
         return f"<Category {self.name}>"
