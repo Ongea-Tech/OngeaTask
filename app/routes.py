@@ -280,13 +280,11 @@ def generate_subtasks(task_id):
         user_id=current_user.id
     ).first_or_404()
 
-    # 1. Load what's already there into a set for comparison
     existing_titles = {
         subtask.title.strip().lower()
         for subtask in task.subtasks
     }
 
-    # 2. Get the new suggestions from the AI
     generated_subtasks = generate_subtasks_with_ai(task.title, task.description)
 
     added_count = 0
@@ -299,19 +297,16 @@ def generate_subtasks(task_id):
 
         normalized_title = clean_title.lower()
 
-        # 3. UNIQUE CHECK: If it exists in the DB OR was just added in this loop, skip it
         if normalized_title in existing_titles:
             skipped_count += 1
             continue
 
-        # 4. Add the new subtask and update the set immediately
         db.session.add(Subtask(title=clean_title, task_id=task.id))
         existing_titles.add(normalized_title)
         added_count += 1
 
     db.session.commit()
 
-    # 5. Specific feedback based on what happened
     if added_count == 0 and skipped_count > 0:
         return {"message": "Duplicate subtask(s) detected. Nothing new was added."}, 400
     
@@ -333,7 +328,7 @@ def edit_subtask(subtask_id):
     
     if new_title:
         subtask.title = new_title
-        db.session.commit() # This saves it permanently
+        db.session.commit()
         return {"message": "Success"}, 200
     return {"message": "Content cannot be empty"}, 400
 
@@ -555,17 +550,14 @@ def move_to_trash():
 @routes.route('/delete-selected', methods=['POST'])
 @login_required
 def delete_selected():
-    # 1. Handle JSON data (from your new fetch script)
     if request.is_json:
         data = request.get_json()
         ids = data.get('delete_ids', [])
-    # 2. Fallback for standard Form data
     else:
         ids_str = request.form.get('delete_ids', '')
         ids = [int(tid) for tid in ids_str.split(',') if tid.strip().isdigit()]
 
     if ids:
-        # Use a more stable delete method for subtasks
         subtasks_to_delete = Subtask.query.join(Task).filter(
             Subtask.id.in_(ids),
             Task.user_id == current_user.id
@@ -575,8 +567,7 @@ def delete_selected():
             db.session.delete(subtask)
             
         db.session.commit()
-        
-        # Return JSON if the request was JSON, otherwise redirect
+
         if request.is_json:
             return {"message": "Success"}, 200
 

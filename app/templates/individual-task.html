@@ -173,26 +173,23 @@
     const genBtn = document.getElementById("generateSubtasksBtn");
     let allChecked = false;
 
-    // Helper to manage AI button state (Assignment 3 & 4)
+    // Helper to manage AI button state
     function updateGenButtonState() {
       const items = subtaskList.querySelectorAll(".checkbox");
       const genMsg = document.getElementById("genBtnMessage"); // Get the message element
 
       if (items.length > 0) {
-        // Subtasks exist: Disable button and SHOW message
+        // Subtasks exist: Disable button and show message
         genBtn.disabled = true;
         genMsg.classList.remove("hidden");
       } else {
-        // No subtasks: Enable button and HIDE message
+        // No subtasks: Enable button and hide message
         genBtn.disabled = false;
         genMsg.classList.add("hidden");
       }
     }
 
-    // Initial check on load - this ensures the message is gone if button is blue
     updateGenButtonState();
-
-    // AI Generation Logic (Slide 9 & 11) [cite: 598, 654]
     genBtn.addEventListener("click", async () => {
       const confirmed = confirm("Generate subtasks using AI?");
       if (!confirmed) return;
@@ -203,7 +200,7 @@
 
       try {
         const response = await fetch(`/generate_subtasks/${taskId}`, {
-          method: "POST"
+          method: "POST",
         });
 
         const data = await response.json();
@@ -223,37 +220,40 @@
       }
     });
 
-    // Add subtask with Duplication Protection (Assignment 4)
-    document.getElementById("addSubtaskBtn").addEventListener("click", async function () {
-      const input = document.getElementById("subtaskInput");
-      const subtaskText = input.value.trim();
+    document
+      .getElementById("addSubtaskBtn")
+      .addEventListener("click", async function () {
+        const input = document.getElementById("subtaskInput");
+        const subtaskText = input.value.trim();
 
-      if (subtaskText === "") {
-        alert("Please enter a new item.");
-        return;
-      }
+        if (subtaskText === "") {
+          alert("Please enter a new item.");
+          return;
+        }
 
-      // Check for duplicates currently on the screen
-      const existingSubtasks = Array.from(subtaskList.querySelectorAll('p'))
-        .map(p => p.innerText.toLowerCase().trim());
+        const existingSubtasks = Array.from(
+          subtaskList.querySelectorAll("p"),
+        ).map((p) => p.innerText.toLowerCase().trim());
 
-      if (existingSubtasks.includes(subtaskText.toLowerCase())) {
-        alert("Duplicate subtask detected! This item is already in your list.");
-        return;
-      }
+        if (existingSubtasks.includes(subtaskText.toLowerCase())) {
+          alert(
+            "Duplicate subtask detected! This item is already in your list.",
+          );
+          return;
+        }
 
-      const response = await fetch(`/api/tasks/${taskId}/subtasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: subtaskText })
+        const response = await fetch(`/api/tasks/${taskId}/subtasks`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: subtaskText }),
+        });
+
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert("Failed to add subtask.");
+        }
       });
-
-      if (response.ok) {
-        location.reload();
-      } else {
-        alert("Failed to add subtask.");
-      }
-    });
 
     // Delete subtask with AI Button Polish
     subtaskList.addEventListener("click", async function (event) {
@@ -263,7 +263,9 @@
         const subtaskId = label.getAttribute("data-subtask-id");
 
         if (confirm("Are you sure you want to delete this subtask?")) {
-          const res = await fetch(`/api/subtasks/${subtaskId}`, { method: "DELETE" });
+          const res = await fetch(`/api/subtasks/${subtaskId}`, {
+            method: "DELETE",
+          });
           if (res.ok) {
             label.remove();
             updateGenButtonState(); // Re-enable AI button if empty
@@ -277,63 +279,79 @@
     // Bulk Actions Logic
     subtaskList.addEventListener("change", function () {
       const checkboxes = subtaskList.querySelectorAll("input[type='checkbox']");
-      const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-      document.getElementById("bulkActions").style.display = anyChecked ? "flex" : "none";
+      const anyChecked = Array.from(checkboxes).some((cb) => cb.checked);
+      document.getElementById("bulkActions").style.display = anyChecked
+        ? "flex"
+        : "none";
     });
 
     const checkAllBtn = document.getElementById("checkAllBtn");
     checkAllBtn.addEventListener("click", function () {
-      const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']");
+      const checkboxes = document.querySelectorAll(
+        "#subtaskList input[type='checkbox']",
+      );
       allChecked = !allChecked;
-      checkboxes.forEach(cb => cb.checked = allChecked);
-      const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-      document.getElementById("bulkActions").style.display = anyChecked ? "flex" : "none";
+      checkboxes.forEach((cb) => (cb.checked = allChecked));
+      const anyChecked = Array.from(checkboxes).some((cb) => cb.checked);
+      document.getElementById("bulkActions").style.display = anyChecked
+        ? "flex"
+        : "none";
     });
 
     // Mark Completed Logic
-    document.getElementById("markCompletedForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']:checked");
-      const ids = Array.from(checkboxes).map(cb =>
-        cb.closest(".checkbox").getAttribute("data-subtask-id")
-      );
+    document
+      .getElementById("markCompletedForm")
+      .addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const checkboxes = document.querySelectorAll(
+          "#subtaskList input[type='checkbox']:checked",
+        );
+        const ids = Array.from(checkboxes).map((cb) =>
+          cb.closest(".checkbox").getAttribute("data-subtask-id"),
+        );
 
-      if (ids.length === 0) {
-        alert("Please select at least one subtask.");
-        return;
-      }
+        if (ids.length === 0) {
+          alert("Please select at least one subtask.");
+          return;
+        }
 
-      const response = await fetch("{{ url_for('routes.mark_completed') }}", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed_ids: ids })
+        const response = await fetch("{{ url_for('routes.mark_completed') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completed_ids: ids }),
+        });
+
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert("Failed to update tasks.");
+        }
       });
 
-      if (response.ok) {
-        location.reload();
-      } else {
-        alert("Failed to update tasks.");
-      }
-    });
-
     // Delete Selected Logic
-    document.getElementById("deleteSelectedForm").addEventListener("submit", function (e) {
-      const checkboxes = document.querySelectorAll("#subtaskList input[type='checkbox']:checked");
-      const ids = Array.from(checkboxes).map(cb => cb.closest(".checkbox").getAttribute("data-subtask-id"));
+    document
+      .getElementById("deleteSelectedForm")
+      .addEventListener("submit", function (e) {
+        const checkboxes = document.querySelectorAll(
+          "#subtaskList input[type='checkbox']:checked",
+        );
+        const ids = Array.from(checkboxes).map((cb) =>
+          cb.closest(".checkbox").getAttribute("data-subtask-id"),
+        );
 
-      if (ids.length === 0) {
-        e.preventDefault();
-        alert("Please select at least one item.");
-        return;
-      }
+        if (ids.length === 0) {
+          e.preventDefault();
+          alert("Please select at least one item.");
+          return;
+        }
 
-      if (!confirm("Delete selected subtasks?")) {
-        e.preventDefault();
-        return;
-      }
+        if (!confirm("Delete selected subtasks?")) {
+          e.preventDefault();
+          return;
+        }
 
-      document.getElementById("deleteTaskIds").value = ids.join(",");
-    });
+        document.getElementById("deleteTaskIds").value = ids.join(",");
+      });
 
     // Description Save Logic
     const descriptionBox = document.getElementById("descriptionBox");
@@ -351,7 +369,7 @@
       const response = await fetch(`/api/tasks/${taskId}/description`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description: newDescription })
+        body: JSON.stringify({ description: newDescription }),
       });
 
       if (response.ok) {
@@ -362,21 +380,24 @@
     });
 
     // Edit Subtask Logic
-    const editButtons = document.querySelectorAll('.edit-btn');
-    editButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    const editButtons = document.querySelectorAll(".edit-btn");
+    editButtons.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
         e.preventDefault();
-        const subtaskId = btn.getAttribute('data-id');
-        const currentTitle = btn.closest('.checkbox').querySelector('p').innerText;
+        const subtaskId = btn.getAttribute("data-id");
+        const currentTitle = btn
+          .closest(".checkbox")
+          .querySelector("p").innerText;
         const newTitle = prompt("Edit Subtask Title:", currentTitle);
 
         if (newTitle && newTitle.trim() !== "") {
           fetch(`/edit_subtask/${subtaskId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: newTitle })
-          })
-          .then(res => res.ok ? window.location.reload() : alert("Error saving."));
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: newTitle }),
+          }).then((res) =>
+            res.ok ? window.location.reload() : alert("Error saving."),
+          );
         }
       });
     });
