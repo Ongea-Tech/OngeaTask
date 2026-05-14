@@ -20,13 +20,13 @@ class Task(db.Model):
     estimated_minutes = db.Column(db.Integer, nullable=True)
     last_nudged_at = db.Column(db.DateTime, nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
-    category = db.relationship('Category', backref='tasks')
+    category = db.relationship('Category', backref='tasks')   
     subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
 
     def mark_as_completed(self):
         """Mark task as completed and update database"""
         self.completed = True
-        self.completed_date = date.today()
+        self.completed_at = date.today()
         self.deleted = False
         self.deleted_date = None
         db.session.refresh(self)
@@ -36,7 +36,7 @@ class Task(db.Model):
         self.deleted = True
         self.deleted_date = date.today()
         self.completed = False
-        self.completed_date = None
+        self.completed_at = None
         db.session.refresh(self)
 
     @classmethod

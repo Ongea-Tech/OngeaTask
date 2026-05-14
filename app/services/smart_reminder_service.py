@@ -16,7 +16,7 @@ def get_best_completion_hour(user_id):
     if not completed_tasks:
         return None
     completion_hours = [
-        task.completed_at_hour
+        task.completed_at.hour
         for task in completed_tasks
         ]
     most_common_hour = Counter(completion_hours).most_common(1)[0][0]
