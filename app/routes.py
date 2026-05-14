@@ -1,9 +1,10 @@
 from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for, Blueprint
 from flask_login import current_user, login_required
-from app.models import Task, User, Subtask, Category 
+from app.models import Task, User, Subtask, Category , Notification
 from . import db, login_manager
 from app.forms import TaskForm, MoveToTrashForm
+from app.services.smart_reminder_service import (get_best_time_message, generate_smart_nudges_for_user)
 from werkzeug.exceptions import Forbidden
 from flask import abort
 from openai import OpenAI
@@ -144,6 +145,7 @@ def show_task(task_id):
 @login_required
 def create_task():
     form = TaskForm()
+    form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
     if form.validate_on_submit():
     
         title = form.title.data
@@ -280,7 +282,7 @@ def mark_completed_single(task_id):
     ).first_or_404()
 
     task.completed = True
-    task.completed_date = date.today()
+    task.completed_at = date.today()
     task.deleted = False
     task.deleted_date = None
 
@@ -299,7 +301,7 @@ def move_to_trash_single(task_id):
         task.deleted = True
         task.deleted_date = date.today()
         task.completed = False
-        task.completed_date = None
+        task.completed_at = None
 
         db.session.commit()
         flash("Task moved to trash.", "success")
@@ -334,14 +336,14 @@ def history():
         Task.user_id == current_user.id,
         Task.completed == True,
         Task.deleted == False,
-        Task.completed_date == today
+        Task.completed_at == today
     ).all()
 
     yesterday_tasks = Task.query.filter(
         Task.user_id == current_user.id,
         Task.completed == True,
         Task.deleted == False,
-        Task.completed_date == yesterday
+        Task.completed_at == yesterday
     ).all()
 
     def summarize(task):
@@ -379,7 +381,7 @@ def history_action():
 
         if action == 'reopen':
             task.completed = False
-            task.completed_date = None
+            task.completed_at = None
             task.deleted = False
             task.deleted_date = None
             db.session.flush() 
@@ -522,6 +524,33 @@ def update_description(task_id):
     task.description = data.get('description', task.description)
     db.session.commit()
     return {"message": "Updated."}, 200
+
+@routes.route('/smart-reminders')
+@login_required
+def smart_reminders():
+    best_time_message = get_best_time_message(current_user.id)
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(10).all()
+
+    return render_template('smart_reminders.html', best_time_message = best_time_message, notifications=notifications)
+
+@routes.route('/smart-reminders/generate', methods=['POST'])
+@login_required
+def generate_smart_reminders():
+    generated = generate_smart_nudges_for_user(current_user.id)
+
+    if generated:
+        flash(f"{len(generated)} smart reminder(s) generated.", "success")
+    else:
+        flash("No smart reminders needed right now.", "info")
+    return redirect(url_for('routes.smart_reminders'))    
+
+@routes.route('/notifications/<int:notification_id>/read', methods=['POST'])
+@login_required
+def mark_notification_read(notification_id):
+    notification = Notification.query.filter_by(id=notification_id, user_id=current_user.id).first_or_404()
+    notification.read = True
+    db.session.commit()
+    return redirect(url_for('routes.smart_reminders')) 
 
 @login_manager.user_loader
 def load_user(user_id):

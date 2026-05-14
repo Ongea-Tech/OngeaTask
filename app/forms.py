@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import BooleanField
-from wtforms import StringField, SubmitField, TextAreaField, PasswordField, BooleanField,  SelectField, DateField, HiddenField 
-from wtforms.validators import DataRequired, Email, Length,  Optional
+from wtforms import StringField, SubmitField, TextAreaField, PasswordField, BooleanField,  SelectField, DateField, HiddenField , DateTimeLocalField, IntegerField
+from wtforms.validators import DataRequired, Email, Length,  Optional, NumberRange
 
 class ForgotPasswordForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(message="Email is required!"), Email(message="Invalid email")], filters=[lambda x: x.strip() if x else x])
@@ -21,6 +21,9 @@ class TaskForm(FlaskForm):
     description = TextAreaField('Description', validators=[Optional(), Length(min=2, max=2000, message="Description cannot exceed 2000 characters.")], filters=[lambda x: x.strip() if x else x])
     submit = SubmitField('Create Task')
     auto_generate = BooleanField('Auto-generate subtasks')
+    due_date = DateTimeLocalField("Due Date", format="%Y-%m-%dT%H:%M", validators=[Optional()])
+    estimated_minutes = IntegerField("Estimated Minutes", validators=[Optional(), NumberRange(min=1)])
+    category_id = SelectField("Category", coerce=int, validators=[Optional()])
 
 class SignUpForm(FlaskForm):
     username = StringField('Username*', validators=[DataRequired(message="Username is required."), Length(min=2, max=50, message="Username must be between 2 and 50 characters.")], filters=[lambda x: x.strip() if x else x])

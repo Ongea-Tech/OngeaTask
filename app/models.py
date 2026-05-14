@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from app import db    
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -11,14 +11,18 @@ class Task(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     completed = db.Column(db.Boolean, default=False)
-    completed_date = db.Column(db.Date, nullable=True)
+    completed_at = db.Column(db.DateTime, nullable=True)
     deleted = db.Column(db.Boolean, default=False)
     deleted_date = db.Column(db.Date, nullable=True)
-    subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
     priority = db.Column(db.String(20), nullable=False, default="Medium")
-    due_date = db.Column(db.Date, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    due_date = db.Column(db.DateTime, nullable=True)
+    estimated_minutes = db.Column(db.Integer, nullable=True)
+    last_nudged_at = db.Column(db.DateTime, nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
-    
+    category = db.relationship('Category', backref='tasks')
+    subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
+
     def mark_as_completed(self):
         """Mark task as completed and update database"""
         self.completed = True
@@ -55,6 +59,19 @@ class Subtask(db.Model):
     title = db.Column(db.String(100), nullable=False)
     completed = db.Column(db.Boolean, default=False)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
+
+class Notification(db.Model):
+    __tablename__ ="notification"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) 
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=True)
+    message = db.Column(db.Text, nullable=False)
+    nudge_type = db.Column(db.String(50), nullable=False, default="general")
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    read = db.Column(db.Boolean, default=False)
+    task = db.relationship('Task', backref='notifications')
+
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)

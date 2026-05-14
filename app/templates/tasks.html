@@ -1,13 +1,43 @@
 {% extends "index.html" %}
 {% block content %}
 <h1>Tasks</h1>
- {% for task in tasks %}
-        <div>
-            <h2>{{ task.title }}</h2>
-            <p>{{ task.description }}</p>
-            <p>Status: {{ 'Completed' if task.completed else 'Pending' }}</p>
-        </div>
-  {% endfor %}
 
+{% for task in tasks %}
+<div>
+    <h2>{{ task.title }}</h2>
+    <p>{{ task.description }}</p>
+    <p>Status: {{ 'Completed' if task.completed else 'Pending' }}</p>
+</div>
+{% endfor %}
+
+<form method="POST" action="{{ url_for('routes.create_task') }}">
+    {{ form.hidden_tag() }}
+
+    <div>
+        {{ form.due_date.label(class="block font-medium") }}
+        {{ form.due_date(class="border rounded p-2 w-full") }}
+        {% for error in form.due_date.errors %}
+            <span class="text-red-500">{{ error }}</span>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form.estimated_minutes.label(class="block font-medium") }}
+        {{ form.estimated_minutes(class="border rounded p-2 w-full", placeholder="Example: 30") }}
+        {% for error in form.estimated_minutes.errors %}
+            <span class="text-red-500">{{ error }}</span>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form.category_id.label(class="block font-medium") }}
+        {{ form.category_id(class="border rounded p-2 w-full") }}
+        {% for error in form.category_id.errors %}
+            <span class="text-red-500">{{ error }}</span>
+        {% endfor %}
+    </div>
+
+    <button type="submit" class="mt-4 bg-blue-500 text-white rounded p-2">Submit</button>
+</form>
 
 {% endblock %}
