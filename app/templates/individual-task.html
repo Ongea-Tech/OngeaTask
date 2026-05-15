@@ -42,6 +42,18 @@
     </button>
   </div>
 
+  <div class="w-full flex justify-end mt-[10px]">
+  <button
+    id="generateSubtasksBtn"
+    type="button"
+    class="bg-blue-600 text-white px-[12px] py-[6px] rounded-[4px]
+           text-[0.9rem] hover:bg-blue-700 transition duration-200
+           mt-[10px] disabled:bg-gray-400 disabled:cursor-not-allowed"
+  >
+    ✨ Generate Subtasks with AI
+  </button>
+</div>
+
   <!-- Bulk Actions -->
   <div
     id="bulkActions"
@@ -389,5 +401,62 @@
 
 
   });
+</script>
+<script>
+document.getElementById("generateSubtasksBtn")
+  .addEventListener("click", async () => {
+
+    const confirmed = confirm(
+      "Generate subtasks using AI?"
+    );
+
+    if (!confirmed) return;
+
+    const button = document.getElementById(
+      "generateSubtasksBtn"
+    );
+
+    button.disabled = true;
+    button.textContent = "Generating...";
+
+    try {
+      const response = await fetch(
+        `/generate_subtasks/${taskId}`,
+        {
+          method: "POST"
+        }
+      );
+
+      if (response.ok) {
+        location.reload();
+      } else {
+        const data = await response.json();
+
+        alert(
+          data.error ||
+          "Failed to generate subtasks."
+        );
+
+        button.disabled = false;
+        button.textContent =
+          "✨ Generate Subtasks with AI";
+      }
+
+    } catch (error) {
+      alert("Something went wrong.");
+
+      button.disabled = false;
+      button.textContent =
+        "✨ Generate Subtasks with AI";
+    }
+});
+</script>
+
+<script>
+if (subtaskList.children.length > 0) {
+  document.getElementById(
+    "generateSubtasksBtn"
+  ).disabled = true;
+}
 </script>
 {% endblock %}

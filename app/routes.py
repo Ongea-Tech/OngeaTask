@@ -1,13 +1,14 @@
 from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for, Blueprint
 from flask_login import current_user, login_required
-from app.models import Task, User, Subtask
+from app.models import Category, Task, User, Subtask
 from . import db, login_manager
 from app.forms import TaskForm, MoveToTrashForm
 from werkzeug.exceptions import Forbidden
 from flask import abort
 from openai import OpenAI
 import os
+from app.models import Category
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -71,12 +72,15 @@ def index():
     current_user.motivation_date = date.today()
     db.session.commit()
 
+    categories = Category.query.all()
+
     return render_template(
         'index.html',
         tasks=active_tasks,
         form=TaskForm(),
         trash_form=MoveToTrashForm(),
-        motivation_message=message
+        motivation_message=message,
+        categories=categories
     )
 
 
@@ -108,6 +112,45 @@ def categories():
 def logout():
     return render_template('logout.html')
 
+def generate_subtasks_with_ai(title, description=None):
+    prompt = f"""
+    You are a productivity assistant.
+
+    Break down the following task, with its description, into 5-7 clear, actionable subtasks.
+
+    Task Title: {title}
+    Task Description: {description or "No description provided"}
+
+    Rules:
+    - Each subtask should be short and specific
+    - Each should be something an individual can actually do
+    - Return as a simple list (no numbering, no extra text)
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        content = response.choices[0].message.content.strip()
+
+        # Convert response into list
+        subtasks = [
+            line.strip("- ").strip()
+            for line in content.split("\n")
+            if line.strip()
+        ]
+
+        # Remove duplicates while preserving order
+        subtasks = list(dict.fromkeys(subtasks))
+
+        return subtasks
+
+    except Exception as e:
+        print("Subtask generation error:", str(e))
+        return []
+    
 @routes.route('/tasks', methods=['GET'])
 @login_required
 def tasks():
@@ -141,10 +184,64 @@ def create_task():
         new_task = Task(title=title, description=description, completed=False, user_id=current_user.id)
         db.session.add(new_task)
         db.session.commit()
+        # Auto-generate subtasks
+        if form.auto_generate.data:
+            subtasks = generate_subtasks_with_ai(title, description)
+
+            existing_titles = set()
+
+            for sub in subtasks:
+                normalized = sub.lower().strip()
+
+                if normalized not in existing_titles:
+                    existing_titles.add(normalized)
+
+                    db.session.add(
+                        Subtask(
+                            title=sub,
+                            task_id=new_task.id
+                        )
+                    )
+
+            db.session.commit()
         flash('Task created successfully!', 'success')
         return redirect(url_for('routes.individual', task_id=new_task.id))
     return render_template('index.html', form=form)
 
+@routes.route('/generate_subtasks/<int:task_id>', methods=['POST'])
+@login_required
+def generate_subtasks(task_id):
+    task = Task.query.filter_by(
+        id=task_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+
+    subtasks = generate_subtasks_with_ai(
+        task.title,
+        task.description
+    )
+
+    existing_titles = set()
+
+    for sub in subtasks:
+        normalized = sub.lower().strip()
+
+        if normalized not in existing_titles:
+            existing_titles.add(normalized)
+
+            db.session.add(
+                Subtask(
+                    title=sub,
+                    task_id=task.id
+                )
+            )
+
+    db.session.commit()
+
+    return {
+        "message": "Subtasks generated successfully"
+    }, 200
 @routes.route('/individual-task/<int:task_id>')
 @login_required
 def individual(task_id):
