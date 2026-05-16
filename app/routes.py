@@ -1,9 +1,10 @@
 from datetime import date, timedelta
 from flask import flash, render_template, request, redirect, url_for, Blueprint
 from flask_login import current_user, login_required
-from app.models import Task, User, Subtask
+from app.models import Task, User, Subtask, Notification, Category
 from . import db, login_manager
 from app.forms import TaskForm, MoveToTrashForm
+from app.services.smart_reminder_service import (get_best_time_message, generate_smart_nudges_for_user)
 from werkzeug.exceptions import Forbidden
 from flask import abort
 from openai import OpenAI
@@ -32,6 +33,14 @@ def test_401():
 @routes.route('/')
 @login_required
 def index():
+    # 1. Instantiate the form first so we can configure it
+    form = TaskForm()
+
+    # 2. Fetch categories and populate the dropdown choices
+    categories = Category.query.all()
+    form.category_id.choices = [(0, "Select Category")] + [(c.id, c.name) for c in categories]
+
+    # Fetch active tasks
     active_tasks = Task.query.filter(
         db.and_(
             Task.user_id == current_user.id,
@@ -75,10 +84,11 @@ def index():
     current_user.motivation_date = date.today()
     db.session.commit()
 
+    # 3. Pass the fully configured 'form' instance here
     return render_template(
         'index.html',
         tasks=active_tasks,
-        form=TaskForm(),
+        form=form,  
         trash_form=MoveToTrashForm(),
         motivation_message=message
     )
@@ -138,12 +148,20 @@ def show_task(task_id):
 @login_required
 def create_task():
     form = TaskForm()
+    categories = Category.query.all()
+    form.category_id.choices = [(0, "Select Category")] + [(category.id, category.name)
+        for category in Category.query.all()
+    ]
+
     if form.validate_on_submit():
     
         title = form.title.data
         description = form.description.data or None
+        category_id = form.category_id.data or None
+        due_date = form.due_date.data
+        estimated_minutes = form.estimated_minutes.data
 
-        new_task = Task(title=title, description=description, completed=False, user_id=current_user.id)
+        new_task = Task(title=title, description=description, completed=False, user_id=current_user.id, category_id=category_id, due_date=due_date, estimated_minutes=estimated_minutes)
         db.session.add(new_task)
         db.session.commit()
 
@@ -455,3 +473,49 @@ def delete_selected():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+@routes.route('/smart-reminders')
+@login_required
+def smart_reminders():
+    best_time_message = get_best_time_message(current_user.id)
+
+    notifications = Notification.query.filter_by(
+    user_id=current_user.id
+    ).order_by(
+    Notification.created_at.desc()
+    ).limit(10).all()
+
+    return render_template(
+    'smart_reminders.html',
+    best_time_message=best_time_message,
+    notifications=notifications
+    )
+
+@routes.route('/smart-reminders/generate', methods=['POST'])
+@login_required
+def generate_smart_reminders():
+    generated = generate_smart_nudges_for_user(current_user.id)
+
+    if generated:
+        flash(f"{len(generated)} smart reminder(s) generated.", "success")
+    else:
+        flash("No smart reminders needed right now.", "info")
+
+    return redirect(url_for('routes.smart_reminders'))
+
+
+@routes.route('/notifications/<int:notification_id>/read', methods=['POST'])
+@login_required
+def mark_notification_read(notification_id):
+    notification = Notification.query.filter_by(
+    id=notification_id,
+    user_id=current_user.id
+    ).first_or_404()
+
+    notification.read = True
+    db.session.commit()
+
+    return redirect(url_for('routes.smart_reminders'))
+
+

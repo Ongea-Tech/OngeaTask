@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, PasswordField, BooleanField,  SelectField, DateField, HiddenField 
-from wtforms.validators import DataRequired, Email, Length,  Optional
+from wtforms import StringField, SubmitField, TextAreaField, PasswordField, BooleanField,  SelectField, DateField, HiddenField, DateTimeLocalField, IntegerField
+from wtforms.validators import DataRequired, Email, Length,  Optional, NumberRange
 
 
 class ForgotPasswordForm(FlaskForm):
@@ -19,6 +19,9 @@ class ResetPasswordForm(FlaskForm):
 class TaskForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(message= "Task title is required."), Length(min=2, max=100, message="Title must be between 2 and 100 characters.")], filters=[lambda x: x.strip() if x else x])
     description = TextAreaField('Description', validators=[Optional(), Length(min=2, max=2000, message="Description cannot exceed 2000 characters.")], filters=[lambda x: x.strip() if x else x])
+    due_date = DateTimeLocalField("Due Date", format="%Y-%m-%dT%H:%M", validators=[Optional()])
+    estimated_minutes = IntegerField("Estimated Minutes", validators=[Optional(), NumberRange(min=1)])
+    category_id = SelectField("Category", coerce=int, validators=[Optional()])
     auto_generate = BooleanField("Auto-generate subtasks")
     submit = SubmitField('Create Task')
 
