@@ -141,9 +141,68 @@ def create_task():
         new_task = Task(title=title, description=description, completed=False, user_id=current_user.id)
         db.session.add(new_task)
         db.session.commit()
+
+        # Auto-generate subtasks
+        if form.auto_generate.data:
+            subtasks = generate_subtasks_with_ai(title, description)
+
+            for sub in subtasks:
+                db.session.add(Subtask(title=sub, task_id=new_task.id))
+
+            db.session.commit()
+
+
         flash('Task created successfully!', 'success')
         return redirect(url_for('routes.individual', task_id=new_task.id))
     return render_template('index.html', form=form)
+
+def generate_subtasks_with_ai(title, description=None):
+    prompt = f"""
+    You are a productivity assistant.
+
+    Break down the following task, with its description, into 5-7 clear, actionable subtasks.
+
+    Task Title: {title}
+    Task Description: {description or "No description provided"}
+
+    Rules:
+    - Each subtask should be short and specific
+    - Each should be something an individual can actually do
+    - Return as a simple list (no numbering, no extra text)
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        content = response.choices[0].message.content.strip()
+
+        # Convert response into list
+        subtasks = [line.strip("- ").strip() for line in content.split("\n") if line.strip()]
+
+        return subtasks
+
+    except Exception as e:
+        print("Subtask generation error:", str(e))
+        return []
+
+
+@routes.route('/generate_subtasks/<int:task_id>', methods=['POST'])
+@login_required
+def generate_subtasks(task_id):
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
+
+    subtasks = generate_subtasks_with_ai(task.title, task.description)
+
+    for sub in subtasks:
+        db.session.add(Subtask(title=sub, task_id=task.id))
+
+    db.session.commit()
+
+    return {"message": "Subtasks generated successfully"}, 200
+
 
 @routes.route('/individual-task/<int:task_id>')
 @login_required
@@ -153,7 +212,7 @@ def individual(task_id):
 
 @routes.route('/edit_subtask/<int:subtask_id>', methods=['POST'])
 def edit_subtask(subtask_id):
-    subtask = Subtask.query.get_or_404(id)
+    subtask = Subtask.query.get_or_404(subtask_id)
     new_title = request.json.get('title')
     
     if new_title:

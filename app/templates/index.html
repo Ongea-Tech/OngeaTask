@@ -187,6 +187,25 @@
                 {% endfor %} {% endif %}
               </div>
 
+              <div
+                class="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3"
+              >
+                {{ form.auto_generate( id="autoGenerateSubtasks", class_="mt-1
+                h-4 w-4 cursor-pointer accent-[#4379EE]" ) }}
+
+                <div>
+                  <label
+                    for="autoGenerateSubtasks"
+                    class="cursor-pointer text-sm font-medium text-gray-700"
+                  >
+                    ✨ Auto-generate subtasks
+                  </label>
+                  <p class="text-xs text-gray-500">
+                    AI will create subtasks from your task
+                  </p>
+                </div>
+              </div>
+
               <div>
                 {{ form.submit( class_="w-full bg-[#4379EE] rounded-lg py-3
                 hover:bg-blue-600 transition font-medium text-white bottom-2" )
