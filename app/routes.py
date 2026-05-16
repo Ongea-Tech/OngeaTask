@@ -84,13 +84,21 @@ def index():
     current_user.motivation_date = date.today()
     db.session.commit()
 
+    # Count notifications that are neither read nor dismissed
+    unread_count = Notification.query.filter_by(
+        user_id=current_user.id, 
+        read=False, 
+        is_dismissed=False
+    ).count()
+
     # 3. Pass the fully configured 'form' instance here
     return render_template(
         'index.html',
         tasks=active_tasks,
         form=form,  
         trash_form=MoveToTrashForm(),
-        motivation_message=message
+        motivation_message=message,
+        unread_count=unread_count
     )
 
 
@@ -141,7 +149,14 @@ def tasks():
 @login_required
 def show_task(task_id):
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
-    return render_template('individual-task.html', task=task)
+
+    unread_count = Notification.query.filter_by(
+            user_id=current_user.id, 
+            read=False, 
+            is_dismissed=False
+        ).count()
+
+    return render_template('individual-task.html', task=task, unread_count=unread_count)
     
 
 @routes.route('/create_task', methods=['GET', 'POST'])
@@ -181,7 +196,14 @@ def create_task():
 @login_required
 def individual(task_id):
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
-    return render_template('individual-task.html', task=task)
+
+    unread_count = Notification.query.filter_by(
+            user_id=current_user.id, 
+            read=False, 
+            is_dismissed=False
+        ).count()
+
+    return render_template('individual-task.html', task=task, unread_count=unread_count)
 
 def generate_subtasks_with_ai(title, description=None):
     prompt = f"""
@@ -486,10 +508,17 @@ def smart_reminders():
     Notification.created_at.desc()
     ).limit(10).all()
 
+    unread_count = Notification.query.filter_by(
+        user_id=current_user.id, 
+        read=False, 
+        is_dismissed=False
+    ).count()
+
     return render_template(
     'smart_reminders.html',
     best_time_message=best_time_message,
-    notifications=notifications
+    notifications=notifications,
+    unread_count=unread_count
     )
 
 @routes.route('/smart-reminders/generate', methods=['POST'])
@@ -519,3 +548,46 @@ def mark_notification_read(notification_id):
     return redirect(url_for('routes.smart_reminders'))
 
 
+@routes.route('/notification/dismiss/<int:notif_id>', methods=['POST'])
+@login_required
+def dismiss_notification(notif_id):
+    notification = Notification.query.get_or_404(notif_id)
+    if notification.user_id == current_user.id:
+        notification.is_dismissed = True
+        notification.is_read = True 
+        db.session.commit()
+    return redirect(request.referrer or url_for('routes.index'))
+
+@routes.route('/notifications/history')
+@login_required
+def notification_history():
+    # Fetch all past notifications for the user
+    history = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+
+    unread_count = Notification.query.filter_by(
+            user_id=current_user.id, 
+            read=False, 
+            is_dismissed=False
+        ).count()
+
+    return render_template('notification_history.html', history=history, unread_count=unread_count)
+
+
+@routes.route
+def inject_notifications():
+    if current_user.is_authenticated:
+        # Count notifications that are unread and not dismissed
+        unread_count = Notification.query.filter_by(
+            user_id=current_user.id, 
+            read=False, 
+            is_dismissed=False
+        ).count()
+
+        # Get recent notifications for the top-right menu dropdown (Bonus)
+        recent_notifications = Notification.query.filter_by(
+            user_id=current_user.id,
+            is_dismissed=False
+        ).order_by(Notification.created_at.desc()).limit(5).all()
+
+        return dict(unread_count=unread_count, layout_notifications=recent_notifications)
+    return dict(unread_count=0, layout_notifications=[])

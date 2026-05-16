@@ -45,10 +45,23 @@
         />
       </form>
 
-      <div class="relative">
+      <div class="relative flex flex-row items-center mr-8 space-x-10">
+        <div class="notification-wrapper">
+          <a href="{{ url_for('routes.notification_history') }}" 
+            class="relative p-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 block">              
+            <i class="fa-solid fa-bell text-2xl"></i>
+              <!-- 1. Unread Count Badge -->
+              {% if unread_count > 0 %}
+                <span class="absolute top-1 right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse">                      
+                  {{ unread_count }}
+                </span>
+              {% endif %}
+          </a>
+        </div>
+
         <button
           id="profile-btn"
-          class="flex items-center space-x-2 focus:outline-none"
+          class="flex items-center space-x-5  focus:outline-none"
         >
           <img
             src="{{ url_for('static', filename='images/profile.png') }}"
@@ -96,7 +109,12 @@
 
           <a href="{{ url_for('routes.smart_reminders') }}"
           class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"
-          ><i class="fa-solid fa-wand-magic-sparkles text-lg"></i>Smart Reminders</a>
+          ><i class="fa-solid fa-wand-magic-sparkles text-lg"></i>Smart Reminders
+          {% if unread_count > 0 %}
+              <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse">
+                  {{ unread_count }}
+              </span>
+          {% endif %}</a>
 
           <a
             href="{{ url_for('routes.profile') }}"

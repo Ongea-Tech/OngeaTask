@@ -159,4 +159,6 @@ class Notification(db.Model):
         default=False
     )
 
+    is_dismissed = db.Column(db.Boolean, default=False)
+
     task = db.relationship('Task', backref='notifications')

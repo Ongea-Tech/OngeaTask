@@ -1,0 +1,48 @@
+{% extends "index.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <i class="fa-solid fa-bell text-blue-500"></i> Smart Reminder Log
+    </h2>
+
+    <div class="space-y-4">
+        {% if history %}
+            {% for notif in history %}
+                <div class="flex items-center justify-between p-4 border rounded-xl transition-all {% if not notif.is_read and not notif.is_dismissed %}bg-blue-50/60 border-blue-100{% else %}bg-gray-50/40 border-gray-100{% endif %}">
+                    <div class="flex-1">
+                        <!-- Link to the task if available -->
+                        {% if notif.task_id %}
+                            <a href="{{ url_for('routes.individual', task_id=notif.task_id) }}" class="text-gray-700 hover:text-blue-600 font-medium block">
+                                {{ notif.message }}
+                            </a>
+                        {% else %}
+                            <p class="text-gray-700">{{ notif.message }}</p>
+                        {% endif %}
+                        <span class="text-xs text-gray-400 block mt-1">
+                            {{ notif.created_at.strftime('%I:%M %p · %b %d') }}
+                        </span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center space-x-3 ml-4">
+                        {% if not notif.is_dismissed %}
+                            <form action="{{ url_for('routes.dismiss_notification', notif_id=notif.id) }}" method="POST">
+                                <button type="submit" class="text-xs bg-white hover:bg-gray-100 text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors">
+                                    <i class="fa-solid fa-check text-green-500"></i> Dismiss
+                                </button>
+                            </form>
+                        {% else %}
+                            <span class="text-xs text-gray-400 italic">Dismissed</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-12 text-gray-400">
+                <i class="fa-solid fa-circle-check text-4xl mb-3 text-gray-200 block"></i>
+                <p>No reminder updates found yet!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
