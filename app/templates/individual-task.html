@@ -8,7 +8,7 @@
   <div class="title">
     <h2>{{ task.title }}</h2>
     <div class="category-dropdown">
-      <label class="category" id="categoryLabel">Select Category</label>
+      <label class="category" id="categoryLabel">Select Priority</label>
       <div class="dropdown-menu" id="categoryMenu">
         <div class="dropdown-option" data-color="red">
           <span class="color-circle" style="background-color: red"></span> High
@@ -40,6 +40,16 @@
     >
       Save
     </button>
+
+    <div class="w-full flex justify-end mt-[10px]">
+      <button
+        id="generateSubtasksBtn"
+        type="button"
+        class="bg-blue-600 text-white px-[12px] py-[6px] rounded-[4px] text-[0.9rem] hover:bg-blue-700 mt-[10px] disabled:bg-gray-400 disabled:cursor-not-allowed"
+      >
+        ✨ Generate Subtasks with AI
+      </button>
+    </div>
   </div>
 
   <!-- Bulk Actions -->
@@ -100,7 +110,11 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <a href="#" class="icon1 text-gray-500 hover:text-blue-600 edit-btn" data-id="{{ subtask.id }}">
+        <a
+          href="#"
+          class="icon1 text-gray-500 hover:text-blue-600 edit-btn"
+          data-id="{{ subtask.id }}"
+        >
           <i class="fa-solid fa-pen"></i>
         </a>
         <a href="#" class="icon text-gray-500 hover:text-red-600">
@@ -113,9 +127,11 @@
   </div>
 
   <!-- Add Subtask -->
-  
 
-  <div class="addSubtask flex items-center gap-[8px] mt-[10px] h-[40px]" id="addSubtaskContainer">
+  <div
+    class="addSubtask flex items-center gap-[8px] mt-[10px] h-[40px]"
+    id="addSubtaskContainer"
+  >
     <input
       type="text"
       placeholder="Add a new list item"
@@ -130,7 +146,7 @@
     >
       ➕
     </button>
-    
+
     <button
       class="inputButton bg-blue-600 text-white px-[12px] py-[6px] rounded-[4px] text-[0.9rem] hover:bg-blue-700"
       id="addSubtaskBtn"
@@ -138,15 +154,32 @@
       Add
     </button>
   </div>
-
-
 </div>
 
 <script>
-           document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
     const taskId = {{ task.id }};
     const subtaskList = document.getElementById("subtaskList");
     let allChecked = false;
+
+        // Automatic subtask generation
+        if (subtaskList.children.length > 0) {
+          document.getElementById("generateSubtasksBtn").disabled = true;
+        }
+        document.getElementById("generateSubtasksBtn").addEventListener("click", async () => {
+          const confirmed = confirm("Generate subtasks using AI?");
+          if (!confirmed) return;
+
+          const response = await fetch(`/generate_subtasks/${taskId}`, {
+            method: "POST"
+          });
+
+          if (response.ok) {
+            location.reload();
+          } else {
+            alert("Failed to generate subtasks.");
+          }
+        });
 
         // Add subtask
         document.getElementById("addSubtaskBtn").addEventListener("click", async function () {
@@ -265,26 +298,43 @@
         });
 
         // Category dropdown functionality
+        // Variable to store the current selection (default to grey/low)
+        let selectedCategory = {
+            color: 'grey',
+            label: 'Medium'
+        };
+
         const categoryLabel = document.getElementById("categoryLabel");
         const categoryMenu = document.getElementById("categoryMenu");
 
         categoryLabel.addEventListener("click", function () {
-          categoryMenu.style.display = categoryMenu.style.display === "block" ? "none" : "block";
+            categoryMenu.style.display = categoryMenu.style.display === "block" ? "none" : "block";
         });
 
+        // Ensure taskId is defined somewhere accessible to this listener
         categoryMenu.addEventListener("click", function (event) {
-          const selectedColor = event.target.getAttribute("data-color");
-          if (selectedColor) {
-            categoryLabel.textContent = "";
-            categoryLabel.style.backgroundColor = selectedColor;
-            categoryMenu.style.display = "none";
-          }
-        });
+            const option = event.target.closest(".dropdown-option");
+            if (option) {
+                const color = option.getAttribute("data-color");
+                const label = option.innerText.trim();
 
-        document.addEventListener("click", function (event) {
-          if (!categoryLabel.contains(event.target) && !categoryMenu.contains(event.target)) {
-            categoryMenu.style.display = "none";
-          }
+                // 1. Update UI
+                categoryLabel.style.backgroundColor = color === 'green' ? '#4caf50' : color;
+
+                // 2. The critical part: Using the correct taskId
+                // Replace 'taskData.id' with however you are storing the current task's ID
+                fetch(`/api/tasks/${taskId}/category`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category_color: color,
+                        category_name: label
+                    })
+                })
+                .then(res => res.json())
+                .then(data => console.log("Saved successfully:", data))
+                .catch(err => console.error("Error saving:", err));
+            }
         });
 
         // Description save functionality
@@ -326,17 +376,17 @@
         editButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                
+
                 // 2. Get the ID from the data attribute we added to the HTML
                 const subtaskId = btn.getAttribute('data-id');
-                
+
                 // 3. Ask the user for the new title
                 const currentTitle = btn.closest('.searchable-item').querySelector('span').innerText;
                 const newTitle = prompt("Edit Subtask Title:", currentTitle);
 
                 // 4. If they didn't hit cancel and the text isn't empty...
                 if (newTitle && newTitle.trim() !== "") {
-                    
+
                     // 5. Call our API route
                     fetch(`/edit_subtask/${subtaskId}`, {
                         method: 'POST',
@@ -366,7 +416,7 @@
       expandBtn.addEventListener("click", () => {
       inputField.classList.toggle("expanded");
       inputField.classList.toggle("collapsed");
-      
+
       if (inputField.classList.contains("expanded")) {
         inputField.focus();
       }
