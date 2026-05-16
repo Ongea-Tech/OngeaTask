@@ -2,6 +2,7 @@ from datetime import date
 from app import db    
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from datetime import datetime
 
 class Task(db.Model):
     __tablename__ = "task"
@@ -11,15 +12,29 @@ class Task(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    due_date = db.Column(db.DateTime, nullable=True)
+    estimated_minutes = db.Column(db.Integer, nullable=True)
     completed = db.Column(db.Boolean, default=False)
-    completed_date = db.Column(db.Date, nullable=True)
+    completed_at = db.Column(db.DateTime, nullable=True)
     deleted = db.Column(db.Boolean, default=False)
     deleted_date = db.Column(db.Date, nullable=True)
     subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
     priority = db.Column(db.String(20), nullable=False, default="Medium")
+    last_nudged_at = db.Column(db.DateTime, nullable=True)
     category_color = db.Column(db.String(20), default='grey')
     category_name = db.Column(db.String(50), default='Medium')
 
+    category_id = db.Column(
+    db.Integer,
+    db.ForeignKey('category.id'),
+    nullable=True
+    )
+
+    category = db.relationship(
+    'Category',
+    backref='tasks'
+    )
 
     def mark_as_completed(self):
         """Mark task as completed and update database"""
@@ -107,3 +122,41 @@ class CategoryItem(db.Model):
 
     def __repr__(self):
         return f"<CategoryItem {self.title} (Category {self.category_id})>"
+
+
+class Notification(db.Model):
+    __tablename__ = "notification"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id'),
+        nullable=False
+    )
+
+    task_id = db.Column(
+        db.Integer,
+        db.ForeignKey('task.id'),
+        nullable=True
+    )
+
+    message = db.Column(db.Text, nullable=False)
+
+    nudge_type = db.Column(
+        db.String(50),
+        nullable=False,
+        default="general"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    read = db.Column(
+        db.Boolean,
+        default=False
+    )
+
+    task = db.relationship('Task', backref='notifications')
