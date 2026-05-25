@@ -9,7 +9,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      
     ports:
       - "3306:3306"
     volumes:
