@@ -72,8 +72,7 @@ def upgrade():
     # op.drop_table('category_item')  # Skipped: table may not exist in fresh DB
 
 
-    with op.batch_alter_table('task', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('due_date', sa.Date(), nullable=True))
+
 
     # ### end Alembic commands ###
 
