@@ -78,6 +78,23 @@ def index():
         trash_form=MoveToTrashForm(),
         motivation_message=message
     )
+def get_motivation_message():
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "user",
+                "content": "Give me one short, powerful motivational message for someone managing their daily tasks. Max 20 words. No quotes, no labels, just the message."
+            }
+        ],
+        max_tokens=50
+    )
+    return response.choices[0].message.content.strip()
+
+@routes.route('/regenerate-motivation')
+def regenerate_motivation():
+    message = get_motivation_message()  
+    return jsonify({"message": message})
 
 @routes.route('/login', methods=['GET', 'POST'])
 def login():

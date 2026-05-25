@@ -12,6 +12,7 @@
     "@playwright/test": "^1.40.1",
     "@tailwindcss/cli": "^4.1.14",
     "@tailwindcss/postcss": "^4.1.16",
+    "@types/node": "^25.6.0",
     "autoprefixer": "^10.4.27",
     "browser-sync": "^3.0.4",
     "postcss": "^8.5.8",
