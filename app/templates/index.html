@@ -358,22 +358,20 @@
           });
         </script>
 
-
-      {% endblock %}
-    </main>
-  </div>
-
-</body>
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <div class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
-      {% for message in messages %}
-        <div class="bg-red-500 text-white px-4 py-2 rounded-md shadow mb-2 text-sm">
-          {{ message }}
-        </div>
-      {% endfor %}
+        {% endblock %}
+      </main>
     </div>
-  {% endif %}
-{% endwith %}
-
+    {% block scripts %}
+    <script src="{{ url_for('static', filename='individual-task.js') }}"></script>
+    {% endblock %}
+  </body>
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
+    {% for message in messages %}
+    <div class="bg-red-500 text-white px-4 py-2 rounded-md shadow mb-2 text-sm">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %} {% endwith %}
 </html>
