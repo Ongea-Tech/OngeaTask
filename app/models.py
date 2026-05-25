@@ -1,13 +1,18 @@
-from datetime import date
+from datetime import date, datetime
 from app import db    
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+
+# Association table for Task <-> Category (Many-to-Many)
+task_categories = db.Table('task_categories',
+    db.Column('task_id', db.Integer, db.ForeignKey('task.id'), primary_key=True),
+    db.Column('category_id', db.Integer, db.ForeignKey('category.id'), primary_key=True)
+)
 
 class Task(db.Model):
     __tablename__ = "task"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
@@ -15,6 +20,12 @@ class Task(db.Model):
     completed_date = db.Column(db.Date, nullable=True)
     deleted = db.Column(db.Boolean, default=False)
     deleted_date = db.Column(db.Date, nullable=True)
+    priority = db.Column(db.String(20), nullable=False, default="Medium")
+    due_date = db.Column(db.Date, nullable=True)
+
+    # Link to categories (Many-to-Many)
+    categories = db.relationship('Category', secondary=task_categories,
+                                 backref=db.backref('tasks', lazy='dynamic'))
     subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
     priority = db.Column(db.String(20), nullable=False, default="Medium")
     category_color = db.Column(db.String(20), default='grey')
@@ -22,41 +33,54 @@ class Task(db.Model):
 
 
     def mark_as_completed(self):
-        """Mark task as completed and update database"""
         self.completed = True
         self.completed_date = date.today()
         self.deleted = False
         self.deleted_date = None
-        db.session.refresh(self)
 
     def move_to_trash(self):
-        """Move task to trash and update database"""
         self.deleted = True
         self.deleted_date = date.today()
         self.completed = False
         self.completed_date = None
-        db.session.refresh(self)
+
+    def is_overdue(self):
+        if self.due_date and not self.completed and not self.deleted:
+            return self.due_date < date.today()
+        return False
 
     @classmethod
     def get_active_tasks(cls, user_id):
-        """active tasks not completed and not deleted"""
-        return cls.query.filter_by(user_id = user_id, completed=False, deleted=False).all()
+        return cls.query.filter_by(user_id=user_id, completed=False, deleted=False).all()
 
     @classmethod
     def get_completed_tasks(cls, user_id):
-        """completed tasks for a specific date"""
-        return cls.query.filter_by(user_id = user_id, completed=True, deleted=False).all()
+        return cls.query.filter_by(user_id=user_id, completed=True, deleted=False).all()
 
     @classmethod
     def get_deleted_tasks(cls, user_id):
-        """deleted tasks"""
-        return cls.query.filter_by(user_id = user_id, deleted=True).all()
-    
+        return cls.query.filter_by(user_id=user_id, deleted=True).all()
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'completed': self.completed,
+            'priority': self.priority,
+            'due_date': self.due_date.isoformat() if self.due_date else None,
+            'is_overdue': self.is_overdue(),
+            'subtasks': [{'id': st.id, 'title': st.title, 'completed': st.completed} for st in self.subtasks],
+            'categories': [{'id': c.id, 'name': c.name, 'color': c.color, 'icon': c.icon} for c in self.categories]
+        }
+
+
 class Subtask(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     completed = db.Column(db.Boolean, default=False)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
+
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -70,6 +94,7 @@ class User(db.Model, UserMixin):
     motivation_date = db.Column(db.Date, nullable=True)
 
     tasks = db.relationship('Task', backref='user', lazy=True)
+    categories = db.relationship('Category', backref='owner', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -88,22 +113,57 @@ class User(db.Model, UserMixin):
             "motivation_message": self.motivation_message,
             "motivation_date": self.motivation_date.isoformat() if self.motivation_date else None
         }
+
     def __repr__(self):
         return f"<User {self.username}>"
-    
+
+
 class Category(db.Model):
+    __tablename__ = 'category'
+
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    color = db.Column(db.String(20), default='#cccccc')  # New field for urgency color
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    color = db.Column(db.String(20), default='#3b82f6')
+    icon = db.Column(db.String(50), default='fa-folder')  # Font Awesome class
+    description = db.Column(db.Text, nullable=True)
+    archived = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def get_stats(self):
+        """Compute category statistics efficiently."""
+        all_tasks = self.tasks.filter_by(deleted=False).all()
+        total = len(all_tasks)
+        completed = sum(1 for t in all_tasks if t.completed)
+        overdue = sum(1 for t in all_tasks if t.is_overdue())
+        completion_rate = round((completed / total * 100)) if total > 0 else 0
+
+        # Last activity: most recent task modified
+        last_task = (self.tasks.filter_by(deleted=False)
+                     .order_by(Task.id.desc()).first())
+        
+        return {
+            'total_tasks': total,
+            'completed_tasks': completed,
+            'overdue_tasks': overdue,
+            'completion_rate': completion_rate,
+            'last_task_id': last_task.id if last_task else None
+        }
+
+    def to_dict(self, include_stats=False):
+        data = {
+            'id': self.id,
+            'name': self.name,
+            'color': self.color,
+            'icon': self.icon,
+            'description': self.description,
+            'archived': self.archived,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'user_id': self.user_id
+        }
+        if include_stats:
+            data.update(self.get_stats())
+        return data
 
     def __repr__(self):
         return f"<Category {self.name}>"
-
-class CategoryItem(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    selected = db.Column(db.Boolean, default=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-
-    def __repr__(self):
-        return f"<CategoryItem {self.title} (Category {self.category_id})>"

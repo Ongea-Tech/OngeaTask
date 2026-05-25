@@ -166,35 +166,62 @@
                 Create New Task
               </h2>
 
-              <div>
-                {{ form.title.label(class_="block text-sm font-medium
-                text-gray-700 mb-1") }} {{ form.title( class_="block w-full
-                border border-gray-400 rounded-lg px-4 py-3 text-gray-700
-                focus:ring-[#4379EE] focus:border-[#4379EE]" ) }} {% if
-                form.title.errors %} {% for err in form.title.errors %}
-                <p class="text-sm text-red-600 mt-1">{{ err }}</p>
-                {% endfor %} {% endif %}
+            <div>
+              {{ form.title.label(class_="block text-sm font-medium text-gray-700 mb-1") }}
+              {{ form.title(
+              class_="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 focus:ring-[#4379EE]
+              focus:border-[#4379EE]",
+              id="taskTitleInput"
+              ) }}
+              <!-- AI suggestion chip -->
+              <div id="catSuggestionChip" style="display:none; margin-top:6px;">
+                <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 cursor-pointer" id="applySuggestion">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  Suggested: <strong id="suggestedCatName"></strong>
+                  <i class="fa-solid fa-xmark ml-1 text-indigo-400 hover:text-indigo-600" id="dismissSuggestion"></i>
+                </span>
               </div>
 
-              <div>
-                {{ form.description.label(class_="block text-sm font-medium
-                text-gray-700 mb-1") }} {{ form.description( class_="block
-                w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700
-                resize-none focus:ring-[#4379EE] focus:border-[#4379EE] pb-3",
-                rows="4" ) }} {% if form.description.errors %} {% for err in
-                form.description.errors %}
-                <p class="text-sm text-red-600 mt-1">{{ err }}</p>
-                {% endfor %} {% endif %}
-              </div>
+              {% if form.title.errors %}
+              {% for err in form.title.errors %}
+              <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+              {% endfor %}
+              {% endif %}
+            </div>
 
-              <div>
-                {{ form.submit( class_="w-full bg-[#4379EE] rounded-lg py-3
-                hover:bg-blue-600 transition font-medium text-white bottom-2" )
-                }}
+            <div>
+              {{ form.description.label(class_="block text-sm font-medium text-gray-700 mb-1") }}
+              {{ form.description(
+              class_="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 resize-none
+              focus:ring-[#4379EE] focus:border-[#4379EE] pb-3",
+              rows="4"
+              ) }}
+
+              {% if form.description.errors %}
+              {% for err in form.description.errors %}
+              <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+              {% endfor %}
+              {% endif %}
+            </div>
+
+            <!-- Category Selector -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Categories</label>
+              <div id="categoryCheckboxes" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto p-2 border border-gray-200 rounded-lg bg-gray-50">
+                <span class="text-xs text-gray-400">Loading categories...</span>
               </div>
-            </form>
-          </div>
+            </div>
+
+            <div>
+              <button type="submit" id="createTaskSubmitBtn"
+                class="w-full bg-[#4379EE] rounded-lg py-3 hover:bg-blue-600 transition font-medium text-white">
+                Create Task
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
+
 
         <div id="bulk-actions" class="flex items-center space-x-4 mb-4 hidden">
           <form
@@ -228,135 +255,199 @@
           const profileBtn = document.getElementById("profile-btn");
           const dropdownMenu = document.getElementById("dropdown-menu");
 
-          profileBtn.addEventListener("click", (e) => {
-            e.stopPropagation(); // Prevent click from propagating to window
-            dropdownMenu.classList.toggle("hidden");
+        profileBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          dropdownMenu.classList.toggle("hidden");
+        });
+
+        window.addEventListener("click", (e) => {
+          if (!profileBtn.contains(e.target)) {
+            dropdownMenu.classList.add("hidden");
+          }
+        });
+      </script>
+      <script>
+        // Close modal with X button or outside click
+        const closeBtn = document.getElementById("closeModalBtn");
+        closeBtn.onclick = () => {
+          document.getElementById("taskModal").classList.add("hidden");
+        };
+        window.addEventListener("click", (event) => {
+          const m = document.getElementById("taskModal");
+          if (event.target === m) m.classList.add("hidden");
+        });
+      </script>
+
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const bulkActions = document.getElementById('bulk-actions');
+          const completedInput = document.getElementById('completedTaskIds');
+          const trashInput = document.getElementById('trashTaskIds');
+          const selectedTaskIds = new Set();
+          let suggestedCatId = null;
+
+          function updateBulkActionsVisibility() {
+            bulkActions.style.display = selectedTaskIds.size > 0 ? 'flex' : 'none';
+          }
+
+          // ── Load categories into modal checkboxes ──
+          function loadCategoryCheckboxes() {
+            fetch('/api/categories').then(r => r.json()).then(cats => {
+              const box = document.getElementById('categoryCheckboxes');
+              if (!cats.length) { box.innerHTML = '<span class="text-xs text-gray-400">No categories yet</span>'; return; }
+              box.innerHTML = cats.map(c => `
+                <label class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border cursor-pointer hover:bg-gray-100"
+                       style="border-color:${c.color};">
+                  <input type="checkbox" value="${c.id}" class="cat-check accent-blue-500 w-3 h-3" />
+                  <span class="w-2 h-2 rounded-full inline-block" style="background:${c.color};"></span>
+                  ${c.name}
+                </label>
+              `).join('');
+            });
+          }
+
+          // Load on modal open
+          const openBtn = document.getElementById('openModalBtn');
+          const taskModal = document.getElementById('taskModal');
+          openBtn.addEventListener('click', () => {
+            taskModal.classList.remove('hidden');
+            loadCategoryCheckboxes();
           });
 
-          // Optional: Hide dropdown when clicking outside
-          window.addEventListener("click", () => {
-            if (!profileBtn.contains(e.target)) {
-              dropdownMenu.classList.add("hidden");
-            }
-          });
-        </script>
-        <script>
-          const modal = document.getElementById("taskModal");
-          const openBtn = document.getElementById("openModalBtn");
-          const closeBtn = document.getElementById("closeModalBtn");
+          // ── AI suggestion on title blur ──
+          const titleInput = document.getElementById('taskTitleInput');
+          if (titleInput) {
+            let debounceTimer;
+            titleInput.addEventListener('blur', () => {
+              clearTimeout(debounceTimer);
+              debounceTimer = setTimeout(async () => {
+                const title = titleInput.value.trim();
+                if (title.length < 3) return;
+                try {
+                  const res = await fetch('/api/tasks/suggest-category', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title })
+                  });
+                  const data = await res.json();
+                  if (data.suggested_category) {
+                    document.getElementById('suggestedCatName').textContent = data.suggested_category;
+                    document.getElementById('catSuggestionChip').style.display = 'block';
+                    suggestedCatId = data.suggested_category_id;
+                  }
+                } catch (e) { /* ignore */ }
+              }, 300);
+            });
+          }
 
-          openBtn.onclick = () => {
-            modal.classList.remove("hidden");
-          };
-
-          closeBtn.onclick = () => {
-            modal.classList.add("hidden");
-          };
-
-          // Close modal if user clicks outside the modal content
-          window.onclick = (event) => {
-            if (event.target === modal) {
-              modal.classList.add("hidden");
-            }
-          };
-        </script>
-
-        <script>
-          document.addEventListener("DOMContentLoaded", function () {
-            const bulkActions = document.getElementById("bulk-actions");
-            const completedInput = document.getElementById("completedTaskIds");
-            const trashInput = document.getElementById("trashTaskIds");
-            const selectedTaskIds = new Set();
-
-            function updateBulkActionsVisibility() {
-              if (selectedTaskIds.size > 0) {
-                bulkActions.style.display = "flex";
-              } else {
-                bulkActions.style.display = "none";
+          // Apply suggestion
+          const applyBtn = document.getElementById('applySuggestion');
+          if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+              if (suggestedCatId) {
+                const cb = document.querySelector(`.cat-check[value="${suggestedCatId}"]`);
+                if (cb) cb.checked = true;
               }
+              document.getElementById('catSuggestionChip').style.display = 'none';
+            });
+          }
+          const dismissBtn = document.getElementById('dismissSuggestion');
+          if (dismissBtn) {
+            dismissBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              document.getElementById('catSuggestionChip').style.display = 'none';
+            });
+          }
+
+          // ── API-based task creation (no reload) ──
+          document.getElementById('createTaskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = titleInput.value.trim();
+            if (!title) return;
+            const desc = document.querySelector('#createTaskForm textarea')?.value.trim() || '';
+            const catIds = Array.from(document.querySelectorAll('.cat-check:checked')).map(cb => parseInt(cb.value));
+
+            const res = await fetch('/api/tasks', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ title, description: desc, category_ids: catIds })
+            });
+            const data = await res.json();
+            if (data.task) {
+              taskModal.classList.add('hidden');
+              titleInput.value = '';
+              if (document.querySelector('#createTaskForm textarea')) document.querySelector('#createTaskForm textarea').value = '';
+              // Add new task card to DOM
+              renderSingleTask(data.task);
             }
-
-            fetch("/api/tasks")
-              .then((response) => response.json())
-              .then((tasks) => {
-                const taskList = document.getElementById("taskList");
-                taskList.innerHTML = ""; // Clear existing content
-
-                tasks.forEach((task) => {
-                  const completedSubtasks = task.subtasks.filter(
-                    (st) => st.completed,
-                  ).length;
-                  const totalSubtasks = task.subtasks.length;
-
-                  // Create the card
-                  const taskCard = document.createElement("div");
-                  taskCard.className =
-                    "flex items-stretch justify-between bg-white rounded-lg shadow-md hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-400 cursor-pointer h-24 mb-4";
-                  taskCard.style.cursor = "pointer";
-                  taskCard.addEventListener("click", () => {
-                    window.location.href = `/${task.id}`;
-                  });
-
-                  // Create the checkbox
-                  const checkbox = document.createElement("input");
-                  checkbox.type = "checkbox";
-                  checkbox.className =
-                    "ml-4 w-5 h-5 accent-[#4379EE] rounded cursor-pointer self-center";
-                  checkbox.dataset.taskId = task.id;
-
-                  // Prevent checkbox click from triggering card navigation
-                  checkbox.addEventListener("click", (event) => {
-                    event.stopPropagation();
-                  });
-
-                  // Track selected tasks
-                  checkbox.addEventListener("change", () => {
-                    const taskId = checkbox.dataset.taskId;
-                    if (checkbox.checked) {
-                      selectedTaskIds.add(taskId);
-                    } else {
-                      selectedTaskIds.delete(taskId);
-                    }
-                    updateBulkActionsVisibility();
-                  });
-
-                  // Task info section
-                  const taskInfo = document.createElement("div");
-                  taskInfo.className = "justify-center flex-1";
-                  taskInfo.innerHTML = `
-                            <span class="inline-block text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded mb-2">General</span>
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-800">${task.title}</h4>
-                                <p class="text-sm text-gray-500">${completedSubtasks}/${totalSubtasks} completed</p>
-                            </div>
-                        `;
-                  const priorityIndicator = document.createElement("div");
-                  priorityIndicator.className =
-                    "w-5 rounded-r-lg bg-green-400 ml-4";
-                  taskCard.appendChild(checkbox);
-                  taskCard.appendChild(taskInfo);
-                  taskList.appendChild(taskCard);
-                  taskCard.appendChild(priorityIndicator);
-                });
-              })
-              .catch((error) => {
-                console.error("Error fetching tasks:", error);
-              });
-
-            // Attach form submit handlers to pass selected task IDs
-            document
-              .getElementById("markCompletedForm")
-              .addEventListener("submit", function () {
-                completedInput.value = Array.from(selectedTaskIds).join(",");
-              });
-
-            document
-              .getElementById("moveToTrashForm")
-              .addEventListener("submit", function () {
-                trashInput.value = Array.from(selectedTaskIds).join(",");
-              });
           });
-        </script>
+
+          // ── Render tasks ──
+          function renderSingleTask(task) {
+            const taskList = document.getElementById('taskList');
+            const completedSubtasks = task.subtasks.filter(st => st.completed).length;
+            const totalSubtasks = task.subtasks.length;
+            const taskCard = document.createElement('div');
+            taskCard.className = 'flex items-stretch justify-between bg-white rounded-lg shadow-md hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-400 cursor-pointer h-24 mb-4';
+            taskCard.style.cursor = 'pointer';
+            taskCard.addEventListener('click', () => { window.location.href = `/${task.id}`; });
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'ml-4 w-5 h-5 accent-[#4379EE] rounded cursor-pointer self-center';
+            checkbox.dataset.taskId = task.id;
+            checkbox.addEventListener('click', e => e.stopPropagation());
+            checkbox.addEventListener('change', () => {
+              if (checkbox.checked) selectedTaskIds.add(String(task.id));
+              else selectedTaskIds.delete(String(task.id));
+              updateBulkActionsVisibility();
+            });
+
+            const taskInfo = document.createElement('div');
+            taskInfo.className = 'justify-center flex-1';
+            let catChips = '';
+            if (task.categories && task.categories.length > 0) {
+              catChips = '<div class="flex flex-wrap gap-1 mt-1">' + task.categories.map(c =>
+                `<span class="text-[10px] font-medium px-2 py-0.5 rounded-full text-white shadow-sm" style="background:${c.color};">${c.name}</span>`
+              ).join('') + '</div>';
+            }
+            taskInfo.innerHTML = `
+              <div>
+                <h4 class="text-lg font-semibold text-gray-800">${task.title}</h4>
+                <p class="text-sm text-gray-500">${completedSubtasks}/${totalSubtasks} completed</p>
+              </div>
+              ${catChips}
+            `;
+
+            const priorityIndicator = document.createElement('div');
+            priorityIndicator.className = 'w-5 rounded-r-lg bg-green-400 ml-4';
+            taskCard.appendChild(checkbox);
+            taskCard.appendChild(taskInfo);
+            taskCard.appendChild(priorityIndicator);
+            taskList.prepend(taskCard);
+          }
+
+          fetch('/api/tasks')
+            .then(response => response.json())
+            .then(tasks => {
+              const taskList = document.getElementById('taskList');
+              taskList.innerHTML = '';
+              tasks.forEach(task => renderSingleTask(task));
+            })
+            .catch(error => console.error('Error fetching tasks:', error));
+
+          // Attach form submit handlers to pass selected task IDs
+          document.getElementById('markCompletedForm').addEventListener('submit', function () {
+            completedInput.value = Array.from(selectedTaskIds).join(',');
+          });
+          document.getElementById('moveToTrashForm').addEventListener('submit', function () {
+            trashInput.value = Array.from(selectedTaskIds).join(',');
+          });
+        });
+      </script>
+
+
 
         {% endblock %}
       </main>

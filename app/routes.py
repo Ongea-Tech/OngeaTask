@@ -117,9 +117,6 @@ def tasks():
             Task.deleted == False
         )
     ).all()
-    current_user.logger.info(
-    f"Loaded tasks page for user_id={current_user.id}, active_tasks={len(active_tasks)}"
-    ) 
     return render_template('tasks.html', tasks=active_tasks)
 
 @routes.route('/<int:task_id>')
