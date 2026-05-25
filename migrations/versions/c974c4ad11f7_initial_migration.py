@@ -41,7 +41,8 @@ def upgrade():
         sa.Column('icon', sa.String(length=50), default='fa-folder'),
         sa.Column('description', sa.Text(), nullable=True),
         sa.Column('archived', sa.Boolean(), default=False),
-        sa.Column('created_at', sa.DateTime(), nullable=True)
+        sa.Column('created_at', sa.DateTime(), nullable=True),
+        sa.ForeignKeyConstraint(['user_id'], ['user.id'], name='fk_category_user_id')
     )
 
     # Create task table (depends on user)
@@ -69,14 +70,7 @@ def upgrade():
         sa.PrimaryKeyConstraint('task_id', 'category_id')
     )
     # op.drop_table('category_item')  # Skipped: table may not exist in fresh DB
-    with op.batch_alter_table('category', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('user_id', sa.Integer(), nullable=False))
-        batch_op.add_column(sa.Column('icon', sa.String(length=50), nullable=True))
-        batch_op.add_column(sa.Column('description', sa.Text(), nullable=True))
-        batch_op.add_column(sa.Column('archived', sa.Boolean(), nullable=True))
-        batch_op.add_column(sa.Column('created_at', sa.DateTime(), nullable=True))
-        # batch_op.drop_index(batch_op.f('name'))  # Skipped: index does not exist in fresh DB
-        batch_op.create_foreign_key('fk_category_user_id', 'user', ['user_id'], ['id'])
+
 
     with op.batch_alter_table('task', schema=None) as batch_op:
         batch_op.add_column(sa.Column('due_date', sa.Date(), nullable=True))
