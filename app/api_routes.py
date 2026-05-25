@@ -18,7 +18,9 @@ def get_active_tasks():
             'title': task.title,
             'description': task.description,
             'completed': task.completed,
-            'subtasks': subtasks
+            'subtasks': subtasks,
+            'category_color': task.category_color,  # Send this to JS
+            'category_name': task.category_name
         })
     return jsonify(result)
 
@@ -34,8 +36,25 @@ def get_task(task_id):
         'title': task.title,
         'description': task.description,
         'completed': task.completed,
+        'category_color': task.category_color, # Added this
+        'category_name': task.category_name,    #and this
         'subtasks': subtasks
     })
+
+
+@api.route('/api/tasks/<int:task_id>/category', methods=['POST'])
+@login_required
+def update_task_category(task_id):
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
+    data = request.get_json()
+    print(f"DEBUG: Received data for task {task_id}: {data}")
+    
+    task.category_color = data.get('category_color')
+    task.category_name = data.get('category_name')
+    
+    db.session.commit()
+    print("DEBUG: Database committed successfully")
+    return jsonify({'message': 'Category updated successfully'})
 
 
 
@@ -55,7 +74,10 @@ def create_task():
     new_task = Task(title=title, description=description, completed=False, user_id = current_user.id)
     db.session.add(new_task)
     db.session.commit()
-    return jsonify({'message': 'Task created', 'task_id': new_task.id}), 201
+    return jsonify({
+        'message': 'Task created', 
+        'task_id': new_task.id
+        }), 201
 
 
 @api.route('/api/tasks/<int:task_id>/subtasks', methods=['POST'])

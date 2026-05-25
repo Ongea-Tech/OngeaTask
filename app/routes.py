@@ -79,7 +79,6 @@ def index():
         motivation_message=message
     )
 
-
 @routes.route('/login', methods=['GET', 'POST'])
 def login():
     return render_template('login.html')
