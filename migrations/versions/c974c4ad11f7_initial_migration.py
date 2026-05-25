@@ -25,7 +25,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['task_id'], ['task.id'], ),
     sa.PrimaryKeyConstraint('task_id', 'category_id')
     )
-    op.drop_table('category_item')
+    # op.drop_table('category_item')  # Skipped: table may not exist in fresh DB
     with op.batch_alter_table('category', schema=None) as batch_op:
         batch_op.add_column(sa.Column('user_id', sa.Integer(), nullable=False))
         batch_op.add_column(sa.Column('icon', sa.String(length=50), nullable=True))
