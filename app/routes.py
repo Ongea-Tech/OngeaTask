@@ -13,6 +13,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 routes = Blueprint('routes', __name__)
 
+
 @routes.route('/test-500')
 def test_500():
     raise Exception("Testing my awesome new 500 animation!")
@@ -201,17 +202,115 @@ def show_task(task_id):
 @login_required
 def create_task():
     form = TaskForm()
+
     if form.validate_on_submit():
-    
         title = form.title.data
         description = form.description.data or None
 
         new_task = Task(title=title, description=description, completed=False, user_id=current_user.id)
         db.session.add(new_task)
         db.session.commit()
+
+        if form.auto_generate.data:
+            subtasks = generate_subtasks_with_ai(title, description)
+            seen_subtasks = set()
+
+            for sub in subtasks:
+                clean_title = sub.strip()
+
+                if not clean_title:
+                    continue
+
+                normalized_title = clean_title.lower()
+
+                if normalized_title in seen_subtasks:
+                    continue
+
+                db.session.add(Subtask(title=clean_title, task_id=new_task.id))
+                seen_subtasks.add(normalized_title)
+
+            db.session.commit()
+
         flash('Task created successfully!', 'success')
         return redirect(url_for('routes.individual', task_id=new_task.id))
     return render_template('index.html', form=form)
+
+def generate_subtasks_with_ai(title, description=None):
+    prompt = f"""
+    You are a productivity assistant.
+
+    Break down the following task, with its description, into 5-7 clear, actionable subtasks.
+
+    Task Title: {title}
+    Task Description: {description or "No description provided"}
+
+    Rules:
+    - Each subtask should be short and specific
+    - Each should be something an individual can actually do
+    - Start each subtask with a relevant emoji (e.g., 📖, 💻, 📧).
+    - List them from easiest to most complex.
+    - Return as a simple list (no numbering, no extra text)
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        content = response.choices[0].message.content.strip()
+
+        # Convert response into list
+        subtasks = [line.strip("- ").strip() for line in content.split("\n") if line.strip()]
+
+        return subtasks
+
+    except Exception as e:
+        print("Subtask generation error:", str(e))
+        return []
+
+@routes.route('/generate_subtasks/<int:task_id>', methods=['POST'])
+@login_required
+def generate_subtasks(task_id):
+    task = Task.query.filter_by(
+        id=task_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    existing_titles = {
+        subtask.title.strip().lower()
+        for subtask in task.subtasks
+    }
+
+    generated_subtasks = generate_subtasks_with_ai(task.title, task.description)
+
+    added_count = 0
+    skipped_count = 0
+
+    for sub in generated_subtasks:
+        clean_title = sub.strip()
+        if not clean_title:
+            continue
+
+        normalized_title = clean_title.lower()
+
+        if normalized_title in existing_titles:
+            skipped_count += 1
+            continue
+
+        db.session.add(Subtask(title=clean_title, task_id=task.id))
+        existing_titles.add(normalized_title)
+        added_count += 1
+
+    db.session.commit()
+
+    if added_count == 0 and skipped_count > 0:
+        return {"message": "Duplicate subtask(s) detected. Nothing new was added."}, 400
+    
+    if skipped_count > 0:
+        return {"message": f"Added {added_count} new subtasks (skipped {skipped_count} duplicates)."}, 200
+
+    return {"message": f"{added_count} subtasks generated successfully."}, 200
 
 @routes.route('/individual-task/<int:task_id>')
 @login_required
@@ -226,7 +325,7 @@ def edit_subtask(subtask_id):
     
     if new_title:
         subtask.title = new_title
-        db.session.commit() # This saves it permanently
+        db.session.commit()
         return {"message": "Success"}, 200
     return {"message": "Content cannot be empty"}, 400
 
@@ -481,16 +580,26 @@ def api_move_to_trash():
 @routes.route('/delete-selected', methods=['POST'])
 @login_required
 def delete_selected():
-    ids_str = request.form.get('delete_ids', '')
-    ids = [int(id.strip()) for id in ids_str.split(',') if id.strip().isdigit()]
+    if request.is_json:
+        data = request.get_json()
+        ids = data.get('delete_ids', [])
+    else:
+        ids_str = request.form.get('delete_ids', '')
+        ids = [int(tid) for tid in ids_str.split(',') if tid.strip().isdigit()]
 
     if ids:
-        from app.models import Subtask
-        Subtask.query.join(Task).filter(
+        subtasks_to_delete = Subtask.query.join(Task).filter(
             Subtask.id.in_(ids),
             Task.user_id == current_user.id
-        ).delete(synchronize_session=False)
+        ).all()
+
+        for subtask in subtasks_to_delete:
+            db.session.delete(subtask)
+            
         db.session.commit()
+
+        if request.is_json:
+            return {"message": "Success"}, 200
 
     return redirect(request.referrer or url_for('routes.index'))
 
