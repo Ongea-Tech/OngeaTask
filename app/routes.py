@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from flask import flash, render_template, request, redirect, url_for, Blueprint, jsonify
+from flask import flash, render_template, request, redirect, url_for, Blueprint
 from flask_login import current_user, login_required
 from app.models import Task, User, Subtask
 from . import db, login_manager
@@ -8,7 +8,6 @@ from werkzeug.exceptions import Forbidden
 from flask import abort
 from openai import OpenAI
 import os
-
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -36,8 +35,7 @@ def index():
             Task.deleted == False
         )
     ).all()
-    
-    
+
     task_titles = [task.title for task in active_tasks]
 
     if task_titles:
@@ -73,7 +71,6 @@ def index():
     current_user.motivation_date = date.today()
     db.session.commit()
 
-    taskform = TaskForm()
     return render_template(
         'index.html',
         tasks=active_tasks,
@@ -81,7 +78,6 @@ def index():
         trash_form=MoveToTrashForm(),
         motivation_message=message
     )
-
 def get_motivation_message():
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",

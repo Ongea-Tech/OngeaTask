@@ -17,6 +17,9 @@ class Task(db.Model):
     deleted_date = db.Column(db.Date, nullable=True)
     subtasks = db.relationship('Subtask', backref='task', cascade='all, delete-orphan', lazy=True)
     priority = db.Column(db.String(20), nullable=False, default="Medium")
+    category_color = db.Column(db.String(20), default='grey')
+    category_name = db.Column(db.String(50), default='Medium')
+
 
     def mark_as_completed(self):
         """Mark task as completed and update database"""
@@ -80,7 +83,10 @@ class User(db.Model, UserMixin):
             "username": self.username,
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "email": self.email
+            "email": self.email,
+            "image_filename": self.image_filename,
+            "motivation_message": self.motivation_message,
+            "motivation_date": self.motivation_date.isoformat() if self.motivation_date else None
         }
     def __repr__(self):
         return f"<User {self.username}>"
