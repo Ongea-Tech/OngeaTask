@@ -1,82 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My To-Do List</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='dist/output.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    {% block head %}{% endblock %}
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <title>My To-Do List</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  {% block head %}{% endblock %}
-</head>
+  <body class="h-screen w-screen overflow-hidden">
+    <nav
+      class="flex items-center justify-between bg-white px-4 py-2 shadow-md top-0 left-0 right-0 h-20 fixed"
+    >
+      <a
+        href="{{ url_for('routes.index') }}"
+        class="flex items-center space-x-2"
+      >
+        <img
+          src="{{ url_for('static', filename='images/logo.png') }}"
+          alt="OngeaTask Logo"
+          class="h-12 w-auto"
+        />
+      </a>
 
-<body class="h-screen w-screen overflow-hidden">
+      <form class="relative w-1/3" action="/search" method="GET">
+        <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <input
+          type="text"
+          name="q"
+          placeholder="Search"
+          class="w-full rounded-full border bg-gray-100 pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </form>
 
-  <nav class="flex items-center justify-between bg-white px-4 py-2 shadow-md top-0 left-0 right-0 h-20 fixed">
-    <a href="{{ url_for('routes.index') }}" class="flex items-center space-x-2">
-      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="OngeaTask Logo" class="h-12 w-auto" />
-    </a>
+      <div class="relative">
+        <button
+          id="profile-btn"
+          class="flex items-center space-x-2 focus:outline-none"
+        >
+          <img
+            src="{{ url_for('static', filename='images/profile.png') }}"
+            alt="Profile"
+            class="h-10 w-10 rounded-full cursor-pointer"
+          />
+          <span class="text-gray-700 font-medium"
+            >{{ user.name if user else 'User' }}</span
+          >
+        </button>
 
-    <form class="relative w-1/3" action="/search" method="GET">
-      <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </span>
-      <input type="text" name="q" placeholder="Search"
-        class="w-full rounded-full border bg-gray-100 pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    </form>
-
-    <div class="relative">
-
-      <button id="profile-btn" class="flex items-center space-x-2 focus:outline-none">
-        <img src="{{ url_for('static', filename='images/profile.png') }}" alt="Profile"
-          class="h-10 w-10 rounded-full cursor-pointer" />
-        <span class="text-gray-700 font-medium">{{ user.name if user else 'User' }}</span>
-      </button>
-
-
-      <div id="dropdown-menu"
-        class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50">
-        <a href="{{ url_for('routes.profile') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
-        <a href="{{ url_for('routes.logout') }}" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">Logout</a>
+        <div
+          id="dropdown-menu"
+          class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50"
+        >
+          <a
+            href="{{ url_for('routes.profile') }}"
+            class="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+            >Profile</a
+          >
+          <a
+            href="{{ url_for('routes.logout') }}"
+            class="block px-4 py-2 text-gray-600 hover:bg-gray-100"
+            >Logout</a
+          >
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
 
+    <div class="flex flex-1 pt-20">
+      <div
+        class="w-56 bg-white text-black flex flex-col justify-between fixed top-20 left-0 bottom-0"
+      >
+        <div class="space-y-6 pt-6">
+          <a
+            href="{{ url_for('routes.index') }}"
+            class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"
+            ><i class="fa-solid fa-list-check"></i>Tasks</a
+          >
+          <a
+            href="{{ url_for('routes.categories') }}"
+            class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"
+            ><i class="fa-solid fa-layer-group"></i>Categories</a
+          >
+          <a
+            href="{{ url_for('routes.profile') }}"
+            class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"
+            ><i class="fa-solid fa-user"></i>Profile</a
+          >
+          <a
+            href="{{ url_for('routes.history') }}"
+            class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"
+            ><i class="fa-solid fa-clock-rotate-left"></i>History</a
+          >
+          <!-- <a class="bg-red-700" href="{{ url_for('routes.history') }}"><i class="fa-solid fa-clock-rotate-left"></i>History</a> -->
+        </div>
 
-  <div class="flex flex-1 pt-20">
-
-    <div class="w-56 bg-white text-black flex flex-col justify-between fixed top-20 left-0 bottom-0 ">
-      <div class="space-y-6 pt-6">
-        <a href="{{ url_for('routes.index') }}"
-          class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"><i
-            class="fa-solid fa-list-check"></i>Tasks</a>
-        <a href="{{ url_for('routes.categories') }}"
-          class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"><i
-            class="fa-solid fa-layer-group"></i>Categories</a>
-        <a href="{{ url_for('routes.profile') }}"
-          class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"><i
-            class="fa-solid fa-user"></i>Profile</a>
-        <a href="{{ url_for('routes.history') }}"
-          class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"><i
-            class="fa-solid fa-clock-rotate-left"></i>History</a>
-        <!-- <a class="bg-red-700" href="{{ url_for('routes.history') }}"><i class="fa-solid fa-clock-rotate-left"></i>History</a> -->
+        <div class="mb-6">
+          <a
+            href="{{ url_for('routes.trash') }}"
+            class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-red-600"
+            ><i class="fa-solid fa-trash"></i>Trash</a
+          >
+          <a
+            href="{{ url_for('routes.settings') }}"
+            class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"
+            ><i class="fa-solid fa-gear"></i>Settings</a
+          >
+          <a
+            href="{{ url_for('routes.logout') }}"
+            class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-red-600"
+            ><i class="fa-solid fa-right-from-bracket"></i>Logout</a
+          >
+        </div>
       </div>
 
-      <div class="mb-6">
-        <a href="{{ url_for('routes.trash') }}"
-          class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-red-600"><i
-            class="fa-solid fa-trash"></i>Trash</a>
-        <a href="{{ url_for('routes.settings') }}"
-          class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-blue-600"><i
-            class="fa-solid fa-gear"></i>Settings</a>
-        <a href="{{ url_for('routes.logout') }}"
-          class="flex items-center py-2 pl-6 pr-1 gap-x-3 text-gray-700 hover:text-red-600"><i
-            class="fa-solid fa-right-from-bracket"></i>Logout</a>
-      </div>
-    </div>
-
-    <main class="flex-1 ml-56 h-screen p-6 bg-gray-200 overflow-y-auto">
-      {% block content %}
+      <main class="flex-1 ml-56 h-screen p-6 bg-gray-200 overflow-y-auto">
+        {% block content %}
 
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-semibold text-gray-800">Ongoing Tasks</h2>
@@ -100,17 +150,33 @@
           <span id="closeModalBtn"
             class="absolute top-3 right-4 text-gray-500 text-2xl cursor-pointer hover:text-red-500">&times;</span>
 
-          <form id="createTaskForm" method="POST" action="{{ url_for('routes.create_task') }}" class="space-y-5">
-            {{ form.hidden_tag() }}
+            <form
+              id="createTaskForm"
+              method="POST"
+              action="{{ url_for('routes.create_task') }}"
+              class="space-y-5"
+            >
+              {{ form.hidden_tag() }}
 
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Create New Task</h2>
+              <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">
+                Create New Task
+              </h2>
 
             <div>
               {{ form.title.label(class_="block text-sm font-medium text-gray-700 mb-1") }}
               {{ form.title(
               class_="block w-full border border-gray-400 rounded-lg px-4 py-3 text-gray-700 focus:ring-[#4379EE]
-              focus:border-[#4379EE]"
+              focus:border-[#4379EE]",
+              id="taskTitleInput"
               ) }}
+              <!-- AI suggestion chip -->
+              <div id="catSuggestionChip" style="display:none; margin-top:6px;">
+                <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 cursor-pointer" id="applySuggestion">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  Suggested: <strong id="suggestedCatName"></strong>
+                  <i class="fa-solid fa-xmark ml-1 text-indigo-400 hover:text-indigo-600" id="dismissSuggestion"></i>
+                </span>
+              </div>
 
               {% if form.title.errors %}
               {% for err in form.title.errors %}
@@ -134,45 +200,62 @@
               {% endif %}
             </div>
 
+            <!-- Category Selector -->
             <div>
-              {{ form.submit(
-              class_="w-full bg-[#4379EE] rounded-lg py-3 hover:bg-blue-600 transition font-medium text-white bottom-2"
-              ) }}
+              <label class="block text-sm font-medium text-gray-700 mb-1">Categories</label>
+              <div id="categoryCheckboxes" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto p-2 border border-gray-200 rounded-lg bg-gray-50">
+                <span class="text-xs text-gray-400">Loading categories...</span>
+              </div>
+            </div>
+
+            <div>
+              <button type="submit" id="createTaskSubmitBtn"
+                class="w-full bg-[#4379EE] rounded-lg py-3 hover:bg-blue-600 transition font-medium text-white">
+                Create Task
+              </button>
             </div>
           </form>
         </div>
       </div>
 
-      <div id="bulk-actions" class="flex items-center space-x-4 mb-4 hidden">
-        <form id="markCompletedForm" method="POST" action="{{ url_for('routes.mark_completed') }}">
-          <input type="hidden" name="completed_ids" id="completedTaskIds">
-          <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">Mark
-            as Completed</button>
 
-        </form>
+        <div id="bulk-actions" class="flex items-center space-x-4 mb-4 hidden">
+          <form
+            id="markCompletedForm"
+            method="POST"
+            action="{{ url_for('routes.mark_completed') }}"
+          >
+            <input type="hidden" name="completed_ids" id="completedTaskIds" />
+            <button
+              type="submit"
+              class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+            >
+              Mark as Completed
+            </button>
+          </form>
 
-        <form id="moveToTrashForm" method="POST" action="{{ url_for('routes.move_to_trash') }}">
-          <input type="hidden" name="trash_ids" id="trashTaskIds">
-        
-          <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
-            Move to Trash
-          </button>
-        </form>
+          <form
+            id="moveToTrashForm"
+            method="POST"
+            action="{{ url_for('routes.move_to_trash') }}"
+          >
+            {{ trash_form.hidden_tag() }} {{
+            trash_form.trash_ids(id="trashTaskIds") }} {{ trash_form.submit(
+            class_="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600
+            transition" ) }}
+          </form>
+        </div>
 
-      </div>
-
-      <div class="space-y-4" id="taskList">
-      </div>
-      <script>
-        const profileBtn = document.getElementById("profile-btn");
-        const dropdownMenu = document.getElementById("dropdown-menu");
+        <div class="space-y-4" id="taskList"></div>
+        <script>
+          const profileBtn = document.getElementById("profile-btn");
+          const dropdownMenu = document.getElementById("dropdown-menu");
 
         profileBtn.addEventListener("click", (e) => {
-          e.stopPropagation(); // Prevent click from propagating to window
+          e.stopPropagation();
           dropdownMenu.classList.toggle("hidden");
         });
 
-        // Optional: Hide dropdown when clicking outside
         window.addEventListener("click", (e) => {
           if (!profileBtn.contains(e.target)) {
             dropdownMenu.classList.add("hidden");
@@ -180,25 +263,17 @@
         });
       </script>
       <script>
-        const modal = document.getElementById("taskModal");
-        const openBtn = document.getElementById("openModalBtn");
+        // Close modal with X button or outside click
         const closeBtn = document.getElementById("closeModalBtn");
-
-        openBtn.onclick = () => {
-          modal.classList.remove("hidden");
-        };
-
         closeBtn.onclick = () => {
-          modal.classList.add("hidden");
+          document.getElementById("taskModal").classList.add("hidden");
         };
-
-        // Close modal if user clicks outside the modal content
-        window.onclick = (event) => {
-          if (event.target === modal) {
-            modal.classList.add("hidden");
-          }
-        };
+        window.addEventListener("click", (event) => {
+          const m = document.getElementById("taskModal");
+          if (event.target === m) m.classList.add("hidden");
+        });
       </script>
+
 
       <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -206,76 +281,162 @@
           const completedInput = document.getElementById('completedTaskIds');
           const trashInput = document.getElementById('trashTaskIds');
           const selectedTaskIds = new Set();
+          let suggestedCatId = null;
 
           function updateBulkActionsVisibility() {
-            if (selectedTaskIds.size > 0) {
-              bulkActions.style.display = 'flex';
-            } else {
-              bulkActions.style.display = 'none';
+            bulkActions.style.display = selectedTaskIds.size > 0 ? 'flex' : 'none';
+          }
+
+          // ── Load categories into modal checkboxes ──
+          function loadCategoryCheckboxes() {
+            fetch('/api/categories').then(r => r.json()).then(cats => {
+              const box = document.getElementById('categoryCheckboxes');
+              if (!cats.length) { box.innerHTML = '<span class="text-xs text-gray-400">No categories yet</span>'; return; }
+              box.innerHTML = cats.map(c => `
+                <label class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border cursor-pointer hover:bg-gray-100"
+                       style="border-color:${c.color};">
+                  <input type="checkbox" value="${c.id}" class="cat-check accent-blue-500 w-3 h-3" />
+                  <span class="w-2 h-2 rounded-full inline-block" style="background:${c.color};"></span>
+                  ${c.name}
+                </label>
+              `).join('');
+            });
+          }
+
+          // Load on modal open
+          const openBtn = document.getElementById('openModalBtn');
+          const taskModal = document.getElementById('taskModal');
+          openBtn.addEventListener('click', () => {
+            taskModal.classList.remove('hidden');
+            loadCategoryCheckboxes();
+          });
+
+          // ── AI suggestion on title blur ──
+          const titleInput = document.getElementById('taskTitleInput');
+          if (titleInput) {
+            let debounceTimer;
+            titleInput.addEventListener('blur', () => {
+              clearTimeout(debounceTimer);
+              debounceTimer = setTimeout(async () => {
+                const title = titleInput.value.trim();
+                if (title.length < 3) return;
+                try {
+                  const res = await fetch('/api/tasks/suggest-category', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title })
+                  });
+                  const data = await res.json();
+                  if (data.suggested_category) {
+                    document.getElementById('suggestedCatName').textContent = data.suggested_category;
+                    document.getElementById('catSuggestionChip').style.display = 'block';
+                    suggestedCatId = data.suggested_category_id;
+                  }
+                } catch (e) { /* ignore */ }
+              }, 300);
+            });
+          }
+
+          // Apply suggestion
+          const applyBtn = document.getElementById('applySuggestion');
+          if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+              if (suggestedCatId) {
+                const cb = document.querySelector(`.cat-check[value="${suggestedCatId}"]`);
+                if (cb) cb.checked = true;
+              }
+              document.getElementById('catSuggestionChip').style.display = 'none';
+            });
+          }
+          const dismissBtn = document.getElementById('dismissSuggestion');
+          if (dismissBtn) {
+            dismissBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              document.getElementById('catSuggestionChip').style.display = 'none';
+            });
+          }
+
+          // ── API-based task creation (no reload) ──
+          document.getElementById('createTaskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = titleInput.value.trim();
+            if (!title) return;
+            const desc = document.querySelector('#createTaskForm textarea')?.value.trim() || '';
+            const catIds = Array.from(document.querySelectorAll('.cat-check:checked')).map(cb => parseInt(cb.value));
+
+            const res = await fetch('/api/tasks', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ title, description: desc, category_ids: catIds })
+            });
+            const data = await res.json();
+            if (data.task) {
+              taskModal.classList.add('hidden');
+              titleInput.value = '';
+              if (document.querySelector('#createTaskForm textarea')) document.querySelector('#createTaskForm textarea').value = '';
+              // Add new task card to DOM
+              renderSingleTask(data.task);
             }
+          });
+
+          // ── Render tasks ──
+          function renderSingleTask(task) {
+            const taskList = document.getElementById('taskList');
+            const completedSubtasks = task.subtasks.filter(st => st.completed).length;
+            const totalSubtasks = task.subtasks.length;
+            const taskCard = document.createElement('div');
+            taskCard.className = 'flex items-stretch justify-between bg-white rounded-lg shadow-md hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-400 cursor-pointer h-24 mb-4';
+            taskCard.style.cursor = 'pointer';
+            taskCard.addEventListener('click', () => { window.location.href = `/${task.id}`; });
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'ml-4 w-5 h-5 accent-[#4379EE] rounded cursor-pointer self-center task-select-checkbox';
+            checkbox.dataset.taskId = task.id;
+            checkbox.addEventListener('click', e => e.stopPropagation());
+            checkbox.addEventListener('change', () => {
+              if (checkbox.checked) {
+                selectedTaskIds.add(String(task.id));
+                taskCard.classList.add('bg-blue-50');
+              } else {
+                selectedTaskIds.delete(String(task.id));
+                taskCard.classList.remove('bg-blue-50');
+              }
+              updateBulkActionsVisibility();
+            });
+
+            const taskInfo = document.createElement('div');
+            taskInfo.className = 'justify-center flex-1';
+            let catChips = '';
+            if (task.categories && task.categories.length > 0) {
+              catChips = '<div class="flex flex-wrap gap-1 mt-1">' + task.categories.map(c =>
+                `<span class="text-[10px] font-medium px-2 py-0.5 rounded-full text-white shadow-sm" style="background:${c.color};">${c.name}</span>`
+              ).join('') + '</div>';
+            }
+            taskInfo.innerHTML = `
+              <div>
+                <h4 class="text-lg font-semibold text-gray-800">${task.title}</h4>
+                <p class="text-sm text-gray-500">${completedSubtasks}/${totalSubtasks} completed</p>
+              </div>
+              ${catChips}
+            `;
+
+            const priorityIndicator = document.createElement('div');
+            priorityIndicator.className = 'w-5 rounded-r-lg bg-green-400 ml-4';
+            taskCard.appendChild(checkbox);
+            taskCard.appendChild(taskInfo);
+            taskCard.appendChild(priorityIndicator);
+            taskList.prepend(taskCard);
           }
 
           fetch('/api/tasks')
             .then(response => response.json())
             .then(tasks => {
               const taskList = document.getElementById('taskList');
-              taskList.innerHTML = ''; // Clear existing content
-
-              tasks.forEach(task => {
-                const completedSubtasks = task.subtasks.filter(st => st.completed).length;
-                const totalSubtasks = task.subtasks.length;
-
-                // Create the card
-                const taskCard = document.createElement('div');
-                taskCard.className = 'flex items-stretch justify-between bg-white rounded-lg shadow-md hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-400 cursor-pointer h-24 mb-4';
-                taskCard.style.cursor = 'pointer';
-                taskCard.addEventListener('click', () => {
-                  window.location.href = `/${task.id}`;
-                });
-
-                // Create the checkbox
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.className = 'ml-4 w-5 h-5 accent-[#4379EE] rounded cursor-pointer self-center';
-                checkbox.dataset.taskId = task.id;
-
-                // Prevent checkbox click from triggering card navigation
-                checkbox.addEventListener('click', event => {
-                  event.stopPropagation();
-                });
-
-                // Track selected tasks
-                checkbox.addEventListener('change', () => {
-                  const taskId = checkbox.dataset.taskId;
-                  if (checkbox.checked) {
-                    selectedTaskIds.add(taskId);
-                  } else {
-                    selectedTaskIds.delete(taskId);
-                  }
-                  updateBulkActionsVisibility();
-                });
-
-                // Task info section
-                const taskInfo = document.createElement('div');
-                taskInfo.className = 'justify-center flex-1';
-                taskInfo.innerHTML = `
-                            <span class="inline-block text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded mb-2">General</span>
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-800">${task.title}</h4>
-                                <p class="text-sm text-gray-500">${completedSubtasks}/${totalSubtasks} completed</p>
-                            </div>
-                        `;
-                const priorityIndicator = document.createElement('div');
-                priorityIndicator.className = 'w-5 rounded-r-lg bg-green-400 ml-4'
-                taskCard.appendChild(checkbox);
-                taskCard.appendChild(taskInfo);
-                taskList.appendChild(taskCard);
-                taskCard.appendChild(priorityIndicator);
-              });
+              taskList.innerHTML = '';
+              tasks.forEach(task => renderSingleTask(task));
             })
-            .catch(error => {
-              console.error('Error fetching tasks:', error);
-            });
+            .catch(error => console.error('Error fetching tasks:', error));
 
            // Attach form submit handlers to pass selected task IDs
             document
@@ -286,8 +447,43 @@
 
             document
               .getElementById("moveToTrashForm")
-              .addEventListener("submit", function () {
-                trashInput.value = Array.from(selectedTaskIds).join(",");
+              .addEventListener("submit", async function (e) {
+                const ids = Array.from(selectedTaskIds).join(",");
+                let trashInput = document.getElementById("trashTaskIds");
+                // Fallback: create hidden input if missing
+                if (!trashInput) {
+                  trashInput = document.createElement('input');
+                  trashInput.type = 'hidden';
+                  trashInput.name = 'trash_ids';
+                  trashInput.id = 'trashTaskIds';
+                  this.appendChild(trashInput);
+                }
+                trashInput.value = ids;
+                if (!ids) {
+                  e.preventDefault();
+                  alert("Please select at least one task to move to trash.");
+                  return;
+                }
+                e.preventDefault();
+                const response = await fetch("{{ url_for('routes.api_move_to_trash') }}", {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ task_ids: Array.from(selectedTaskIds) }),
+                  credentials: 'same-origin'
+                });
+                if (response.ok) {
+                  const data = await response.json();
+                  const movedIds = new Set((data.moved_ids || []).map(String));
+                  movedIds.forEach(id => {
+                    const checkbox = document.querySelector(`input.task-select-checkbox[data-task-id="${id}"]`);
+                    const card = checkbox?.closest('.flex.items-stretch');
+                    if (card) card.remove();
+                  });
+                  movedIds.forEach(id => selectedTaskIds.delete(id));
+                  updateBulkActionsVisibility();
+                } else {
+                  alert('Failed to move tasks to trash.');
+                }
               });
           });
         </script>
@@ -296,7 +492,7 @@
       </main>
     </div>
     {% block scripts %}
-    <script src="{{ url_for('static', filename='individual-task.js') }}"></script>
+    <!-- Removed missing individual-task.js script -->
     {% endblock %}
   </body>
   {% with messages = get_flashed_messages() %} {% if messages %}
