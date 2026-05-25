@@ -75,7 +75,7 @@ def upgrade():
         batch_op.add_column(sa.Column('description', sa.Text(), nullable=True))
         batch_op.add_column(sa.Column('archived', sa.Boolean(), nullable=True))
         batch_op.add_column(sa.Column('created_at', sa.DateTime(), nullable=True))
-        batch_op.drop_index(batch_op.f('name'))
+        # batch_op.drop_index(batch_op.f('name'))  # Skipped: index does not exist in fresh DB
         batch_op.create_foreign_key(None, 'user', ['user_id'], ['id'])
 
     with op.batch_alter_table('task', schema=None) as batch_op:
