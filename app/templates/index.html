@@ -128,31 +128,27 @@
       <main class="flex-1 ml-56 h-screen p-6 bg-gray-200 overflow-y-auto">
         {% block content %}
 
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-semibold text-gray-800">Ongoing Tasks</h2>
-          <button
-            id="openModalBtn"
-            class="bg-[#4379EE] text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-          >
-            Add New Task
-          </button>
-        </div>
-        <div class="bg-blue-100 p-4 rounded-lg mb-4">
-          <p>{{ motivation_message }}</p>
-        </div>
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-semibold text-gray-800">Ongoing Tasks</h2>
+        <button id="openModalBtn" class="bg-[#4379EE] text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+          Add New Task
+        </button>
+      </div>
 
-        <div
-          id="taskModal"
-          class="fixed inset-0 backdrop-blur-sm bg-opacity-60 flex justify-center items-center hidden z-50"
-        >
-          <div
-            class="bg-white rounded-2xl shadow-2xl px-10 py-8 w-full max-w-md relative border-2 border-gray-200"
-          >
-            <span
-              id="closeModalBtn"
-              class="absolute top-3 right-4 text-gray-500 text-2xl cursor-pointer hover:text-red-500"
-              >&times;</span
-            >
+      <div class="bg-blue-100 p-4 rounded-lg mb-4">
+       <p>{{ motivation_message }}</p>
+      </div>
+      <form method="POST" action="{{ url_for('routes.regenerate_motivation') }}" class="mt-4 mb-4">
+        <button type="submit" class="bg-[#4379EE] text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+          Re-generate Motivation
+        </button>
+      </form>
+
+      <div id="taskModal"
+        class="fixed inset-0 backdrop-blur-sm bg-opacity-60 flex justify-center items-center hidden z-50">
+        <div class="bg-white rounded-2xl shadow-2xl px-10 py-8 w-full max-w-md relative border-2 border-gray-200">
+          <span id="closeModalBtn"
+            class="absolute top-3 right-4 text-gray-500 text-2xl cursor-pointer hover:text-red-500">&times;</span>
 
             <form
               id="createTaskForm"
@@ -395,12 +391,17 @@
 
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.className = 'ml-4 w-5 h-5 accent-[#4379EE] rounded cursor-pointer self-center';
+            checkbox.className = 'ml-4 w-5 h-5 accent-[#4379EE] rounded cursor-pointer self-center task-select-checkbox';
             checkbox.dataset.taskId = task.id;
             checkbox.addEventListener('click', e => e.stopPropagation());
             checkbox.addEventListener('change', () => {
-              if (checkbox.checked) selectedTaskIds.add(String(task.id));
-              else selectedTaskIds.delete(String(task.id));
+              if (checkbox.checked) {
+                selectedTaskIds.add(String(task.id));
+                taskCard.classList.add('bg-blue-50');
+              } else {
+                selectedTaskIds.delete(String(task.id));
+                taskCard.classList.remove('bg-blue-50');
+              }
               updateBulkActionsVisibility();
             });
 
@@ -437,23 +438,61 @@
             })
             .catch(error => console.error('Error fetching tasks:', error));
 
-          // Attach form submit handlers to pass selected task IDs
-          document.getElementById('markCompletedForm').addEventListener('submit', function () {
-            completedInput.value = Array.from(selectedTaskIds).join(',');
-          });
-          document.getElementById('moveToTrashForm').addEventListener('submit', function () {
-            trashInput.value = Array.from(selectedTaskIds).join(',');
-          });
-        });
-      </script>
+           // Attach form submit handlers to pass selected task IDs
+            document
+              .getElementById("markCompletedForm")
+              .addEventListener("submit", function () {
+                completedInput.value = Array.from(selectedTaskIds).join(",");
+              });
 
-
+            document
+              .getElementById("moveToTrashForm")
+              .addEventListener("submit", async function (e) {
+                const ids = Array.from(selectedTaskIds).join(",");
+                let trashInput = document.getElementById("trashTaskIds");
+                // Fallback: create hidden input if missing
+                if (!trashInput) {
+                  trashInput = document.createElement('input');
+                  trashInput.type = 'hidden';
+                  trashInput.name = 'trash_ids';
+                  trashInput.id = 'trashTaskIds';
+                  this.appendChild(trashInput);
+                }
+                trashInput.value = ids;
+                if (!ids) {
+                  e.preventDefault();
+                  alert("Please select at least one task to move to trash.");
+                  return;
+                }
+                e.preventDefault();
+                const response = await fetch("{{ url_for('routes.api_move_to_trash') }}", {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ task_ids: Array.from(selectedTaskIds) }),
+                  credentials: 'same-origin'
+                });
+                if (response.ok) {
+                  const data = await response.json();
+                  const movedIds = new Set((data.moved_ids || []).map(String));
+                  movedIds.forEach(id => {
+                    const checkbox = document.querySelector(`input.task-select-checkbox[data-task-id="${id}"]`);
+                    const card = checkbox?.closest('.flex.items-stretch');
+                    if (card) card.remove();
+                  });
+                  movedIds.forEach(id => selectedTaskIds.delete(id));
+                  updateBulkActionsVisibility();
+                } else {
+                  alert('Failed to move tasks to trash.');
+                }
+              });
+          });
+        </script>
 
         {% endblock %}
       </main>
     </div>
     {% block scripts %}
-    <script src="{{ url_for('static', filename='individual-task.js') }}"></script>
+    <!-- Removed missing individual-task.js script -->
     {% endblock %}
   </body>
   {% with messages = get_flashed_messages() %} {% if messages %}

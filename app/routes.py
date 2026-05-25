@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from flask import flash, render_template, request, redirect, url_for, Blueprint
+from flask import flash, jsonify, render_template, request, redirect, url_for, Blueprint
 from flask_login import current_user, login_required
 from app.models import Task, User, Subtask
 from . import db, login_manager
@@ -38,38 +38,52 @@ def index():
 
     task_titles = [task.title for task in active_tasks]
 
-    if task_titles:
-        formatted_tasks = "\n".join([f"- {title}" for title in task_titles])
-
-        prompt = f"""
-        You are a motivational coach.
-
-        A user has the following tasks:
-        {formatted_tasks}
-
-        Generate a short, encouraging motivational message (max 2 sentences).
-        Make it personal, warm, and energizing.
-        Avoid clichés.
-        """
-
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4.1-mini",
-                messages=[{"role": "user", "content": prompt}]
-            )
-
-            message = response.choices[0].message.content.strip()
-
-        except Exception:
-            message = "Start where you are. Do what you can. Keep going."
+    # daily cache
+    if current_user.motivation_message and current_user.motivation_date == date.today():
+        message = current_user.motivation_message
 
     else:
-        message = "You have no tasks today. Take time to reset and plan ahead."
+        if len(task_titles) >= 8:
+            tone = "The user has many tasks and may feel overwhelmed. Use a calm, reassuring tone."
+        elif len(task_titles) == 1:
+            tone = "The user has one task. Use a focused, confident tone."
+        else:
+            tone = "Use a warm, balanced encouraging tone."
 
-    # Always store latest message
-    current_user.motivation_message = message
-    current_user.motivation_date = date.today()
-    db.session.commit()
+        if task_titles:
+            formatted_tasks = "\n".join([f"- {title}" for title in task_titles])
+
+            prompt = f"""
+You are a motivational coach.
+
+The user's name is {current_user.first_name}.
+
+The user has the following tasks:
+{formatted_tasks}
+
+{tone}
+
+Generate a short, personal motivational message (max 2 sentences).
+Include the user's name naturally.
+Avoid clichés.
+"""
+
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4.1-mini",
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                message = response.choices[0].message.content.strip()
+
+            except Exception:
+                message = f"Start where you are, {current_user.first_name}. Keep going."
+
+        else:
+            message = f"{current_user.first_name}, you have no tasks today. Take time to reset and plan ahead."
+
+        current_user.motivation_message = message
+        current_user.motivation_date = date.today()
+        db.session.commit()
 
     return render_template(
         'index.html',
@@ -78,6 +92,64 @@ def index():
         trash_form=MoveToTrashForm(),
         motivation_message=message
     )
+
+@routes.route('/regenerate-motivation', methods=['POST'])
+@login_required
+def regenerate_motivation():
+    active_tasks = Task.query.filter(
+        db.and_(
+            Task.user_id == current_user.id,
+            Task.completed == False,
+            Task.deleted == False
+        )
+    ).all()
+
+    task_titles = [task.title for task in active_tasks]
+
+    if len(task_titles) >= 8:
+        tone = "The user has many tasks and may feel overwhelmed. Use a calm, reassuring tone."
+    elif len(task_titles) == 1:
+        tone = "The user has one task. Use a focused, confident tone."
+    else:
+        tone = "Use a warm, balanced encouraging tone."
+
+    if task_titles:
+        formatted_tasks = "\n".join([f"- {title}" for title in task_titles])
+
+        prompt = f"""
+You are a motivational coach.
+
+The user's name is {current_user.first_name}.
+
+The user has the following tasks:
+{formatted_tasks}
+
+{tone}
+
+Generate a short, personal motivational message (max 2 sentences).
+Include the user's name naturally.
+Avoid clichés.
+"""
+
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            message = response.choices[0].message.content.strip()
+
+        except Exception:
+            message = f"Keep going, {current_user.first_name}."
+
+    else:
+        message = f"{current_user.first_name}, you have no tasks today. Reset and plan ahead."
+
+    current_user.motivation_message = message
+    current_user.motivation_date = date.today()
+    db.session.commit()
+
+    flash("Motivation regenerated.", "success")
+    return redirect(url_for('routes.index'))
 
 @routes.route('/login', methods=['GET', 'POST'])
 def login():
@@ -209,6 +281,8 @@ def mark_completed():
                 task.mark_as_completed()
                
         db.session.commit()
+        flash("Task(s) marked as completed.", "success")
+
     return redirect(url_for('routes.index'))
 
 @routes.route('/history')
@@ -291,86 +365,118 @@ def history_action():
 @routes.route('/trash', methods=['GET'])
 @login_required
 def trash():
-    today = date.today()
-    yesterday = today - timedelta(days=1)
-
-    today_deleted = Task.query.filter(
+    # Show all deleted tasks, regardless of date
+    all_deleted = Task.query.filter(
         Task.user_id == current_user.id,
-        Task.deleted == True,
-        Task.deleted_date == today
+        Task.deleted == True
     ).all()
-
-    yesterday_deleted = Task.query.filter(
-        Task.user_id == current_user.id,
-        Task.deleted == True,
-        Task.deleted_date == yesterday
-    ).all()
-
     def summarize(task):
         total = len(task.subtasks)
         done = sum(1 for sub in task.subtasks if sub.completed)
         return f"{done}/{total} completed" if total > 0 else "Completed"
-
-    for task in today_deleted + yesterday_deleted:
+    for task in all_deleted:
         task.category = "Home"
         task.color = "red"
         task.subtask_summary = summarize(task)
-
     return render_template(
         'trash.html',
-        today_deleted=today_deleted,
-        yesterday_deleted=yesterday_deleted,
-        today_date=today.strftime("%B %d, %Y"),
-        yesterday_date=yesterday.strftime("%B %d, %Y")
+        all_deleted=all_deleted
     )
 
 @routes.route('/restore_bulk', methods=['POST'])
 @login_required
 def restore_bulk():
-    task_ids = request.form.getlist('task_ids')
+    task_ids = [int(task_id) for task_id in request.form.getlist('task_ids') if task_id.isdigit()]
+    restored_count = 0
     for task_id in task_ids:
-        task = Task.query.filter_by(id=int(task_id), user_id=current_user.id).first()
+        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
         if task and task.deleted:
             task.deleted = False
             task.deleted_date = None
+            restored_count += 1
     db.session.commit()
-    flash(f"{len(task_ids)} task(s) restored.", "success")
+    if restored_count:
+        flash(f"{restored_count} task(s) restored.", "success")
+    else:
+        flash("No deleted tasks were selected to restore.", "warning")
     return redirect(url_for('routes.trash'))
 
 @routes.route('/delete_tasks_permanently', methods=['POST'])
 @login_required
 def delete_tasks_permanently():
-    task_ids = request.form.getlist('task_ids')
+    task_ids = [int(task_id) for task_id in request.form.getlist('task_ids') if task_id.isdigit()]
+    deleted_count = 0
     for task_id in task_ids:
-        task = Task.query.filter_by(id=int(task_id), user_id=current_user.id).first()
+        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
         if task and task.deleted:
             db.session.delete(task)
+            deleted_count += 1
     db.session.commit()
-    flash(f"{len(task_ids)} task(s) permanently deleted.", "success")
+    if deleted_count:
+        flash(f"{deleted_count} task(s) permanently deleted.", "success")
+    else:
+        flash("No tasks were deleted. Please select tasks in the trash to delete.", "warning")
     return redirect(url_for('routes.trash'))
 
 @routes.route('/move-to-trash', methods=['POST'])
 @login_required
 def move_to_trash():
-    trashform = MoveToTrashForm()
-    try:
-        ids = request.form.get('trash_ids', '')
+    ids = request.form.get('trash_ids', '')
 
-        if ids:
-            task_ids = [int(tid) for tid in ids.split(',')]
-            for task_id in task_ids:
-                task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
-                if task:
-                    task.move_to_trash()
+    if ids:
+        try:
+            task_ids = [int(tid) for tid in ids.split(',') if tid.strip()]
+        except ValueError:
+            flash("Invalid task IDs.", "danger")
+            return redirect(url_for('routes.index'))
 
-            db.session.commit()
-            flash(f"Tasks moved to trash successfully", "success")
-        return redirect(url_for('routes.index'), trash_form=trashform)
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error moving tasks to trash: {str(e)}")
-        flash("Error moving tasks to trash", "error")
-        return redirect(url_for('routes.index'))
+        for task_id in task_ids:
+            task = Task.query.filter_by(
+                id=task_id,
+                user_id=current_user.id
+            ).first()
+
+            if task:
+                task.move_to_trash()
+
+        db.session.commit()
+        flash("Task(s) moved to trash.", "success")
+    else:
+        flash("No tasks selected to move to trash.", "warning")
+
+    return redirect(url_for('routes.index'))
+
+@routes.route('/api/move-to-trash', methods=['POST'])
+@login_required
+def api_move_to_trash():
+    data = request.get_json(silent=True) or {}
+    raw_ids = data.get('task_ids', [])
+
+    task_ids = []
+    for task_id in raw_ids:
+        try:
+            task_ids.append(int(task_id))
+        except (TypeError, ValueError):
+            continue
+
+    if not task_ids:
+        return jsonify({'error': 'No valid task IDs provided.'}), 400
+
+    tasks = Task.query.filter(
+        Task.user_id == current_user.id,
+        Task.id.in_(task_ids),
+        Task.deleted == False
+    ).all()
+
+    for task in tasks:
+        task.move_to_trash()
+
+    db.session.commit()
+
+    return jsonify({
+        'message': f'{len(tasks)} task(s) moved to trash.',
+        'moved_ids': [task.id for task in tasks]
+    }), 200
     
 @routes.route('/delete-selected', methods=['POST'])
 @login_required

@@ -1,40 +1,27 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app import db
 from app.models import User
 from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 from flask_mail import Message
+from flask_login import login_user, logout_user
 from app import mail
-from app.forms import ForgotPasswordForm, LogInForm, SignUpForm, ResetPasswordForm
-from flask_login import login_user, logout_user, login_required, current_user
+from app.forms import LogInForm, ResetPasswordForm
 
 
 auth = Blueprint('auth', __name__)
 
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():
-    """Gets new user data and adds them to the database"""
-    if current_user.is_authenticated:
-        return redirect(url_for('routes.index'))
-
-    form = SignUpForm()
-    if form.validate_on_submit():
-        username = request.form.get('username', '').strip()
-        first_name = request.form.get('first_name', '').strip()
-        last_name = request.form.get('last_name', '').strip()
-        email = request.form.get('email', '').strip().lower()
-        password = form.password.data
-        confirm_password = form.confirm_password.data
-
-        # Checks if all fields are provided
-        if not all([username, first_name, last_name, email, password, confirm_password]):
-            flash("All fields are required")
-            return redirect(url_for('auth.signup'))
+    if request.method == 'POST':
+        username = request.form.get('username')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
 
         # Check if user already exists
-        if User.query.filter_by(email=email).first():
-            flash('Email already exists')
-            return redirect(url_for('auth.signup'))
         if User.query.filter_by(username=username).first():
             flash('Username already exists')
             return redirect(url_for('auth.signup'))
@@ -52,39 +39,32 @@ def signup():
         flash('Account created. Please log in.')
         return redirect(url_for('auth.login'))
 
-    return render_template('signup.html', form=form)
+    return render_template('signup.html')
 
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    """Logs in existing user"""
-    
-    if current_user.is_authenticated:
-        return redirect(url_for('routes.index'))
-
     form = LogInForm()
-
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
 
         user = User.query.filter_by(username=username).first()
-            
         if user and user.check_password(password):
-            login_user(user, remember=True)
+            login_user(user)
+            session['user_id'] = user.id
+            session['username'] = user.username
             flash('Logged in successfully.')
             return redirect(url_for('routes.index'))
         else:
-            flash('Invalid credentials', 'error')
+            flash('Invalid credentials')
 
     return render_template('login.html', form=form)
 
 @auth.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
-    """Sends link to existing user for password reset"""
-    form = ForgotPasswordForm()
-    if form.validate_on_submit:
-        email = form.email.data
+    if request.method == 'POST':
+        email = request.form.get('email')
         user = User.query.filter_by(email=email).first()
 
         if user:
@@ -101,12 +81,11 @@ def forgot_password():
             return redirect(url_for('auth.login'))
         else:
             flash('No account found with that email.')
-    return render_template('forgot_password.html', form=form)
+    return render_template('forgot_password.html')
 
 
 @auth.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
-    """Enables password reset"""
     email = confirm_token(token)  
 
     if not email:
@@ -135,20 +114,17 @@ def reset_password(token):
     return render_template('reset_password.html', user=user, form=form, token=token)
 
 @auth.route('/logout')
-@login_required
 def logout():
-    """logs out user"""
     logout_user()
+    session.clear()
     flash('Logged out.')
     return redirect(url_for('auth.login'))
 
 def generate_token(email):
-    """Generates password token"""
     serializer = URLSafeTimedSerializer(current_app.secret_key)
     return serializer.dumps(email, salt='password-reset-salt')
 
 def confirm_token(token, expiration=3600):
-    """confirms password token"""
     serializer = URLSafeTimedSerializer(current_app.secret_key)
     try:
         email = serializer.loads(token, salt='password-reset-salt', max_age=expiration)
