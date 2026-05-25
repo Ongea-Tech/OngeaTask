@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from flask import flash, render_template, request, redirect, url_for, Blueprint
+from flask import flash, jsonify, render_template, request, redirect, url_for, Blueprint
 from flask_login import current_user, login_required
 from app.models import Task, User, Subtask
 from . import db, login_manager
@@ -190,9 +190,6 @@ def tasks():
             Task.deleted == False
         )
     ).all()
-    current_user.logger.info(
-    f"Loaded tasks page for user_id={current_user.id}, active_tasks={len(active_tasks)}"
-    ) 
     return render_template('tasks.html', tasks=active_tasks)
 
 @routes.route('/<int:task_id>')
@@ -467,62 +464,57 @@ def history_action():
 @routes.route('/trash', methods=['GET'])
 @login_required
 def trash():
-    today = date.today()
-    yesterday = today - timedelta(days=1)
-
-    today_deleted = Task.query.filter(
+    # Show all deleted tasks, regardless of date
+    all_deleted = Task.query.filter(
         Task.user_id == current_user.id,
-        Task.deleted == True,
-        Task.deleted_date == today
+        Task.deleted == True
     ).all()
-
-    yesterday_deleted = Task.query.filter(
-        Task.user_id == current_user.id,
-        Task.deleted == True,
-        Task.deleted_date == yesterday
-    ).all()
-
     def summarize(task):
         total = len(task.subtasks)
         done = sum(1 for sub in task.subtasks if sub.completed)
         return f"{done}/{total} completed" if total > 0 else "Completed"
-
-    for task in today_deleted + yesterday_deleted:
+    for task in all_deleted:
         task.category = "Home"
         task.color = "red"
         task.subtask_summary = summarize(task)
-
     return render_template(
         'trash.html',
-        today_deleted=today_deleted,
-        yesterday_deleted=yesterday_deleted,
-        today_date=today.strftime("%B %d, %Y"),
-        yesterday_date=yesterday.strftime("%B %d, %Y")
+        all_deleted=all_deleted
     )
 
 @routes.route('/restore_bulk', methods=['POST'])
 @login_required
 def restore_bulk():
-    task_ids = request.form.getlist('task_ids')
+    task_ids = [int(task_id) for task_id in request.form.getlist('task_ids') if task_id.isdigit()]
+    restored_count = 0
     for task_id in task_ids:
-        task = Task.query.filter_by(id=int(task_id), user_id=current_user.id).first()
+        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
         if task and task.deleted:
             task.deleted = False
             task.deleted_date = None
+            restored_count += 1
     db.session.commit()
-    flash(f"{len(task_ids)} task(s) restored.", "success")
+    if restored_count:
+        flash(f"{restored_count} task(s) restored.", "success")
+    else:
+        flash("No deleted tasks were selected to restore.", "warning")
     return redirect(url_for('routes.trash'))
 
 @routes.route('/delete_tasks_permanently', methods=['POST'])
 @login_required
 def delete_tasks_permanently():
-    task_ids = request.form.getlist('task_ids')
+    task_ids = [int(task_id) for task_id in request.form.getlist('task_ids') if task_id.isdigit()]
+    deleted_count = 0
     for task_id in task_ids:
-        task = Task.query.filter_by(id=int(task_id), user_id=current_user.id).first()
+        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
         if task and task.deleted:
             db.session.delete(task)
+            deleted_count += 1
     db.session.commit()
-    flash(f"{len(task_ids)} task(s) permanently deleted.", "success")
+    if deleted_count:
+        flash(f"{deleted_count} task(s) permanently deleted.", "success")
+    else:
+        flash("No tasks were deleted. Please select tasks in the trash to delete.", "warning")
     return redirect(url_for('routes.trash'))
 
 @routes.route('/move-to-trash', methods=['POST'])
@@ -531,7 +523,11 @@ def move_to_trash():
     ids = request.form.get('trash_ids', '')
 
     if ids:
-        task_ids = [int(tid) for tid in ids.split(',')]
+        try:
+            task_ids = [int(tid) for tid in ids.split(',') if tid.strip()]
+        except ValueError:
+            flash("Invalid task IDs.", "danger")
+            return redirect(url_for('routes.index'))
 
         for task_id in task_ids:
             task = Task.query.filter_by(
@@ -543,9 +539,43 @@ def move_to_trash():
                 task.move_to_trash()
 
         db.session.commit()
-        flash("Task(s) moved to trash.", "error")
+        flash("Task(s) moved to trash.", "success")
+    else:
+        flash("No tasks selected to move to trash.", "warning")
 
     return redirect(url_for('routes.index'))
+
+@routes.route('/api/move-to-trash', methods=['POST'])
+@login_required
+def api_move_to_trash():
+    data = request.get_json(silent=True) or {}
+    raw_ids = data.get('task_ids', [])
+
+    task_ids = []
+    for task_id in raw_ids:
+        try:
+            task_ids.append(int(task_id))
+        except (TypeError, ValueError):
+            continue
+
+    if not task_ids:
+        return jsonify({'error': 'No valid task IDs provided.'}), 400
+
+    tasks = Task.query.filter(
+        Task.user_id == current_user.id,
+        Task.id.in_(task_ids),
+        Task.deleted == False
+    ).all()
+
+    for task in tasks:
+        task.move_to_trash()
+
+    db.session.commit()
+
+    return jsonify({
+        'message': f'{len(tasks)} task(s) moved to trash.',
+        'moved_ids': [task.id for task in tasks]
+    }), 200
     
 @routes.route('/delete-selected', methods=['POST'])
 @login_required

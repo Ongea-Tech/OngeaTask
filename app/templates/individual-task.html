@@ -8,7 +8,7 @@
   <div class="title">
     <h2>{{ task.title }}</h2>
     <div class="category-dropdown">
-      <label class="category" id="categoryLabel">Select Category</label>
+      <label class="category" id="categoryLabel">Select Priority</label>
       <div class="dropdown-menu" id="categoryMenu">
         <div class="dropdown-option" data-color="red">
           <span class="color-circle" style="background-color: red"></span> High
@@ -353,10 +353,50 @@
         document.getElementById("deleteTaskIds").value = ids.join(",");
       });
 
-    // Description Save Logic
-    const descriptionBox = document.getElementById("descriptionBox");
-    const saveButton = document.getElementById("saveDescriptionBtn");
-    let originalDescription = descriptionBox.value.trim();
+        // Category dropdown functionality
+        // Variable to store the current selection (default to grey/low)
+        let selectedCategory = {
+            color: 'grey',
+            label: 'Medium'
+        };
+
+        const categoryLabel = document.getElementById("categoryLabel");
+        const categoryMenu = document.getElementById("categoryMenu");
+
+        categoryLabel.addEventListener("click", function () {
+            categoryMenu.style.display = categoryMenu.style.display === "block" ? "none" : "block";
+        });
+
+        // Ensure taskId is defined somewhere accessible to this listener
+        categoryMenu.addEventListener("click", function (event) {
+            const option = event.target.closest(".dropdown-option");
+            if (option) {
+                const color = option.getAttribute("data-color");
+                const label = option.innerText.trim();
+
+                // 1. Update UI
+                categoryLabel.style.backgroundColor = color === 'green' ? '#4caf50' : color;
+
+                // 2. The critical part: Using the correct taskId
+                // Replace 'taskData.id' with however you are storing the current task's ID
+                fetch(`/api/tasks/${taskId}/category`, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category_color: color,
+                        category_name: label
+                    })
+                })
+                .then(res => res.json())
+                .then(data => console.log("Saved successfully:", data))
+                .catch(err => console.error("Error saving:", err));
+            }
+        });
+
+        // Description save functionality
+        const descriptionBox = document.getElementById("descriptionBox");
+        const saveButton = document.getElementById("saveDescriptionBtn");
+        let originalDescription = descriptionBox.value.trim();
 
     descriptionBox.addEventListener("input", function () {
       const currentText = descriptionBox.value.trim();

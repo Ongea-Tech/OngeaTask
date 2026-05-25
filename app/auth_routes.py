@@ -4,7 +4,9 @@ from app.models import User
 from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 from flask_mail import Message
+from flask_login import login_user, logout_user
 from app import mail
+from app.forms import LogInForm, ResetPasswordForm
 
 
 auth = Blueprint('auth', __name__)
@@ -42,12 +44,14 @@ def signup():
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+    form = LogInForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
 
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
+            login_user(user)
             session['user_id'] = user.id
             session['username'] = user.username
             flash('Logged in successfully.')
@@ -55,7 +59,7 @@ def login():
         else:
             flash('Invalid credentials')
 
-    return render_template('login.html')
+    return render_template('login.html', form=form)
 
 @auth.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
@@ -73,7 +77,7 @@ def forgot_password():
             msg.body = f"Click the link to reset your password: {reset_url}"
             mail.send(msg)
 
-            flash('password reset link has been sent to your email.')
+            flash('Password reset link has been sent to your email.')
             return redirect(url_for('auth.login'))
         else:
             flash('No account found with that email.')
@@ -89,23 +93,29 @@ def reset_password(token):
         return redirect(url_for('auth.forgot_password'))
 
     user = User.query.filter_by(email=email).first_or_404()
-
-    if request.method == 'POST':
+    
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
         new_password = request.form.get('new_password')
         confirm_password = request.form.get('confirm_password')
 
-        if new_password != confirm_password:
+        if not new_password or not confirm_password:
+            flash('Please fill out all fields.')
+        elif new_password != confirm_password:
             flash('Passwords do not match.')
+        elif len(new_password) < 6 or len(new_password) > 100:
+            flash('Password must be between 6 and 100 characters.')
         else:
             user.set_password(new_password)
             db.session.commit()
             flash('Password reset successful. Please log in.')
             return redirect(url_for('auth.login'))
 
-    return render_template('reset_password.html', user=user)
+    return render_template('reset_password.html', user=user, form=form, token=token)
 
 @auth.route('/logout')
 def logout():
+    logout_user()
     session.clear()
     flash('Logged out.')
     return redirect(url_for('auth.login'))
