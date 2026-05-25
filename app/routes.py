@@ -6,6 +6,10 @@ from . import db, login_manager
 from app.forms import TaskForm, MoveToTrashForm
 from werkzeug.exceptions import Forbidden
 from flask import abort
+from openai import OpenAI
+import os
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 routes = Blueprint('routes', __name__)
 
@@ -31,9 +35,49 @@ def index():
             Task.deleted == False
         )
     ).all()
-    taskform = TaskForm()
-    return render_template('index.html', tasks=active_tasks, form=taskform, trash_form=MoveToTrashForm())
 
+    task_titles = [task.title for task in active_tasks]
+
+    if task_titles:
+        formatted_tasks = "\n".join([f"- {title}" for title in task_titles])
+
+        prompt = f"""
+        You are a motivational coach.
+
+        A user has the following tasks:
+        {formatted_tasks}
+
+        Generate a short, encouraging motivational message (max 2 sentences).
+        Make it personal, warm, and energizing.
+        Avoid clichés.
+        """
+
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            message = response.choices[0].message.content.strip()
+
+        except Exception:
+            message = "Start where you are. Do what you can. Keep going."
+
+    else:
+        message = "You have no tasks today. Take time to reset and plan ahead."
+
+    # Always store latest message
+    current_user.motivation_message = message
+    current_user.motivation_date = date.today()
+    db.session.commit()
+
+    return render_template(
+        'index.html',
+        tasks=active_tasks,
+        form=TaskForm(),
+        trash_form=MoveToTrashForm(),
+        motivation_message=message
+    )
 
 @routes.route('/login', methods=['GET', 'POST'])
 def login():

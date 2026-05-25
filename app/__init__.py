@@ -18,9 +18,9 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = 'dev-secret-key'
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", "sqlite:///test.db")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+    app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "dev-secret-key")
     app.config["WTF_CSRF_ENABLED"] = True
     
     db.init_app(app)
@@ -38,11 +38,11 @@ def create_app():
     
 
     app.config.update(
-    MAIL_SERVER=os.getenv('MAIL_SERVER'),
-    MAIL_PORT=int(os.getenv('MAIL_PORT')),
-    MAIL_USE_TLS=os.getenv('MAIL_USE_TLS') == 'True',
-    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
-    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD")
+    MAIL_SERVER=os.getenv('MAIL_SERVER', 'smtp.example.com'),
+    MAIL_PORT=int(os.getenv('MAIL_PORT', 587)),
+    MAIL_USE_TLS=os.getenv('MAIL_USE_TLS', 'True') == 'True',
+    MAIL_USERNAME=os.getenv('MAIL_USERNAME', 'test@example.com'),
+    MAIL_PASSWORD=os.getenv('MAIL_PASSWORD', 'testpassword'),
     
 )
     

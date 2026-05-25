@@ -36,6 +36,8 @@
 - [ ] Documentation (README/API docs) updated where needed.
 - [ ] I have reviewed my own code.
 
+# How To Test Code
+
 # Screenshots
 <!-- Add before/after screenshots or terminal outputs to show the effect of your changes. -->
 

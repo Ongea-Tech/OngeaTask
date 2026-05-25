@@ -56,11 +56,21 @@ def openai_chat(prompt: str, system: str = "You are a helpful assistant.", max_t
 @api.route('/api/tasks', methods=['GET'])
 @login_required
 def get_active_tasks():
-    """Gets all ongoing incomplete tasks for the current user."""
-    tasks = Task.query.filter_by(
-        user_id=current_user.id, completed=False, deleted=False
-    ).all()
-    return jsonify([t.to_dict() for t in tasks])
+    """Gets all the ongoing incomplete tasks"""
+    tasks = Task.query.filter_by(user_id = current_user.id, completed=False, deleted=False).all()  # ✅ Only ongoing tasks
+    result = []
+    for task in tasks:
+        subtasks = [{'id': st.id, 'title': st.title, 'completed': st.completed} for st in task.subtasks]
+        result.append({
+            'id': task.id,
+            'title': task.title,
+            'description': task.description,
+            'completed': task.completed,
+            'subtasks': subtasks,
+            'category_color': task.category_color,  # Send this to JS
+            'category_name': task.category_name
+        })
+    return jsonify(result)
 
 
 @api.route('/api/tasks/<int:task_id>', methods=['GET'])
@@ -68,7 +78,33 @@ def get_active_tasks():
 def get_task(task_id):
     """Gets a specific task."""
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
-    return jsonify(task.to_dict())
+    subtasks = [{'id': st.id, 'title': st.title, 'completed': st.completed} for st in task.subtasks]
+    return jsonify({
+        'id': task.id,
+        'title': task.title,
+        'description': task.description,
+        'completed': task.completed,
+        'category_color': task.category_color, # Added this
+        'category_name': task.category_name,    #and this
+        'subtasks': subtasks
+    })
+
+
+@api.route('/api/tasks/<int:task_id>/category', methods=['POST'])
+@login_required
+def update_task_category(task_id):
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
+    data = request.get_json()
+    print(f"DEBUG: Received data for task {task_id}: {data}")
+    
+    task.category_color = data.get('category_color')
+    task.category_name = data.get('category_name')
+    
+    db.session.commit()
+    print("DEBUG: Database committed successfully")
+    return jsonify({'message': 'Category updated successfully'})
+
+
 
 
 @api.route('/api/tasks', methods=['POST'])
@@ -102,11 +138,10 @@ def create_task():
 
     db.session.add(new_task)
     db.session.commit()
-
     return jsonify({
-        'message': 'Task created',
-        'task': new_task.to_dict()
-    }), 201
+        'message': 'Task created', 
+        'task_id': new_task.id
+        }), 201
 
 
 @api.route('/api/tasks/<int:task_id>', methods=['PUT'])

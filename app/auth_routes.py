@@ -80,7 +80,6 @@ def login():
     return render_template('login.html', form=form)
 
 @auth.route('/forgot-password', methods=['GET', 'POST'])
-@login_required
 def forgot_password():
     """Sends link to existing user for password reset"""
     form = ForgotPasswordForm()
@@ -98,7 +97,7 @@ def forgot_password():
             msg.body = f"Click the link to reset your password: {reset_url}"
             mail.send(msg)
 
-            flash('password reset link has been sent to your email.')
+            flash('Password reset link has been sent to your email.')
             return redirect(url_for('auth.login'))
         else:
             flash('No account found with that email.')
@@ -106,7 +105,6 @@ def forgot_password():
 
 
 @auth.route('/reset-password/<token>', methods=['GET', 'POST'])
-@login_required
 def reset_password(token):
     """Enables password reset"""
     email = confirm_token(token)  
@@ -118,19 +116,23 @@ def reset_password(token):
     user = User.query.filter_by(email=email).first_or_404()
     
     form = ResetPasswordForm()
-    if form.validate_on_submit:
+    if form.validate_on_submit():
         new_password = request.form.get('new_password')
         confirm_password = request.form.get('confirm_password')
 
-        if new_password != confirm_password:
+        if not new_password or not confirm_password:
+            flash('Please fill out all fields.')
+        elif new_password != confirm_password:
             flash('Passwords do not match.')
+        elif len(new_password) < 6 or len(new_password) > 100:
+            flash('Password must be between 6 and 100 characters.')
         else:
             user.set_password(new_password)
             db.session.commit()
             flash('Password reset successful. Please log in.')
             return redirect(url_for('auth.login'))
 
-    return render_template('reset_password.html', user=user)
+    return render_template('reset_password.html', user=user, form=form, token=token)
 
 @auth.route('/logout')
 @login_required
